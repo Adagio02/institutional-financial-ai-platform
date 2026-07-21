@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: finai-hpa
+data:
+  status: "deployment template"

@@ -1,0 +1,7 @@
+experiment_id: alpha_29
+model_family: alpha
+seed: 69
+point_in_time: true
+walk_forward: true
+transaction_costs: true
+status: planned

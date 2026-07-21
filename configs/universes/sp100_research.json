@@ -1,0 +1,25 @@
+{
+  "name": "sp100_research",
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "GOOGL",
+    "META",
+    "NVDA",
+    "JPM",
+    "BAC",
+    "XOM",
+    "UNH",
+    "JNJ",
+    "PG",
+    "HD",
+    "MA",
+    "V",
+    "LLY",
+    "AVGO",
+    "COST",
+    "WMT",
+    "ORCL"
+  ]
+}

@@ -1,0 +1,4 @@
+model: rag
+version: 0.1.0
+status: research
+random_seed: 42

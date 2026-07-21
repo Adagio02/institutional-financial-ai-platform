@@ -1,0 +1,7 @@
+experiment_id: volatility_14
+model_family: volatility
+seed: 54
+point_in_time: true
+walk_forward: true
+transaction_costs: true
+status: planned

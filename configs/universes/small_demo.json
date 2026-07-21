@@ -1,0 +1,10 @@
+{
+  "name": "small_demo",
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "JPM",
+    "XOM",
+    "UNH"
+  ]
+}

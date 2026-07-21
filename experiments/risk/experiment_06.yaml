@@ -1,0 +1,7 @@
+experiment_id: risk_06
+model_family: risk
+seed: 46
+point_in_time: true
+walk_forward: true
+transaction_costs: true
+status: planned
