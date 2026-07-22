@@ -1,0 +1,485 @@
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docker-compose.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/finai/api/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/finai/api/routes/health.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/finai/core/config.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/finai/core/logging.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/integration/test_health.py', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/.env.example b/.env.example[m
+[1mindex a11b19d..07c091a 100644[m
+[1m--- a/.env.example[m
+[1m+++ b/.env.example[m
+[36m@@ -1,6 +1,6 @@[m
+ APP_ENV=development[m
+ LOG_LEVEL=INFO[m
+[31m-DATABASE_URL=postgresql+psycopg://finai:finai@localhost:5432/finai[m
+[32m+[m[32mDATABASE_URL=postgresql+psycopg://finai:finai@localhost:5433/finai[m
+ QDRANT_URL=http://localhost:6333[m
+ QDRANT_COLLECTION=sec_filings[m
+ MLFLOW_TRACKING_URI=http://localhost:5000[m
+[1mdiff --git a/docker-compose.yml b/docker-compose.yml[m
+[1mindex 937cc0e..fe2ba29 100644[m
+[1m--- a/docker-compose.yml[m
+[1m+++ b/docker-compose.yml[m
+[36m@@ -5,18 +5,30 @@[m [mservices:[m
+       POSTGRES_USER: finai[m
+       POSTGRES_PASSWORD: finai[m
+       POSTGRES_DB: finai[m
+[31m-    ports: ["5433:5432"][m
+[31m-    volumes: [postgres_data:/var/lib/postgresql/data][m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - "5433:5432"[m
+[32m+[m[32m    volumes:[m
+[32m+[m[32m      - postgres_data:/var/lib/postgresql/data[m
+     healthcheck:[m
+[31m-      test: ["CMD-SHELL", "pg_isready -U finai -d finai"][m
+[32m+[m[32m      test:[m
+[32m+[m[32m        [[m
+[32m+[m[32m          "CMD-SHELL",[m
+[32m+[m[32m          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"[m
+[32m+[m[32m        ][m
+       interval: 10s[m
+       timeout: 5s[m
+[31m-      retries: 10[m
+[32m+[m[32m      retries: 5[m
+[32m+[m[32m      start_period: 10s[m
+[32m+[m[32m    restart: unless-stopped[m
+ [m
+   qdrant:[m
+     image: qdrant/qdrant:latest[m
+[31m-    ports: ["6333:6333", "6334:6334"][m
+[31m-    volumes: [qdrant_data:/qdrant/storage][m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - "6333:6333"[m
+[32m+[m[32m      - "6334:6334"[m
+[32m+[m[32m    volumes:[m
+[32m+[m[32m      - qdrant_data:/qdrant/storage[m
+[32m+[m[32m    restart: unless-stopped[m
+ [m
+   minio:[m
+     image: minio/minio:latest[m
+[36m@@ -24,24 +36,58 @@[m [mservices:[m
+     environment:[m
+       MINIO_ROOT_USER: minio[m
+       MINIO_ROOT_PASSWORD: minioadmin[m
+[31m-    ports: ["9000:9000", "9001:9001"][m
+[31m-    volumes: [minio_data:/data][m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - "9000:9000"[m
+[32m+[m[32m      - "9001:9001"[m
+[32m+[m[32m    volumes:[m
+[32m+[m[32m      - minio_data:/data[m
+[32m+[m[32m    healthcheck:[m
+[32m+[m[32m      test:[m
+[32m+[m[32m        [[m
+[32m+[m[32m          "CMD",[m
+[32m+[m[32m          "curl",[m
+[32m+[m[32m          "-f",[m
+[32m+[m[32m          "http://localhost:9000/minio/health/live"[m
+[32m+[m[32m        ][m
+[32m+[m[32m      interval: 10s[m
+[32m+[m[32m      timeout: 5s[m
+[32m+[m[32m      retries: 5[m
+[32m+[m[32m      start_period: 15s[m
+[32m+[m[32m    restart: unless-stopped[m
+ [m
+   mlflow:[m
+     image: ghcr.io/mlflow/mlflow:latest[m
+[31m-    command: mlflow server --host 0.0.0.0 --port 5000[m
+[31m-    ports: ["5000:5000"][m
+[32m+[m[32m    command:[m
+[32m+[m[32m      - mlflow[m
+[32m+[m[32m      - server[m
+[32m+[m[32m      - --host[m
+[32m+[m[32m      - "0.0.0.0"[m
+[32m+[m[32m      - --port[m
+[32m+[m[32m      - "5000"[m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - "5000:5000"[m
+[32m+[m[32m    restart: unless-stopped[m
+ [m
+   prometheus:[m
+     image: prom/prometheus:latest[m
+[31m-    ports: ["9090:9090"][m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - "9090:9090"[m
+     volumes:[m
+       - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro[m
+[32m+[m[32m    command:[m
+[32m+[m[32m      - --config.file=/etc/prometheus/prometheus.yml[m
+[32m+[m[32m    restart: unless-stopped[m
+ [m
+   grafana:[m
+     image: grafana/grafana:latest[m
+[31m-    ports: ["3000:3000"][m
+[31m-    volumes: [grafana_data:/var/lib/grafana][m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - "3000:3000"[m
+[32m+[m[32m    volumes:[m
+[32m+[m[32m      - grafana_data:/var/lib/grafana[m
+[32m+[m[32m    depends_on:[m
+[32m+[m[32m      prometheus:[m
+[32m+[m[32m        condition: service_started[m
+[32m+[m[32m    restart: unless-stopped[m
+ [m
+ volumes:[m
+   postgres_data:[m
+[1mdiff --git a/src/finai/api/main.py b/src/finai/api/main.py[m
+[1mindex 97b683f..b03bbe8 100644[m
+[1m--- a/src/finai/api/main.py[m
+[1m+++ b/src/finai/api/main.py[m
+[36m@@ -1,11 +1,69 @@[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom collections.abc import AsyncIterator[m
+[32m+[m[32mfrom contextlib import asynccontextmanager[m
+[32m+[m
+[32m+[m[32mimport structlog[m
+ from fastapi import FastAPI[m
+[31m-from prometheus_client import make_asgi_app[m
+[31m-from finai.api.routes import health, market, predictions, risk, portfolio, rag, models, data_quality[m
+[31m-[m
+[31m-app = FastAPI(title="Institutional Financial AI Platform", version="0.1.0")[m
+[31m-for router in [[m
+[31m-    health.router, market.router, predictions.router, risk.router,[m
+[31m-    portfolio.router, rag.router, models.router, data_quality.router[m
+[31m-]:[m
+[31m-    app.include_router(router)[m
+[31m-app.mount("/metrics", make_asgi_app())[m
+[32m+[m
+[32m+[m[32mfrom finai.api.errors import ([m
+[32m+[m[32m    ApplicationError,[m
+[32m+[m[32m    application_error_handler,[m
+[32m+[m[32m)[m
+[32m+[m[32mfrom finai.api.middleware.request_id import RequestIDMiddleware[m
+[32m+[m[32mfrom finai.api.routes.health import router as health_router[m
+[32m+[m[32mfrom finai.core.config import get_settings[m
+[32m+[m[32mfrom finai.core.logging import configure_logging[m
+[32m+[m[32mfrom finai.infrastructure.database.engine import ([m
+[32m+[m[32m    dispose_database_engine,[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mconfigure_logging()[m
+[32m+[m[32mlogger = structlog.get_logger(__name__)[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@asynccontextmanager[m
+[32m+[m[32masync def lifespan(app: FastAPI) -> AsyncIterator[None]:[m
+[32m+[m[32m    settings = get_settings()[m
+[32m+[m
+[32m+[m[32m    logger.info([m
+[32m+[m[32m        "application_starting",[m
+[32m+[m[32m        service=settings.app_name,[m
+[32m+[m[32m        version=settings.app_version,[m
+[32m+[m[32m        environment=settings.app_environment,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    yield[m
+[32m+[m
+[32m+[m[32m    dispose_database_engine()[m
+[32m+[m
+[32m+[m[32m    logger.info([m
+[32m+[m[32m        "application_stopped",[m
+[32m+[m[32m        service=settings.app_name,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef create_application() -> FastAPI:[m
+[32m+[m[32m    settings = get_settings()[m
+[32m+[m
+[32m+[m[32m    application = FastAPI([m
+[32m+[m[32m        title=settings.app_name,[m
+[32m+[m[32m        version=settings.app_version,[m
+[32m+[m[32m        debug=settings.debug,[m
+[32m+[m[32m        lifespan=lifespan,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    application.add_middleware(RequestIDMiddleware)[m
+[32m+[m
+[32m+[m[32m    application.add_exception_handler([m
+[32m+[m[32m        ApplicationError,[m
+[32m+[m[32m        application_error_handler,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    application.include_router(health_router)[m
+[32m+[m
+[32m+[m[32m    return application[m
+[32m+[m
+[32m+[m
+[32m+[m[32mapp = create_application()[m
+\ No newline at end of file[m
+[1mdiff --git a/src/finai/api/routes/health.py b/src/finai/api/routes/health.py[m
+[1mindex 927cf56..334d8eb 100644[m
+[1m--- a/src/finai/api/routes/health.py[m
+[1m+++ b/src/finai/api/routes/health.py[m
+[36m@@ -1,5 +1,60 @@[m
+[31m-from fastapi import APIRouter[m
+[31m-router = APIRouter(tags=["health"])[m
+[31m-@router.get("/health")[m
+[31m-def health() -> dict[str, str]:[m
+[31m-    return {"status": "ok", "service": "institutional-financial-ai"}[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom fastapi import APIRouter, Response, status[m
+[32m+[m
+[32m+[m[32mfrom finai.api.schemas.health import ([m
+[32m+[m[32m    LivenessResponse,[m
+[32m+[m[32m    ReadinessDependency,[m
+[32m+[m[32m    ReadinessResponse,[m
+[32m+[m[32m)[m
+[32m+[m[32mfrom finai.core.config import get_settings[m
+[32m+[m[32mfrom finai.infrastructure.database.engine import check_database_connection[m
+[32m+[m
+[32m+[m
+[32m+[m[32mrouter = APIRouter([m
+[32m+[m[32m    prefix="/health",[m
+[32m+[m[32m    tags=["health"],[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@router.get([m
+[32m+[m[32m    "/live",[m
+[32m+[m[32m    response_model=LivenessResponse,[m
+[32m+[m[32m)[m
+[32m+[m[32mdef liveness() -> LivenessResponse:[m
+[32m+[m[32m    settings = get_settings()[m
+[32m+[m
+[32m+[m[32m    return LivenessResponse([m
+[32m+[m[32m        status="alive",[m
+[32m+[m[32m        service=settings.app_name,[m
+[32m+[m[32m        version=settings.app_version,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@router.get([m
+[32m+[m[32m    "/ready",[m
+[32m+[m[32m    response_model=ReadinessResponse,[m
+[32m+[m[32m)[m
+[32m+[m[32mdef readiness(response: Response) -> ReadinessResponse:[m
+[32m+[m[32m    settings = get_settings()[m
+[32m+[m[32m    database_ready = check_database_connection()[m
+[32m+[m
+[32m+[m[32m    dependencies = [[m
+[32m+[m[32m        ReadinessDependency([m
+[32m+[m[32m            name="postgresql",[m
+[32m+[m[32m            ready=database_ready,[m
+[32m+[m[32m            detail=None if database_ready else "Database connection failed",[m
+[32m+[m[32m        )[m
+[32m+[m[32m    ][m
+[32m+[m
+[32m+[m[32m    is_ready = all(dependency.ready for dependency in dependencies)[m
+[32m+[m
+[32m+[m[32m    if not is_ready:[m
+[32m+[m[32m        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE[m
+[32m+[m
+[32m+[m[32m    return ReadinessResponse([m
+[32m+[m[32m        status="ready" if is_ready else "not_ready",[m
+[32m+[m[32m        service=settings.app_name,[m
+[32m+[m[32m        version=settings.app_version,[m
+[32m+[m[32m        dependencies=dependencies,[m
+[32m+[m[32m    )[m
+\ No newline at end of file[m
+[1mdiff --git a/src/finai/core/config.py b/src/finai/core/config.py[m
+[1mindex 1e0ed94..bb4a4ee 100644[m
+[1m--- a/src/finai/core/config.py[m
+[1m+++ b/src/finai/core/config.py[m
+[36m@@ -1,21 +1,62 @@[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+ from functools import lru_cache[m
+[32m+[m[32mfrom typing import Literal[m
+[32m+[m
+[32m+[m[32mfrom pydantic import Field, SecretStr[m
+ from pydantic_settings import BaseSettings, SettingsConfigDict[m
+ [m
+[32m+[m
+ class Settings(BaseSettings):[m
+[31m-    app_env: str = "development"[m
+[32m+[m[32m    """Application configuration loaded from environment variables."""[m
+[32m+[m
+[32m+[m[32m    model_config = SettingsConfigDict([m
+[32m+[m[32m        env_file=".env",[m
+[32m+[m[32m        env_file_encoding="utf-8",[m
+[32m+[m[32m        case_sensitive=False,[m
+[32m+[m[32m        extra="ignore",[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    app_name: str = "Institutional Financial AI Platform"[m
+[32m+[m[32m    app_version: str = "0.2.0"[m
+[32m+[m[32m    app_environment: Literal[[m
+[32m+[m[32m        "development",[m
+[32m+[m[32m        "testing",[m
+[32m+[m[32m        "staging",[m
+[32m+[m[32m        "production",[m
+[32m+[m[32m    ] = "development"[m
+[32m+[m
+[32m+[m[32m    debug: bool = False[m
+     log_level: str = "INFO"[m
+[31m-    database_url: str = "postgresql+psycopg://finai:finai@localhost:5432/finai"[m
+[32m+[m
+[32m+[m[32m    api_host: str = "127.0.0.1"[m
+[32m+[m[32m    api_port: int = 8000[m
+[32m+[m
+[32m+[m[32m    database_url: str = Field([m
+[32m+[m[32m    default="postgresql+psycopg://finai:finai@localhost:5433/finai"[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m[32m    database_pool_size: int = 5[m
+[32m+[m[32m    database_max_overflow: int = 10[m
+[32m+[m[32m    database_pool_timeout_seconds: int = 30[m
+[32m+[m[32m    database_pool_recycle_seconds: int = 1800[m
+[32m+[m
+     qdrant_url: str = "http://localhost:6333"[m
+     qdrant_collection: str = "sec_filings"[m
+[32m+[m
+     mlflow_tracking_uri: str = "http://localhost:5000"[m
+[31m-    fred_api_key: str = ""[m
+[31m-    sec_user_agent: str = "InstitutionalFinancialAI research@example.com"[m
+[31m-    openai_api_key: str = ""[m
+[31m-    openai_chat_model: str = "gpt-4.1-mini"[m
+[31m-    market_data_provider: str = "stub"[m
+[31m-    market_data_api_key: str = ""[m
+[31m-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")[m
+[32m+[m
+[32m+[m[32m    minio_endpoint: str = "localhost:9000"[m
+[32m+[m[32m    minio_access_key: str = "minio"[m
+[32m+[m[32m    minio_secret_key: SecretStr = SecretStr("minioadmin")[m
+[32m+[m
+[32m+[m[32m    fred_api_key: SecretStr | None = None[m
+[32m+[m[32m    sec_user_agent: str = "Financial AI Research contact@example.com"[m
+[32m+[m[32m    openai_api_key: SecretStr | None = None[m
+[32m+[m
+[32m+[m[32m    request_id_header: str = "X-Request-ID"[m
+[32m+[m
+ [m
+ @lru_cache[m
+ def get_settings() -> Settings:[m
+[31m-    return Settings()[m
+[32m+[m[32m    return Settings()[m
+\ No newline at end of file[m
+[1mdiff --git a/src/finai/core/logging.py b/src/finai/core/logging.py[m
+[1mindex 908db4b..3e380cb 100644[m
+[1m--- a/src/finai/core/logging.py[m
+[1m+++ b/src/finai/core/logging.py[m
+[36m@@ -1,20 +1,54 @@[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+ import logging[m
+[31m-import json[m
+[31m-from datetime import datetime, timezone[m
+[31m-[m
+[31m-class JsonFormatter(logging.Formatter):[m
+[31m-    def format(self, record: logging.LogRecord) -> str:[m
+[31m-        payload = {[m
+[31m-            "timestamp": datetime.now(timezone.utc).isoformat(),[m
+[31m-            "level": record.levelname,[m
+[31m-            "logger": record.name,[m
+[31m-            "message": record.getMessage(),[m
+[31m-        }[m
+[31m-        return json.dumps(payload)[m
+[31m-[m
+[31m-def configure_logging(level: str = "INFO") -> None:[m
+[31m-    handler = logging.StreamHandler()[m
+[31m-    handler.setFormatter(JsonFormatter())[m
+[31m-    root = logging.getLogger()[m
+[31m-    root.handlers = [handler][m
+[31m-    root.setLevel(level.upper())[m
+[32m+[m[32mimport sys[m
+[32m+[m
+[32m+[m[32mimport structlog[m
+[32m+[m
+[32m+[m[32mfrom finai.core.config import get_settings[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef configure_logging() -> None:[m
+[32m+[m[32m    """Configure standard logging and structlog."""[m
+[32m+[m
+[32m+[m[32m    settings = get_settings()[m
+[32m+[m
+[32m+[m[32m    log_level = getattr([m
+[32m+[m[32m        logging,[m
+[32m+[m[32m        settings.log_level.upper(),[m
+[32m+[m[32m        logging.INFO,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    logging.basicConfig([m
+[32m+[m[32m        format="%(message)s",[m
+[32m+[m[32m        stream=sys.stdout,[m
+[32m+[m[32m        level=log_level,[m
+[32m+[m[32m        force=True,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    shared_processors = [[m
+[32m+[m[32m        structlog.contextvars.merge_contextvars,[m
+[32m+[m[32m        structlog.processors.add_log_level,[m
+[32m+[m[32m        structlog.processors.TimeStamper(fmt="iso", utc=True),[m
+[32m+[m[32m        structlog.processors.StackInfoRenderer(),[m
+[32m+[m[32m        structlog.processors.format_exc_info,[m
+[32m+[m[32m    ][m
+[32m+[m
+[32m+[m[32m    if settings.app_environment == "development":[m
+[32m+[m[32m        renderer = structlog.dev.ConsoleRenderer()[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        renderer = structlog.processors.JSONRenderer()[m
+[32m+[m
+[32m+[m[32m    structlog.configure([m
+[32m+[m[32m        processors=[[m
+[32m+[m[32m            *shared_processors,[m
+[32m+[m[32m            renderer,[m
+[32m+[m[32m        ],[m
+[32m+[m[32m        wrapper_class=structlog.make_filtering_bound_logger(log_level),[m
+[32m+[m[32m        logger_factory=structlog.PrintLoggerFactory(),[m
+[32m+[m[32m        cache_logger_on_first_use=True,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:[m
+[32m+[m[32m    return structlog.get_logger(name)[m
+\ No newline at end of file[m
+[1mdiff --git a/tests/integration/test_health.py b/tests/integration/test_health.py[m
+[1mindex c247359..65fc3f7 100644[m
+[1m--- a/tests/integration/test_health.py[m
+[1m+++ b/tests/integration/test_health.py[m
+[36m@@ -1,7 +1,37 @@[m
+ from fastapi.testclient import TestClient[m
+[32m+[m
+ from finai.api.main import app[m
+ [m
+[31m-def test_health():[m
+[31m-    response = TestClient(app).get("/health")[m
+[32m+[m
+[32m+[m[32mdef test_liveness() -> None:[m
+[32m+[m[32m    with TestClient(app) as client:[m
+[32m+[m[32m        response = client.get("/health/live")[m
+[32m+[m
+[32m+[m[32m    assert response.status_code == 200[m
+[32m+[m
+[32m+[m[32m    payload = response.json()[m
+[32m+[m
+[32m+[m[32m    assert payload["status"] == "alive"[m
+[32m+[m[32m    assert payload["service"] == "Institutional Financial AI Platform"[m
+[32m+[m[32m    assert payload["version"] == "0.2.0"[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef test_readiness() -> None:[m
+[32m+[m[32m    with TestClient(app) as client:[m
+[32m+[m[32m        response = client.get("/health/ready")[m
+[32m+[m
+     assert response.status_code == 200[m
+[31m-    assert response.json()["status"] == "ok"[m
+[32m+[m
+[32m+[m[32m    payload = response.json()[m
+[32m+[m
+[32m+[m[32m    assert payload["status"] == "ready"[m
+[32m+[m[32m    assert payload["service"] == "Institutional Financial AI Platform"[m
+[32m+[m[32m    assert payload["version"] == "0.2.0"[m
+[32m+[m
+[32m+[m[32m    assert payload["dependencies"] == [[m
+[32m+[m[32m        {[m
+[32m+[m[32m            "name": "postgresql",[m
+[32m+[m[32m            "ready": True,[m
+[32m+[m[32m            "detail": None,[m
+[32m+[m[32m        }[m
+[32m+[m[32m    ][m
+\ No newline at end of file[m
