@@ -4,11 +4,13 @@ import cvxpy as cp
 import numpy as np
 import pandas as pd
 
+
 @dataclass(frozen=True)
 class OptimizationResult:
     weights: pd.Series
     status: str
     objective_value: float | None
+
 
 def optimize_portfolio(
     expected_returns: pd.Series,
@@ -25,7 +27,8 @@ def optimize_portfolio(
     w = cp.Variable(n)
     prev = (
         previous_weights.reindex(assets).fillna(0.0).to_numpy()
-        if previous_weights is not None else np.zeros(n)
+        if previous_weights is not None
+        else np.zeros(n)
     )
     objective = cp.Maximize(mu @ w - risk_aversion * cp.quad_form(w, cp.psd_wrap(cov)))
     constraints = [

@@ -2,6 +2,7 @@ from __future__ import annotations
 import httpx
 import polars as pl
 
+
 class TreasuryFiscalConnector:
     endpoint = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/avg_interest_rates"
 

@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
@@ -15,6 +16,10 @@ class Settings(BaseSettings):
     market_data_provider: str = "stub"
     market_data_api_key: str = ""
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    market_data_provider: str = "mock"
+    market_data_max_bars_per_request: int = 10_000
+    market_data_default_query_limit: int = 500
+
 
 @lru_cache
 def get_settings() -> Settings:

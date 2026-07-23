@@ -1,5 +1,8 @@
 from fastapi import APIRouter
+
 router = APIRouter(prefix="/models", tags=["models"])
+
+
 @router.get("")
 def models() -> list[dict[str, str]]:
     return [

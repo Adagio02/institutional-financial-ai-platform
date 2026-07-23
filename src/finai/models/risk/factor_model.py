@@ -5,11 +5,13 @@ import pandas as pd
 from sklearn.covariance import LedoitWolf
 from sklearn.linear_model import Ridge
 
+
 @dataclass(frozen=True)
 class FactorRiskModel:
     exposures: pd.DataFrame
     factor_covariance: pd.DataFrame
     specific_variance: pd.Series
+
 
 def estimate_factor_risk(
     asset_returns: pd.DataFrame,

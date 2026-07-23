@@ -2,6 +2,7 @@ from __future__ import annotations
 import httpx
 from finai.core.config import get_settings
 
+
 class SecConnector:
     base = "https://data.sec.gov"
 

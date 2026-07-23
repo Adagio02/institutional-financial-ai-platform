@@ -26,11 +26,7 @@ def validate_market_prices(df: pl.DataFrame) -> list[str]:
         errors.append(f"missing_columns={sorted(missing)}")
         return errors
 
-    duplicate_rows = (
-        df.group_by(["ticker", "date"])
-        .len()
-        .filter(pl.col("len") > 1)
-    )
+    duplicate_rows = df.group_by(["ticker", "date"]).len().filter(pl.col("len") > 1)
 
     if duplicate_rows.height > 0:
         errors.append("duplicate_ticker_date")

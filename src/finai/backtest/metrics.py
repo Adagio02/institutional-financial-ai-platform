@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def performance_metrics(returns: pd.Series, periods: int = 252) -> dict[str, float]:
     clean = returns.dropna()
     if clean.empty:

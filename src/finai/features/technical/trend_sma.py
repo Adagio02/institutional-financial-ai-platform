@@ -1,5 +1,7 @@
 """Price relative to long moving average."""
+
 import polars as pl
+
 
 def compute(df: pl.DataFrame) -> pl.Series:
     if "ret_1d" in df.columns:

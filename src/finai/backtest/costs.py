@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def estimate_transaction_cost(
     trade_fraction: np.ndarray,
     adv_fraction: np.ndarray,
