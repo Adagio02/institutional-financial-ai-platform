@@ -6,6 +6,9 @@ from sqlalchemy import engine_from_config, pool
 from finai.core.config import get_settings
 from finai.infrastructure.database.engine import Base
 
+from finai.infrastructure.database.models.ingestion_job import (
+    IngestionJobModel,  # noqa: F401
+)
 
 config = context.config
 

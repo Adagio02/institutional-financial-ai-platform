@@ -10,7 +10,7 @@ from finai.api.schemas.market_data import (
     MarketDataIngestionRequest,
     MarketDataIngestionResponse,
 )
-from finai.application.market_data.ingestion_service import (
+from finai.application.services.market_data_ingestion_service import (
     MarketDataIngestionService,
 )
 from finai.core.config import get_settings
@@ -28,6 +28,7 @@ from finai.infrastructure.database.repositories.market_bar_repository import (
 from finai.infrastructure.market_data.factory import (
     create_market_data_provider,
 )
+
 
 
 router = APIRouter(
@@ -52,31 +53,23 @@ def ingest_market_data(
 ) -> MarketDataIngestionResponse:
     settings = get_settings()
 
-    provider = create_market_data_provider(settings.market_data_provider)
+    provider = create_market_data_provider(
+        settings.market_data_provider
+    )
 
     service = MarketDataIngestionService(
-        session=session,
+        instrument_repository=InstrumentRepository(session),
+        market_bar_repository=MarketBarRepository(session),
         provider=provider,
         maximum_bars=settings.market_data_max_bars_per_request,
     )
 
-    try:
-        result = service.ingest(
-            symbol=request.symbol,
-            interval=request.interval,
-            start_time=request.start_time,
-            end_time=request.end_time,
-        )
-    except InstrumentNotFoundError as error:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(error),
-        ) from error
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
+    result = service.ingest(
+        symbol=request.symbol,
+        interval=request.interval,
+        start_time=request.start_time,
+        end_time=request.end_time,
+    )
 
     return MarketDataIngestionResponse(
         symbol=result.symbol,
