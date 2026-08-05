@@ -51,25 +51,15 @@ class MarketDataIngestionService:
             raise ValueError("Symbol cannot be empty.")
 
         if start_time.tzinfo is None or end_time.tzinfo is None:
-            raise ValueError(
-                "Start and end times must be timezone-aware."
-            )
+            raise ValueError("Start and end times must be timezone-aware.")
 
         if start_time >= end_time:
-            raise ValueError(
-                "Start time must be earlier than end time."
-            )
+            raise ValueError("Start time must be earlier than end time.")
 
-        instrument_model = (
-            self._instrument_repository.get_model_by_symbol(
-                normalized_symbol
-            )
-        )
+        instrument_model = self._instrument_repository.get_model_by_symbol(normalized_symbol)
 
         if instrument_model is None:
-            raise ResourceNotFoundError(
-                f"Instrument not found: {normalized_symbol}"
-            )
+            raise ResourceNotFoundError(f"Instrument not found: {normalized_symbol}")
 
         bars = self._provider.get_historical_bars(
             symbol=instrument_model.symbol,
@@ -79,9 +69,7 @@ class MarketDataIngestionService:
         )
 
         if len(bars) > self._maximum_bars:
-            raise ValueError(
-                "Provider returned more bars than the configured limit."
-            )
+            raise ValueError("Provider returned more bars than the configured limit.")
 
         persisted_count = self._market_bar_repository.upsert_many(
             instrument=instrument_model,

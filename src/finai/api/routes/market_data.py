@@ -30,7 +30,6 @@ from finai.infrastructure.market_data.factory import (
 )
 
 
-
 router = APIRouter(
     prefix="/api/v1/market-data",
     tags=["market-data"],
@@ -53,9 +52,7 @@ def ingest_market_data(
 ) -> MarketDataIngestionResponse:
     settings = get_settings()
 
-    provider = create_market_data_provider(
-        settings.market_data_provider
-    )
+    provider = create_market_data_provider(settings.market_data_provider)
 
     service = MarketDataIngestionService(
         instrument_repository=InstrumentRepository(session),

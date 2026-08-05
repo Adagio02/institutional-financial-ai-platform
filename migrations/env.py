@@ -10,6 +10,16 @@ from finai.infrastructure.database.models.ingestion_job import (
     IngestionJobModel,  # noqa: F401
 )
 
+from finai.infrastructure.database.models.dataset_version import (
+    DatasetVersionModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.feature_set import (
+    FeatureSetModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.feature_value import (
+    FeatureValueModel,  # noqa: F401
+)
+
 config = context.config
 
 if config.config_file_name is not None:
