@@ -135,3 +135,38 @@ This mirrors public institutional research practices without claiming access to 
 ## License
 
 Apache-2.0. Review each external data source's license and usage terms before redistribution.
+## Version 0.5
+
+Version 0.5 adds a reproducible feature-engineering
+and dataset platform.
+
+### Feature capabilities
+
+- Simple returns
+- Logarithmic returns
+- Rolling means
+- Rolling standard deviation
+- Annualized rolling volatility
+- Momentum
+- RSI
+- MACD
+- ATR
+- Volume change
+- Drawdown
+
+### Dataset capabilities
+
+- Versioned feature sets
+- Persisted feature values
+- Deterministic schema hashes
+- Deterministic content hashes
+- Parquet dataset output
+- Dataset lineage and status
+- Temporal-leakage tests
+
+POST /api/v1/features/generate
+GET  /api/v1/features/sets
+
+POST /api/v1/datasets/build
+GET  /api/v1/datasets
+GET  /api/v1/datasets/{dataset_id}

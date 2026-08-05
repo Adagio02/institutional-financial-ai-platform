@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     market_data_api_key: str = ""
     market_data_max_bars_per_request: int = 10_000
     market_data_default_query_limit: int = 500
+    feature_default_window: int = 20
+    feature_max_rows_per_request: int = 100_000
+
+    dataset_output_directory: str = "data/gold/datasets"
+    dataset_drop_missing_rows: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",
