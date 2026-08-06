@@ -20,6 +20,12 @@ from finai.api.routes.dataset import (
 from finai.api.routes.feature import (
     router as feature_router,
 )
+from finai.api.routes.model import (
+    router as model_router,
+)
+from finai.api.routes.training import (
+    router as training_router,
+)
 
 
 application = FastAPI(
@@ -33,6 +39,8 @@ application.include_router(market_data_router)
 application.include_router(ingestion_job_router)
 application.include_router(feature_router)
 application.include_router(dataset_router)
+application.include_router(training_router)
+application.include_router(model_router)
 
 register_exception_handlers(application)
 

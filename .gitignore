@@ -25,3 +25,5 @@ mlruns/
 Thumbs.db
 data/gold/datasets/*.parquet
 !data/gold/datasets/.gitkeep
+data/models/*.joblib
+!data/models/.gitkeep

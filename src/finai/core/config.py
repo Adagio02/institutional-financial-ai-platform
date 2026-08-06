@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "sec_filings"
 
+    model_output_directory: str = "data/models"
+
+    mlflow_experiment_name: str = "institutional-financial-ai-v06"
+
+    training_default_splits: int = 3
+    training_default_test_size: int = 10
+    training_random_seed: int = 42
+
     mlflow_tracking_uri: str = "http://localhost:5000"
 
     fred_api_key: str = ""

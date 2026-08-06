@@ -170,3 +170,30 @@ GET  /api/v1/features/sets
 POST /api/v1/datasets/build
 GET  /api/v1/datasets
 GET  /api/v1/datasets/{dataset_id}
+
+## Version 0.6
+
+Version 0.6 adds reproducible model training and
+experiment tracking.
+
+### Training capabilities
+
+- Classification and regression tasks
+- Logistic-regression baseline
+- Linear-regression baseline
+- Random-forest classification
+- Random-forest regression
+- Expanding walk-forward validation
+- Fold-level and aggregate evaluation metrics
+- Train-only preprocessing
+- Deterministic random seeds
+
+### Tracking and artifacts
+
+- MLflow experiment tracking
+- Persisted training-run records
+- Persisted fold metrics
+- Serialized Joblib model artifacts
+- SHA-256 model artifact hashes
+- Candidate, staging, production, rejected, and
+  archived model stages

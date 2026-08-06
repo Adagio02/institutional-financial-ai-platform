@@ -45,6 +45,9 @@ dependencies = [
   "numpy",
   "pandas",
   "pyarrow",
+  "joblib",
+  "mlflow",
+  "scikit-learn",
 ]
 
 [project.optional-dependencies]

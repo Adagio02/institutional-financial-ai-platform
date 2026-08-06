@@ -19,6 +19,15 @@ from finai.infrastructure.database.models.feature_set import (
 from finai.infrastructure.database.models.feature_value import (
     FeatureValueModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.evaluation_result import (
+    EvaluationResultModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.model_artifact import (
+    ModelArtifactModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.training_run import (
+    TrainingRunModel,  # noqa: F401
+)
 
 config = context.config
 
