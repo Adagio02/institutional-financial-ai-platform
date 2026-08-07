@@ -197,3 +197,34 @@ experiment tracking.
 - SHA-256 model artifact hashes
 - Candidate, staging, production, rejected, and
   archived model stages
+
+  ## Version 0.7
+
+Version 0.7 adds governed prediction serving and model
+explanations.
+
+### Prediction serving
+
+- Staging and production model serving
+- Model artifact checksum verification
+- Exact feature-schema validation
+- Historical timestamp filtering
+- Prediction persistence
+- Model and dataset lineage
+- Classification probabilities and confidence
+
+### Governance
+
+- Model cards
+- Evaluation requirements
+- Artifact validation
+- Explicit staging-to-production promotion
+- Configurable metric thresholds
+- Controlled stage transitions
+
+### Explanations
+
+- Linear-model feature contributions
+- Tree-model feature importance
+- Persisted explanation records
+- Clear separation between model explanation and causality

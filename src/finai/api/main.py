@@ -26,6 +26,15 @@ from finai.api.routes.model import (
 from finai.api.routes.training import (
     router as training_router,
 )
+from finai.api.routes.explanation import (
+    router as explanation_router,
+)
+from finai.api.routes.model_governance import (
+    router as model_governance_router,
+)
+from finai.api.routes.prediction import (
+    router as prediction_router,
+)
 
 
 application = FastAPI(
@@ -41,6 +50,9 @@ application.include_router(feature_router)
 application.include_router(dataset_router)
 application.include_router(training_router)
 application.include_router(model_router)
+application.include_router(prediction_router)
+application.include_router(explanation_router)
+application.include_router(model_governance_router)
 
 register_exception_handlers(application)
 

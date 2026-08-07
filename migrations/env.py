@@ -28,6 +28,15 @@ from finai.infrastructure.database.models.model_artifact import (
 from finai.infrastructure.database.models.training_run import (
     TrainingRunModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.model_card import (
+    ModelCardModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.prediction import (
+    PredictionModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.prediction_explanation import (
+    PredictionExplanationModel,  # noqa: F401
+)
 
 config = context.config
 

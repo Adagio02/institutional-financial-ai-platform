@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     dataset_output_directory: str = "data/gold/datasets"
     dataset_drop_missing_rows: bool = True
 
+    prediction_default_forecast_horizon: str = "next_period"
+
+    governance_minimum_accuracy: float = 0.50
+    governance_minimum_r_squared: float = -1.0
+
+    prediction_default_query_limit: int = 100
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

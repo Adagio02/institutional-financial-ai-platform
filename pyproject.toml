@@ -48,6 +48,7 @@ dependencies = [
   "joblib",
   "mlflow",
   "scikit-learn",
+  "shap",
 ]
 
 [project.optional-dependencies]
