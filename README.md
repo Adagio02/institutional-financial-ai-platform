@@ -228,3 +228,50 @@ explanations.
 - Tree-model feature importance
 - Persisted explanation records
 - Clear separation between model explanation and causality
+
+## Version 0.8
+
+Version 0.8 adds institutional backtesting,
+portfolio simulation, and strategy risk analytics.
+
+### Strategy simulation
+
+- Classification prediction signals
+- Regression prediction signals
+- Configurable long/short thresholds
+- Configurable position sizing
+- Optional short exposure
+- Commission modeling
+- Slippage modeling
+- Persisted simulated trades
+
+### Portfolio accounting
+
+- Cash tracking
+- Position tracking
+- Market-value tracking
+- Equity curves
+- Drawdown tracking
+- Persisted portfolio snapshots
+
+### Risk analytics
+
+- Total return
+- Maximum drawdown
+- Annualized volatility
+- Sharpe ratio
+- Sortino ratio
+- Downside deviation
+- 95% Value at Risk
+- 95% Conditional Value at Risk
+
+Version 0.8 remains simulation-only and does not
+submit orders to a broker or exchange.
+
+POST /api/v1/backtests
+GET  /api/v1/backtests
+GET  /api/v1/backtests/{backtest_run_id}
+GET  /api/v1/backtests/{backtest_run_id}/trades
+GET  /api/v1/backtests/{backtest_run_id}/equity
+
+GET  /api/v1/risk/backtests/{backtest_run_id}

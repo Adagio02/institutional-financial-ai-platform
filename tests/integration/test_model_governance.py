@@ -30,20 +30,14 @@ def test_model_card_and_production_evaluation() -> None:
             f"/api/v1/models/{model_id}/card",
             json={
                 "summary": "Daily return direction classifier.",
-                "intended_use": (
-                    "Research and simulated portfolio analysis."
-                ),
-                "limitations": (
-                    "Not approved for autonomous live trading."
-                ),
+                "intended_use": ("Research and simulated portfolio analysis."),
+                "limitations": ("Not approved for autonomous live trading."),
             },
         )
 
         assert card_response.status_code == 201
 
-        evaluation_response = client.post(
-            f"/api/v1/models/{model_id}/production-evaluation"
-        )
+        evaluation_response = client.post(f"/api/v1/models/{model_id}/production-evaluation")
 
         assert evaluation_response.status_code == 200
 
@@ -53,9 +47,7 @@ def test_model_card_and_production_evaluation() -> None:
         assert evaluation["artifact_verified"] is True
         assert evaluation["model_card_present"] is True
 
-        promotion_response = client.post(
-            f"/api/v1/models/{model_id}/promote-production"
-        )
+        promotion_response = client.post(f"/api/v1/models/{model_id}/promote-production")
 
         assert promotion_response.status_code == 200
         assert promotion_response.json()["stage"] == "production"

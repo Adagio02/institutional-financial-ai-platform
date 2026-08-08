@@ -13,6 +13,9 @@ from finai.application.services.dataset_validation_service import (
 from finai.domain.datasets.entities import (
     DatasetBuildResult,
 )
+from finai.domain.market_data.enums import (
+    BarInterval,
+)
 from finai.infrastructure.database.repositories.dataset_version_repository import (
     DatasetVersionRepository,
 )
@@ -24,6 +27,9 @@ from finai.infrastructure.database.repositories.feature_value_repository import 
 )
 from finai.infrastructure.database.repositories.instrument_repository import (
     InstrumentRepository,
+)
+from finai.infrastructure.database.repositories.market_bar_repository import (
+    MarketBarRepository,
 )
 
 
@@ -39,6 +45,8 @@ class DatasetBuilderService:
         self._feature_value_repository = FeatureValueRepository(session)
 
         self._instrument_repository = InstrumentRepository(session)
+
+        self._market_bar_repository = MarketBarRepository(session)
 
         self._dataset_repository = DatasetVersionRepository(session)
 
@@ -62,7 +70,17 @@ class DatasetBuilderService:
         if feature_set is None:
             raise LookupError(f"Feature set not found: {feature_set_id}")
 
-        instrument = self._instrument_repository.get_model_by_symbol(symbol.strip().upper())
+        normalized_symbol = symbol.strip().upper()
+
+        instrument = self._instrument_repository.get_model_by_symbol(normalized_symbol)
+
+        if instrument is None:
+            raise LookupError(f"Instrument not found: {normalized_symbol}")
+
+        try:
+            bar_interval = BarInterval(interval)
+        except ValueError as error:
+            raise ValueError(f"Unsupported bar interval: {interval}") from error
 
         dataset = self._dataset_repository.create(
             name=name,
@@ -72,7 +90,9 @@ class DatasetBuilderService:
             start_time=start_time,
             end_time=end_time,
             configuration={
-                "drop_missing_rows": (drop_missing_rows),
+                "drop_missing_rows": drop_missing_rows,
+                "includes_market_price": True,
+                "market_price_column": "close",
             },
         )
 
@@ -84,7 +104,22 @@ class DatasetBuilderService:
                 end_time=end_time,
             )
 
-            frame = self._values_to_frame(values)
+            feature_frame = self._values_to_frame(values)
+
+            bars = self._market_bar_repository.get_bars(
+                instrument_id=instrument.id,
+                interval=bar_interval,
+                start_time=start_time,
+                end_time=end_time,
+                limit=100_000,
+            )
+
+            price_frame = self._bars_to_price_frame(bars)
+
+            frame = self._combine_features_and_prices(
+                feature_frame=feature_frame,
+                price_frame=price_frame,
+            )
 
             if drop_missing_rows:
                 frame = frame.dropna()
@@ -135,7 +170,7 @@ class DatasetBuilderService:
         rows = [
             {
                 "timestamp": value.timestamp,
-                "feature_name": (value.feature_name),
+                "feature_name": value.feature_name,
                 "feature_value": (
                     float(value.feature_value) if value.feature_value is not None else None
                 ),
@@ -160,6 +195,56 @@ class DatasetBuilderService:
         return frame
 
     @staticmethod
+    def _bars_to_price_frame(
+        bars,
+    ) -> pd.DataFrame:
+        rows = [
+            {
+                "timestamp": bar.timestamp,
+                "close": float(bar.close_price),
+            }
+            for bar in bars
+        ]
+
+        if not rows:
+            raise ValueError("No market bars exist for the requested dataset range.")
+
+        frame = pd.DataFrame(rows)
+
+        frame = (
+            frame.sort_values("timestamp")
+            .drop_duplicates(
+                subset=["timestamp"],
+                keep="last",
+            )
+            .set_index("timestamp")
+        )
+
+        return frame
+
+    @staticmethod
+    def _combine_features_and_prices(
+        *,
+        feature_frame: pd.DataFrame,
+        price_frame: pd.DataFrame,
+    ) -> pd.DataFrame:
+        if feature_frame.empty:
+            raise ValueError("No feature values exist for the requested dataset range.")
+
+        if price_frame.empty:
+            raise ValueError("No market prices exist for the requested dataset range.")
+
+        frame = feature_frame.join(
+            price_frame,
+            how="inner",
+        )
+
+        if frame.empty:
+            raise ValueError("Feature values and market prices do not share any timestamps.")
+
+        return frame.sort_index()
+
+    @staticmethod
     def _calculate_schema_hash(
         frame: pd.DataFrame,
     ) -> str:
@@ -178,6 +263,7 @@ class DatasetBuilderService:
         frame: pd.DataFrame,
     ) -> str:
         normalized = frame.copy()
+
         normalized = normalized.sort_index()
 
         normalized = normalized.reindex(

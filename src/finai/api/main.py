@@ -35,6 +35,12 @@ from finai.api.routes.model_governance import (
 from finai.api.routes.prediction import (
     router as prediction_router,
 )
+from finai.api.routes.backtest import (
+    router as backtest_router,
+)
+from finai.api.routes.risk import (
+    router as risk_router,
+)
 
 
 application = FastAPI(
@@ -53,6 +59,8 @@ application.include_router(model_router)
 application.include_router(prediction_router)
 application.include_router(explanation_router)
 application.include_router(model_governance_router)
+application.include_router(backtest_router)
+application.include_router(risk_router)
 
 register_exception_handlers(application)
 

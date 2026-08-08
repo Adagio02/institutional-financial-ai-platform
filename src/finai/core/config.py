@@ -45,6 +45,21 @@ class Settings(BaseSettings):
 
     prediction_default_query_limit: int = 100
 
+    backtest_default_initial_capital: float = 100_000.0
+
+    backtest_default_long_threshold: float = 0.60
+    backtest_default_short_threshold: float = 0.40
+
+    backtest_default_position_fraction: float = 0.10
+
+    backtest_default_commission_bps: float = 1.0
+    backtest_default_slippage_bps: float = 2.0
+
+    backtest_allow_short: bool = False
+
+    risk_periods_per_year: int = 252
+    risk_free_rate: float = 0.0
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

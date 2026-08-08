@@ -37,6 +37,15 @@ from finai.infrastructure.database.models.prediction import (
 from finai.infrastructure.database.models.prediction_explanation import (
     PredictionExplanationModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.backtest_run import (
+    BacktestRunModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.portfolio_snapshot import (
+    PortfolioSnapshotModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.simulated_trade import (
+    SimulatedTradeModel,  # noqa: F401
+)
 
 config = context.config
 
