@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -26,22 +27,38 @@ class OrderRepository:
         quantity: float,
         limit_price: float | None,
         time_in_force: str,
+        reference_price: float,
+        reference_price_timestamp: datetime,
+        reference_price_provider: str,
     ) -> OrderModel:
         order = OrderModel(
             account_id=account_id,
             instrument_id=instrument_id,
-            symbol=symbol,
+            symbol=symbol.strip().upper(),
             side=side,
             order_type=order_type,
             quantity=quantity,
             limit_price=limit_price,
             time_in_force=time_in_force,
+            reference_price=reference_price,
+            reference_price_timestamp=(
+                reference_price_timestamp
+            ),
+            reference_price_provider=(
+                reference_price_provider
+            ),
             status="pending",
         )
 
-        self._session.add(order)
+        self._session.add(
+            order
+        )
+
         self._session.commit()
-        self._session.refresh(order)
+
+        self._session.refresh(
+            order
+        )
 
         return order
 
@@ -60,11 +77,20 @@ class OrderRepository:
     ) -> list[OrderModel]:
         statement = (
             select(OrderModel)
-            .where(OrderModel.account_id == account_id)
-            .order_by(OrderModel.created_at.desc())
+            .where(
+                OrderModel.account_id
+                == account_id
+            )
+            .order_by(
+                OrderModel.created_at.desc()
+            )
         )
 
-        return list(self._session.scalars(statement))
+        return list(
+            self._session.scalars(
+                statement
+            ).all()
+        )
 
     def mark_rejected(
         self,
@@ -73,10 +99,16 @@ class OrderRepository:
         reason: str,
     ) -> OrderModel:
         order.status = "rejected"
-        order.rejection_reason = reason
+
+        order.rejection_reason = (
+            reason
+        )
 
         self._session.commit()
-        self._session.refresh(order)
+
+        self._session.refresh(
+            order
+        )
 
         return order
 
@@ -88,10 +120,21 @@ class OrderRepository:
         average_fill_price: float,
     ) -> OrderModel:
         order.status = "filled"
-        order.filled_quantity = filled_quantity
-        order.average_fill_price = average_fill_price
+
+        order.filled_quantity = (
+            filled_quantity
+        )
+
+        order.average_fill_price = (
+            average_fill_price
+        )
+
+        order.rejection_reason = None
 
         self._session.commit()
-        self._session.refresh(order)
+
+        self._session.refresh(
+            order
+        )
 
         return order

@@ -72,6 +72,9 @@ class Settings(BaseSettings):
     paper_maximum_position_fraction: float = 0.25
     paper_minimum_cash_reserve_fraction: float = 0.05
 
+    paper_quote_maximum_age_seconds: int = 86_400
+    paper_quote_interval: str = "1d"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

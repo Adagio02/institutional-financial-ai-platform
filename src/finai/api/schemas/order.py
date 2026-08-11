@@ -16,6 +16,10 @@ from finai.domain.execution.enums import (
 
 
 class OrderCreate(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid"
+    )
+
     account_id: UUID
 
     symbol: str = Field(
@@ -25,13 +29,11 @@ class OrderCreate(BaseModel):
 
     side: OrderSide
 
-    order_type: OrderType = OrderType.MARKET
-
-    quantity: float = Field(
-        gt=0,
+    order_type: OrderType = (
+        OrderType.MARKET
     )
 
-    reference_price: float = Field(
+    quantity: float = Field(
         gt=0,
     )
 
@@ -40,7 +42,9 @@ class OrderCreate(BaseModel):
         gt=0,
     )
 
-    time_in_force: TimeInForce = TimeInForce.DAY
+    time_in_force: TimeInForce = (
+        TimeInForce.DAY
+    )
 
     @field_validator("symbol")
     @classmethod
@@ -48,11 +52,20 @@ class OrderCreate(BaseModel):
         cls,
         value: str,
     ) -> str:
-        return value.strip().upper()
+        normalized = value.strip().upper()
+
+        if not normalized:
+            raise ValueError(
+                "symbol cannot be empty"
+            )
+
+        return normalized
 
 
 class OrderResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
     id: UUID
     account_id: UUID
@@ -68,6 +81,10 @@ class OrderResponse(BaseModel):
     limit_price: float | None
     average_fill_price: float | None
 
+    reference_price: float | None
+    reference_price_timestamp: datetime | None
+    reference_price_provider: str | None
+
     time_in_force: str
     status: str
 
@@ -78,7 +95,9 @@ class OrderResponse(BaseModel):
 
 
 class FillResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
     id: UUID
     order_id: UUID
