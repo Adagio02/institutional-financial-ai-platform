@@ -46,6 +46,21 @@ from finai.infrastructure.database.models.portfolio_snapshot import (
 from finai.infrastructure.database.models.simulated_trade import (
     SimulatedTradeModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.execution_fill import (
+    ExecutionFillModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.order import (
+    OrderModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.paper_account import (
+    PaperAccountModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.paper_portfolio_snapshot import (
+    PaperPortfolioSnapshotModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.paper_position import (
+    PaperPositionModel,  # noqa: F401
+)
 
 config = context.config
 

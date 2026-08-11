@@ -60,6 +60,18 @@ class Settings(BaseSettings):
     risk_periods_per_year: int = 252
     risk_free_rate: float = 0.0
 
+    paper_trading_initial_cash: float = 100_000.0
+
+    paper_trading_commission_bps: float = 1.0
+    paper_trading_slippage_bps: float = 2.0
+
+    paper_maximum_order_notional: float = 25_000.0
+    paper_maximum_position_notional: float = 50_000.0
+    paper_maximum_gross_exposure: float = 100_000.0
+
+    paper_maximum_position_fraction: float = 0.25
+    paper_minimum_cash_reserve_fraction: float = 0.05
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

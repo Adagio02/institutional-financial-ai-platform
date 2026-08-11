@@ -41,6 +41,15 @@ from finai.api.routes.backtest import (
 from finai.api.routes.risk import (
     router as risk_router,
 )
+from finai.api.routes.order import (
+    router as order_router,
+)
+from finai.api.routes.paper_account import (
+    router as paper_account_router,
+)
+from finai.api.routes.portfolio import (
+    router as portfolio_router,
+)
 
 
 application = FastAPI(
@@ -61,6 +70,9 @@ application.include_router(explanation_router)
 application.include_router(model_governance_router)
 application.include_router(backtest_router)
 application.include_router(risk_router)
+application.include_router(paper_account_router)
+application.include_router(order_router)
+application.include_router(portfolio_router)
 
 register_exception_handlers(application)
 

@@ -275,3 +275,48 @@ GET  /api/v1/backtests/{backtest_run_id}/trades
 GET  /api/v1/backtests/{backtest_run_id}/equity
 
 GET  /api/v1/risk/backtests/{backtest_run_id}
+
+## Version 0.9
+
+Version 0.9 introduces paper-trading execution and
+pre-trade risk controls.
+
+### Paper execution
+
+- Paper trading accounts
+- Market orders
+- Limit orders
+- Simulated fills
+- Slippage modeling
+- Commission modeling
+- Fill audit records
+
+### Order management
+
+- Pending orders
+- Filled orders
+- Rejected orders
+- Order history
+- Fill history
+- Time-in-force metadata
+
+### Portfolio accounting
+
+- Cash balances
+- Position quantities
+- Average entry prices
+- Gross exposure
+- Net exposure
+- Equity
+- Unrealized P&L
+
+### Risk controls
+
+- Maximum order notional
+- Maximum position notional
+- Maximum gross exposure
+- Maximum position fraction
+- Minimum cash reserve
+
+Version 0.9 remains paper-only. It does not send orders
+to a real brokerage or exchange.

@@ -10,9 +10,7 @@ client = TestClient(application)
 
 
 def test_create_backtest() -> None:
-    model_id, dataset_id, symbol = (
-        create_model_and_dataset()
-    )
+    model_id, dataset_id, symbol = create_model_and_dataset()
 
     response = client.post(
         "/api/v1/backtests",
@@ -35,35 +33,24 @@ def test_create_backtest() -> None:
     backtest = response.json()
 
     assert backtest["status"] == "completed"
-    assert (
-        backtest["initial_capital"]
-        == 100_000.0
-    )
+    assert backtest["initial_capital"] == 100_000.0
     assert backtest["final_equity"] is not None
     assert backtest["metrics"]
 
     run_id = backtest["id"]
 
-    get_response = client.get(
-        f"/api/v1/backtests/{run_id}"
-    )
+    get_response = client.get(f"/api/v1/backtests/{run_id}")
 
     assert get_response.status_code == 200
 
-    equity_response = client.get(
-        f"/api/v1/backtests/{run_id}/equity"
-    )
+    equity_response = client.get(f"/api/v1/backtests/{run_id}/equity")
 
     assert equity_response.status_code == 200
-    assert len(
-        equity_response.json()
-    ) > 0
+    assert len(equity_response.json()) > 0
 
 
 def test_backtest_risk_metrics() -> None:
-    model_id, dataset_id, symbol = (
-        create_model_and_dataset()
-    )
+    model_id, dataset_id, symbol = create_model_and_dataset()
 
     backtest_response = client.post(
         "/api/v1/backtests",
@@ -81,18 +68,11 @@ def test_backtest_risk_metrics() -> None:
         },
     )
 
-    assert (
-        backtest_response.status_code
-        == 201
-    )
+    assert backtest_response.status_code == 201
 
-    run_id = backtest_response.json()[
-        "id"
-    ]
+    run_id = backtest_response.json()["id"]
 
-    risk_response = client.get(
-        f"/api/v1/risk/backtests/{run_id}"
-    )
+    risk_response = client.get(f"/api/v1/risk/backtests/{run_id}")
 
     assert risk_response.status_code == 200
 
