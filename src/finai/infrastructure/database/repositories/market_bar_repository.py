@@ -45,39 +45,21 @@ class MarketBarRepository:
             for bar in bars
         ]
 
-        statement = insert(
-            MarketBarModel
-        ).values(values)
+        statement = insert(MarketBarModel).values(values)
 
-        statement = (
-            statement.on_conflict_do_update(
-                constraint="uq_market_bars_identity",
-                set_={
-                    "open_price": (
-                        statement.excluded.open_price
-                    ),
-                    "high_price": (
-                        statement.excluded.high_price
-                    ),
-                    "low_price": (
-                        statement.excluded.low_price
-                    ),
-                    "close_price": (
-                        statement.excluded.close_price
-                    ),
-                    "volume": (
-                        statement.excluded.volume
-                    ),
-                    "provider": (
-                        statement.excluded.provider
-                    ),
-                },
-            )
+        statement = statement.on_conflict_do_update(
+            constraint="uq_market_bars_identity",
+            set_={
+                "open_price": (statement.excluded.open_price),
+                "high_price": (statement.excluded.high_price),
+                "low_price": (statement.excluded.low_price),
+                "close_price": (statement.excluded.close_price),
+                "volume": (statement.excluded.volume),
+                "provider": (statement.excluded.provider),
+            },
         )
 
-        self._session.execute(
-            statement
-        )
+        self._session.execute(statement)
 
         self._session.commit()
 
@@ -95,34 +77,20 @@ class MarketBarRepository:
         statement = (
             select(MarketBarModel)
             .where(
-                MarketBarModel.instrument_id
-                == instrument_id,
-                MarketBarModel.interval
-                == interval.value,
+                MarketBarModel.instrument_id == instrument_id,
+                MarketBarModel.interval == interval.value,
             )
-            .order_by(
-                MarketBarModel.timestamp
-            )
+            .order_by(MarketBarModel.timestamp)
             .limit(limit)
         )
 
         if start_time is not None:
-            statement = statement.where(
-                MarketBarModel.timestamp
-                >= start_time
-            )
+            statement = statement.where(MarketBarModel.timestamp >= start_time)
 
         if end_time is not None:
-            statement = statement.where(
-                MarketBarModel.timestamp
-                <= end_time
-            )
+            statement = statement.where(MarketBarModel.timestamp <= end_time)
 
-        return list(
-            self._session.scalars(
-                statement
-            ).all()
-        )
+        return list(self._session.scalars(statement).all())
 
     def get_latest_bar(
         self,
@@ -133,17 +101,11 @@ class MarketBarRepository:
         statement = (
             select(MarketBarModel)
             .where(
-                MarketBarModel.instrument_id
-                == instrument_id,
-                MarketBarModel.interval
-                == interval.value,
+                MarketBarModel.instrument_id == instrument_id,
+                MarketBarModel.interval == interval.value,
             )
-            .order_by(
-                MarketBarModel.timestamp.desc()
-            )
+            .order_by(MarketBarModel.timestamp.desc())
             .limit(1)
         )
 
-        return self._session.scalar(
-            statement
-        )
+        return self._session.scalar(statement)

@@ -19,18 +19,13 @@ def create_paper_account() -> dict:
         },
     )
 
-    assert response.status_code == 201, (
-        response.text
-    )
+    assert response.status_code == 201, response.text
 
     return response.json()
 
 
 def create_instrument_with_market_data() -> str:
-    symbol = (
-        f"PT{uuid4().hex[:6]}"
-        .upper()
-    )
+    symbol = f"PT{uuid4().hex[:6]}".upper()
 
     instrument_response = client.post(
         "/api/v1/instruments",
@@ -43,46 +38,48 @@ def create_instrument_with_market_data() -> str:
         },
     )
 
-    assert (
-        instrument_response.status_code
-        == 201
-    ), instrument_response.text
+    assert instrument_response.status_code == 201, instrument_response.text
 
     end_time = datetime.now(UTC)
 
-    start_time = (
-        end_time
-        - timedelta(days=5)
-    )
+    start_time = end_time - timedelta(days=5)
 
     ingestion_response = client.post(
         "/api/v1/market-data/ingest",
         json={
             "symbol": symbol,
             "interval": "1d",
-            "start_time": (
-                start_time.isoformat()
-            ),
-            "end_time": (
-                end_time.isoformat()
-            ),
+            "start_time": (start_time.isoformat()),
+            "end_time": (end_time.isoformat()),
         },
     )
 
-    assert (
-        ingestion_response.status_code
-        == 201
-    ), ingestion_response.text
+    assert ingestion_response.status_code == 201, ingestion_response.text
 
     return symbol
+
+
+def ensure_trading_enabled() -> None:
+    client.post(
+        ("/api/v1/trading-control/kill-switch/deactivate"),
+        json={"reason": ("Paper trading test reset")},
+    )
+
+    response = client.put(
+        "/api/v1/trading-control/enabled",
+        json={
+            "enabled": True,
+            "reason": ("Paper trading test"),
+        },
+    )
+
+    assert response.status_code == 200
 
 
 def test_create_account_and_market_order() -> None:
     account = create_paper_account()
 
-    symbol = (
-        create_instrument_with_market_data()
-    )
+    symbol = create_instrument_with_market_data()
 
     order_response = client.post(
         "/api/v1/paper/orders",
@@ -96,62 +93,29 @@ def test_create_account_and_market_order() -> None:
         },
     )
 
-    assert order_response.status_code == 201, (
-        order_response.text
-    )
+    assert order_response.status_code == 201, order_response.text
 
     order = order_response.json()
 
     assert order["status"] == "filled"
 
-    assert (
-        order["filled_quantity"]
-        == 10
-    )
+    assert order["filled_quantity"] == 10
 
-    assert (
-        order["average_fill_price"]
-        is not None
-    )
+    assert order["average_fill_price"] is not None
 
-    assert (
-        order["reference_price"]
-        is not None
-    )
+    assert order["reference_price"] is not None
 
-    assert (
-        order["reference_price"]
-        > 0
-    )
+    assert order["reference_price"] > 0
 
-    assert (
-        order[
-            "reference_price_timestamp"
-        ]
-        is not None
-    )
+    assert order["reference_price_timestamp"] is not None
 
-    assert (
-        order[
-            "reference_price_provider"
-        ]
-        is not None
-    )
+    assert order["reference_price_provider"] is not None
 
-    assert (
-        order["average_fill_price"]
-        >= order["reference_price"]
-    )
+    assert order["average_fill_price"] >= order["reference_price"]
 
-    fill_response = client.get(
-        f"/api/v1/paper/orders/"
-        f"{order['id']}/fills"
-    )
+    fill_response = client.get(f"/api/v1/paper/orders/{order['id']}/fills")
 
-    assert (
-        fill_response.status_code
-        == 200
-    )
+    assert fill_response.status_code == 200
 
     fills = fill_response.json()
 
@@ -165,50 +129,27 @@ def test_create_account_and_market_order() -> None:
     assert fill["commission"] >= 0
     assert fill["slippage_cost"] >= 0
 
-    portfolio_response = client.get(
-        f"/api/v1/paper/portfolio/"
-        f"{account['id']}"
-    )
+    portfolio_response = client.get(f"/api/v1/paper/portfolio/{account['id']}")
 
-    assert (
-        portfolio_response.status_code
-        == 200
-    )
+    assert portfolio_response.status_code == 200
 
-    portfolio = (
-        portfolio_response.json()
-    )
+    portfolio = portfolio_response.json()
 
-    assert len(
-        portfolio["positions"]
-    ) == 1
+    assert len(portfolio["positions"]) == 1
 
-    position = (
-        portfolio["positions"][0]
-    )
+    position = portfolio["positions"][0]
 
-    assert (
-        position["symbol"]
-        == symbol
-    )
+    assert position["symbol"] == symbol
 
-    assert (
-        position["quantity"]
-        == 10
-    )
+    assert position["quantity"] == 10
 
-    assert (
-        portfolio["cash"]
-        < account["initial_cash"]
-    )
+    assert portfolio["cash"] < account["initial_cash"]
 
 
 def test_oversized_order_is_rejected() -> None:
     account = create_paper_account()
 
-    symbol = (
-        create_instrument_with_market_data()
-    )
+    symbol = create_instrument_with_market_data()
 
     order_response = client.post(
         "/api/v1/paper/orders",
@@ -222,41 +163,23 @@ def test_oversized_order_is_rejected() -> None:
         },
     )
 
-    assert order_response.status_code == 201, (
-        order_response.text
-    )
+    assert order_response.status_code == 201, order_response.text
 
     order = order_response.json()
 
-    assert (
-        order["status"]
-        == "rejected"
-    )
+    assert order["status"] == "rejected"
 
-    assert (
-        order["rejection_reason"]
-        is not None
-    )
+    assert order["rejection_reason"] is not None
 
-    assert (
-        order["reference_price"]
-        is not None
-    )
+    assert order["reference_price"] is not None
 
-    assert (
-        order[
-            "reference_price_timestamp"
-        ]
-        is not None
-    )
+    assert order["reference_price_timestamp"] is not None
 
 
 def test_client_cannot_supply_reference_price() -> None:
     account = create_paper_account()
 
-    symbol = (
-        create_instrument_with_market_data()
-    )
+    symbol = create_instrument_with_market_data()
 
     response = client.post(
         "/api/v1/paper/orders",
@@ -277,10 +200,7 @@ def test_client_cannot_supply_reference_price() -> None:
 def test_order_requires_server_market_data() -> None:
     account = create_paper_account()
 
-    symbol = (
-        f"ND{uuid4().hex[:6]}"
-        .upper()
-    )
+    symbol = f"ND{uuid4().hex[:6]}".upper()
 
     instrument_response = client.post(
         "/api/v1/instruments",
@@ -293,10 +213,7 @@ def test_order_requires_server_market_data() -> None:
         },
     )
 
-    assert (
-        instrument_response.status_code
-        == 201
-    ), instrument_response.text
+    assert instrument_response.status_code == 201, instrument_response.text
 
     order_response = client.post(
         "/api/v1/paper/orders",
@@ -310,18 +227,8 @@ def test_order_requires_server_market_data() -> None:
         },
     )
 
-    assert (
-        order_response.status_code
-        == 404
-    ), order_response.text
+    assert order_response.status_code == 404, order_response.text
 
-    detail = (
-        order_response.json()[
-            "detail"
-        ]
-    )
+    detail = order_response.json()["detail"]
 
-    assert (
-        "No market data"
-        in detail
-    )
+    assert "No market data" in detail

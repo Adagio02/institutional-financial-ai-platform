@@ -24,17 +24,11 @@ class MarketQuoteService:
         maximum_quote_age_seconds: int = 86_400,
         quote_interval: BarInterval = BarInterval.ONE_DAY,
     ) -> None:
-        self._instrument_repository = InstrumentRepository(
-            session
-        )
+        self._instrument_repository = InstrumentRepository(session)
 
-        self._market_bar_repository = MarketBarRepository(
-            session
-        )
+        self._market_bar_repository = MarketBarRepository(session)
 
-        self._maximum_quote_age_seconds = (
-            maximum_quote_age_seconds
-        )
+        self._maximum_quote_age_seconds = maximum_quote_age_seconds
 
         self._quote_interval = quote_interval
 
@@ -46,67 +40,36 @@ class MarketQuoteService:
         normalized_symbol = symbol.strip().upper()
 
         if not normalized_symbol:
-            raise ValueError(
-                "Symbol cannot be empty."
-            )
+            raise ValueError("Symbol cannot be empty.")
 
-        instrument = (
-            self._instrument_repository
-            .get_model_by_symbol(
-                normalized_symbol
-            )
-        )
+        instrument = self._instrument_repository.get_model_by_symbol(normalized_symbol)
 
         if instrument is None:
-            raise LookupError(
-                f"Instrument not found: "
-                f"{normalized_symbol}"
-            )
+            raise LookupError(f"Instrument not found: {normalized_symbol}")
 
-        bar = (
-            self._market_bar_repository
-            .get_latest_bar(
-                instrument_id=instrument.id,
-                interval=self._quote_interval,
-            )
+        bar = self._market_bar_repository.get_latest_bar(
+            instrument_id=instrument.id,
+            interval=self._quote_interval,
         )
 
         if bar is None:
-            raise LookupError(
-                "No market data is available for "
-                f"{normalized_symbol}."
-            )
+            raise LookupError(f"No market data is available for {normalized_symbol}.")
 
-        price = float(
-            bar.close_price
-        )
+        price = float(bar.close_price)
 
         if price <= 0:
-            raise ValueError(
-                "Latest market price must be positive."
-            )
+            raise ValueError("Latest market price must be positive.")
 
         quote_timestamp = bar.timestamp
 
         if quote_timestamp.tzinfo is None:
-            quote_timestamp = (
-                quote_timestamp.replace(
-                    tzinfo=UTC
-                )
-            )
+            quote_timestamp = quote_timestamp.replace(tzinfo=UTC)
 
         current_time = datetime.now(UTC)
 
-        maximum_quote_age = timedelta(
-            seconds=(
-                self._maximum_quote_age_seconds
-            )
-        )
+        maximum_quote_age = timedelta(seconds=(self._maximum_quote_age_seconds))
 
-        quote_age = (
-            current_time
-            - quote_timestamp
-        )
+        quote_age = current_time - quote_timestamp
 
         if quote_age > maximum_quote_age:
             raise ValueError(

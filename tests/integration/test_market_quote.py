@@ -47,14 +47,10 @@ def test_quote_uses_latest_persisted_market_bar() -> None:
     try:
         service = MarketQuoteService(
             session=session,
-            maximum_quote_age_seconds=(
-                60 * 60 * 24 * 365
-            ),
+            maximum_quote_age_seconds=(60 * 60 * 24 * 365),
         )
 
-        quote = service.get_quote(
-            symbol=symbol
-        )
+        quote = service.get_quote(symbol=symbol)
 
         assert quote.symbol == symbol
         assert quote.price > 0

@@ -75,6 +75,8 @@ class Settings(BaseSettings):
     paper_quote_maximum_age_seconds: int = 86_400
     paper_quote_interval: str = "1d"
 
+    paper_maximum_daily_loss: float = 5_000.0
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

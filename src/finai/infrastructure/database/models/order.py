@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import (
     UUID as PostgreSQLUUID,
@@ -23,6 +24,14 @@ from finai.infrastructure.database.engine import (
 
 class OrderModel(Base):
     __tablename__ = "orders"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "account_id",
+            "client_order_id",
+            name=("uq_orders_account_client_order_id"),
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(
         PostgreSQLUUID(as_uuid=True),
@@ -50,6 +59,12 @@ class OrderModel(Base):
         index=True,
     )
 
+    client_order_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+        index=True,
+    )
+
     symbol: Mapped[str] = mapped_column(
         String(32),
         nullable=False,
@@ -71,55 +86,41 @@ class OrderModel(Base):
         nullable=False,
     )
 
-    filled_quantity: Mapped[float] = (
-        mapped_column(
-            Float,
-            nullable=False,
-            default=0.0,
-        )
+    filled_quantity: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.0,
     )
 
-    limit_price: Mapped[
-        float | None
-    ] = mapped_column(
+    limit_price: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )
 
-    average_fill_price: Mapped[
-        float | None
-    ] = mapped_column(
+    average_fill_price: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )
 
-    reference_price: Mapped[
-        float | None
-    ] = mapped_column(
+    reference_price: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )
 
-    reference_price_timestamp: Mapped[
-        datetime | None
-    ] = mapped_column(
+    reference_price_timestamp: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
 
-    reference_price_provider: Mapped[
-        str | None
-    ] = mapped_column(
+    reference_price_provider: Mapped[str | None] = mapped_column(
         String(64),
         nullable=True,
     )
 
-    time_in_force: Mapped[str] = (
-        mapped_column(
-            String(16),
-            nullable=False,
-            default="day",
-        )
+    time_in_force: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default="day",
     )
 
     status: Mapped[str] = mapped_column(
@@ -129,32 +130,20 @@ class OrderModel(Base):
         index=True,
     )
 
-    rejection_reason: Mapped[
-        str | None
-    ] = mapped_column(
+    rejection_reason: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
     )
 
-    created_at: Mapped[datetime] = (
-        mapped_column(
-            DateTime(timezone=True),
-            nullable=False,
-            default=lambda: datetime.now(
-                UTC
-            ),
-        )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
     )
 
-    updated_at: Mapped[datetime] = (
-        mapped_column(
-            DateTime(timezone=True),
-            nullable=False,
-            default=lambda: datetime.now(
-                UTC
-            ),
-            onupdate=lambda: datetime.now(
-                UTC
-            ),
-        )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )

@@ -16,11 +16,15 @@ from finai.domain.execution.enums import (
 
 
 class OrderCreate(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid"
-    )
+    model_config = ConfigDict(extra="forbid")
 
     account_id: UUID
+
+    client_order_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=128,
+    )
 
     symbol: str = Field(
         min_length=1,
@@ -29,9 +33,7 @@ class OrderCreate(BaseModel):
 
     side: OrderSide
 
-    order_type: OrderType = (
-        OrderType.MARKET
-    )
+    order_type: OrderType = OrderType.MARKET
 
     quantity: float = Field(
         gt=0,
@@ -42,9 +44,7 @@ class OrderCreate(BaseModel):
         gt=0,
     )
 
-    time_in_force: TimeInForce = (
-        TimeInForce.DAY
-    )
+    time_in_force: TimeInForce = TimeInForce.DAY
 
     @field_validator("symbol")
     @classmethod
@@ -55,21 +55,36 @@ class OrderCreate(BaseModel):
         normalized = value.strip().upper()
 
         if not normalized:
-            raise ValueError(
-                "symbol cannot be empty"
-            )
+            raise ValueError("symbol cannot be empty")
+
+        return normalized
+
+    @field_validator("client_order_id")
+    @classmethod
+    def normalize_client_order_id(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        normalized = value.strip()
+
+        if not normalized:
+            raise ValueError("client_order_id cannot be blank")
 
         return normalized
 
 
 class OrderResponse(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     account_id: UUID
     instrument_id: UUID
+
+    client_order_id: str | None
+
     symbol: str
 
     side: str
@@ -95,9 +110,7 @@ class OrderResponse(BaseModel):
 
 
 class FillResponse(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     order_id: UUID

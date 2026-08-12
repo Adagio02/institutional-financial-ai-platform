@@ -50,7 +50,15 @@ from finai.api.routes.paper_account import (
 from finai.api.routes.portfolio import (
     router as portfolio_router,
 )
-
+from finai.api.routes.reconciliation import (
+    router as reconciliation_router,
+)
+from finai.api.routes.trading_control import (
+    router as trading_control_router,
+)
+from finai.api.routes.execution_audit import (
+    router as execution_audit_router,
+)
 
 application = FastAPI(
     title="Institutional Financial AI Platform",
@@ -73,6 +81,10 @@ application.include_router(risk_router)
 application.include_router(paper_account_router)
 application.include_router(order_router)
 application.include_router(portfolio_router)
+application.include_router(trading_control_router)
+
+application.include_router(reconciliation_router)
+application.include_router(execution_audit_router)
 
 register_exception_handlers(application)
 

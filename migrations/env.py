@@ -61,6 +61,12 @@ from finai.infrastructure.database.models.paper_portfolio_snapshot import (
 from finai.infrastructure.database.models.paper_position import (
     PaperPositionModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.execution_audit import (
+    ExecutionAuditModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.trading_control import (
+    TradingControlModel,  # noqa: F401
+)
 
 config = context.config
 

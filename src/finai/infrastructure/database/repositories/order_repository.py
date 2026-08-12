@@ -21,6 +21,7 @@ class OrderRepository:
         *,
         account_id: UUID,
         instrument_id: UUID,
+        client_order_id: str | None,
         symbol: str,
         side: str,
         order_type: str,
@@ -34,6 +35,7 @@ class OrderRepository:
         order = OrderModel(
             account_id=account_id,
             instrument_id=instrument_id,
+            client_order_id=(client_order_id),
             symbol=symbol.strip().upper(),
             side=side,
             order_type=order_type,
@@ -41,24 +43,14 @@ class OrderRepository:
             limit_price=limit_price,
             time_in_force=time_in_force,
             reference_price=reference_price,
-            reference_price_timestamp=(
-                reference_price_timestamp
-            ),
-            reference_price_provider=(
-                reference_price_provider
-            ),
+            reference_price_timestamp=(reference_price_timestamp),
+            reference_price_provider=(reference_price_provider),
             status="pending",
         )
 
-        self._session.add(
-            order
-        )
-
+        self._session.add(order)
         self._session.commit()
-
-        self._session.refresh(
-            order
-        )
+        self._session.refresh(order)
 
         return order
 
@@ -71,26 +63,30 @@ class OrderRepository:
             order_id,
         )
 
+    def get_by_client_order_id(
+        self,
+        *,
+        account_id: UUID,
+        client_order_id: str,
+    ) -> OrderModel | None:
+        statement = select(OrderModel).where(
+            OrderModel.account_id == account_id,
+            OrderModel.client_order_id == client_order_id,
+        )
+
+        return self._session.scalar(statement)
+
     def list_for_account(
         self,
         account_id: UUID,
     ) -> list[OrderModel]:
         statement = (
             select(OrderModel)
-            .where(
-                OrderModel.account_id
-                == account_id
-            )
-            .order_by(
-                OrderModel.created_at.desc()
-            )
+            .where(OrderModel.account_id == account_id)
+            .order_by(OrderModel.created_at.desc())
         )
 
-        return list(
-            self._session.scalars(
-                statement
-            ).all()
-        )
+        return list(self._session.scalars(statement).all())
 
     def mark_rejected(
         self,
@@ -99,16 +95,10 @@ class OrderRepository:
         reason: str,
     ) -> OrderModel:
         order.status = "rejected"
-
-        order.rejection_reason = (
-            reason
-        )
+        order.rejection_reason = reason
 
         self._session.commit()
-
-        self._session.refresh(
-            order
-        )
+        self._session.refresh(order)
 
         return order
 
@@ -121,20 +111,13 @@ class OrderRepository:
     ) -> OrderModel:
         order.status = "filled"
 
-        order.filled_quantity = (
-            filled_quantity
-        )
+        order.filled_quantity = filled_quantity
 
-        order.average_fill_price = (
-            average_fill_price
-        )
+        order.average_fill_price = average_fill_price
 
         order.rejection_reason = None
 
         self._session.commit()
-
-        self._session.refresh(
-            order
-        )
+        self._session.refresh(order)
 
         return order
