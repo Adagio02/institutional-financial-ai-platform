@@ -5,6 +5,14 @@ from datetime import datetime
 @dataclass(frozen=True, slots=True)
 class MarketQuote:
     symbol: str
-    price: float
+
+    bid: float
+    ask: float
+    last: float
+
     timestamp: datetime
     provider: str
+
+    @property
+    def midpoint(self) -> float:
+        return (self.bid + self.ask) / 2.0

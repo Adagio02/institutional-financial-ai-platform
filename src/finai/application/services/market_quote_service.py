@@ -1,5 +1,3 @@
-from datetime import UTC, datetime, timedelta
-
 from sqlalchemy.orm import Session
 
 from finai.domain.market_data.enums import (
@@ -8,11 +6,8 @@ from finai.domain.market_data.enums import (
 from finai.domain.market_data.quote import (
     MarketQuote,
 )
-from finai.infrastructure.database.repositories.instrument_repository import (
-    InstrumentRepository,
-)
-from finai.infrastructure.database.repositories.market_bar_repository import (
-    MarketBarRepository,
+from finai.infrastructure.market_data.persisted_quote_provider import (
+    PersistedQuoteProvider,
 )
 
 
@@ -21,67 +16,20 @@ class MarketQuoteService:
         self,
         *,
         session: Session,
-        maximum_quote_age_seconds: int = 86_400,
-        quote_interval: BarInterval = BarInterval.ONE_DAY,
+        maximum_quote_age_seconds: int,
+        quote_interval: BarInterval,
+        synthetic_spread_bps: float,
     ) -> None:
-        self._instrument_repository = InstrumentRepository(session)
-
-        self._market_bar_repository = MarketBarRepository(session)
-
-        self._maximum_quote_age_seconds = maximum_quote_age_seconds
-
-        self._quote_interval = quote_interval
+        self._provider = PersistedQuoteProvider(
+            session=session,
+            interval=quote_interval,
+            maximum_age_seconds=(maximum_quote_age_seconds),
+            synthetic_spread_bps=(synthetic_spread_bps),
+        )
 
     def get_quote(
         self,
         *,
         symbol: str,
     ) -> MarketQuote:
-        normalized_symbol = symbol.strip().upper()
-
-        if not normalized_symbol:
-            raise ValueError("Symbol cannot be empty.")
-
-        instrument = self._instrument_repository.get_model_by_symbol(normalized_symbol)
-
-        if instrument is None:
-            raise LookupError(f"Instrument not found: {normalized_symbol}")
-
-        bar = self._market_bar_repository.get_latest_bar(
-            instrument_id=instrument.id,
-            interval=self._quote_interval,
-        )
-
-        if bar is None:
-            raise LookupError(f"No market data is available for {normalized_symbol}.")
-
-        price = float(bar.close_price)
-
-        if price <= 0:
-            raise ValueError("Latest market price must be positive.")
-
-        quote_timestamp = bar.timestamp
-
-        if quote_timestamp.tzinfo is None:
-            quote_timestamp = quote_timestamp.replace(tzinfo=UTC)
-
-        current_time = datetime.now(UTC)
-
-        maximum_quote_age = timedelta(seconds=(self._maximum_quote_age_seconds))
-
-        quote_age = current_time - quote_timestamp
-
-        if quote_age > maximum_quote_age:
-            raise ValueError(
-                "Latest market quote is stale. "
-                f"symbol={normalized_symbol}, "
-                f"quote_timestamp="
-                f"{quote_timestamp.isoformat()}"
-            )
-
-        return MarketQuote(
-            symbol=normalized_symbol,
-            price=price,
-            timestamp=quote_timestamp,
-            provider=bar.provider,
-        )
+        return self._provider.get_quote(symbol=symbol)

@@ -85,6 +85,9 @@ class OrderResponse(BaseModel):
 
     client_order_id: str | None
 
+    broker_order_id: str | None
+    broker_name: str | None
+
     symbol: str
 
     side: str
@@ -92,18 +95,25 @@ class OrderResponse(BaseModel):
 
     quantity: float
     filled_quantity: float
+    remaining_quantity: float
 
     limit_price: float | None
     average_fill_price: float | None
 
     reference_price: float | None
+
     reference_price_timestamp: datetime | None
+
     reference_price_provider: str | None
 
     time_in_force: str
     status: str
 
     rejection_reason: str | None
+
+    submitted_at: datetime | None
+    cancelled_at: datetime | None
+    last_synced_at: datetime | None
 
     created_at: datetime
     updated_at: datetime

@@ -65,6 +65,17 @@ class OrderModel(Base):
         index=True,
     )
 
+    broker_order_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+        index=True,
+    )
+
+    broker_name: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
     symbol: Mapped[str] = mapped_column(
         String(32),
         nullable=False,
@@ -87,6 +98,12 @@ class OrderModel(Base):
     )
 
     filled_quantity: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.0,
+    )
+
+    remaining_quantity: Mapped[float] = mapped_column(
         Float,
         nullable=False,
         default=0.0,
@@ -132,6 +149,21 @@ class OrderModel(Base):
 
     rejection_reason: Mapped[str | None] = mapped_column(
         Text,
+        nullable=True,
+    )
+
+    submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    cancelled_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    last_synced_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
         nullable=True,
     )
 

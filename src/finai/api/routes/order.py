@@ -48,15 +48,10 @@ DatabaseSession = Annotated[
 ]
 
 
-@router.post(
-    "",
-    response_model=OrderResponse,
-    status_code=(status.HTTP_201_CREATED),
-)
-def submit_order(
-    request: OrderCreate,
-    session: DatabaseSession,
-) -> OrderResponse:
+def build_order_service(
+    *,
+    session: Session,
+) -> OrderService:
     settings = get_settings()
 
     risk_limits = PortfolioRiskLimits(
@@ -67,7 +62,7 @@ def submit_order(
         minimum_cash_reserve_fraction=(settings.paper_minimum_cash_reserve_fraction),
     )
 
-    service = OrderService(
+    return OrderService(
         session=session,
         commission_bps=(settings.paper_trading_commission_bps),
         slippage_bps=(settings.paper_trading_slippage_bps),
@@ -75,7 +70,23 @@ def submit_order(
         maximum_quote_age_seconds=(settings.paper_quote_maximum_age_seconds),
         quote_interval=BarInterval(settings.paper_quote_interval),
         maximum_daily_loss=(settings.paper_maximum_daily_loss),
+        synthetic_spread_bps=(settings.paper_quote_synthetic_spread_bps),
+        partial_fill_enabled=(settings.sandbox_partial_fill_enabled),
+        initial_fill_fraction=(settings.sandbox_initial_fill_fraction),
+        execution_mode=(settings.execution_mode),
     )
+
+
+@router.post(
+    "",
+    response_model=OrderResponse,
+    status_code=(status.HTTP_201_CREATED),
+)
+def submit_order(
+    request: OrderCreate,
+    session: DatabaseSession,
+) -> OrderResponse:
+    service = build_order_service(session=session)
 
     try:
         order = service.submit(

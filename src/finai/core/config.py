@@ -77,6 +77,13 @@ class Settings(BaseSettings):
 
     paper_maximum_daily_loss: float = 5_000.0
 
+    execution_mode: str = "sandbox"
+
+    paper_quote_synthetic_spread_bps: float = 2.0
+
+    sandbox_partial_fill_enabled: bool = True
+    sandbox_initial_fill_fraction: float = 0.50
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -1,9 +1,15 @@
-from datetime import datetime
+from datetime import (
+    UTC,
+    datetime,
+)
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from finai.domain.execution.enums import (
+    OrderStatus,
+)
 from finai.infrastructure.database.models.order import (
     OrderModel,
 )
@@ -40,12 +46,14 @@ class OrderRepository:
             side=side,
             order_type=order_type,
             quantity=quantity,
+            filled_quantity=0.0,
+            remaining_quantity=quantity,
             limit_price=limit_price,
             time_in_force=time_in_force,
             reference_price=reference_price,
             reference_price_timestamp=(reference_price_timestamp),
             reference_price_provider=(reference_price_provider),
-            status="pending",
+            status=OrderStatus.PENDING.value,
         )
 
         self._session.add(order)
@@ -88,36 +96,101 @@ class OrderRepository:
 
         return list(self._session.scalars(statement).all())
 
+    def mark_submitted(
+        self,
+        order: OrderModel,
+        *,
+        broker_order_id: str,
+        broker_name: str,
+    ) -> OrderModel:
+        order.broker_order_id = broker_order_id
+
+        order.broker_name = broker_name
+
+        order.status = OrderStatus.ACCEPTED.value
+
+        order.submitted_at = datetime.now(UTC)
+
+        order.last_synced_at = datetime.now(UTC)
+
+        self._session.commit()
+        self._session.refresh(order)
+
+        return order
+
+    def update_fill_state(
+        self,
+        order: OrderModel,
+        *,
+        filled_quantity: float,
+        average_fill_price: float | None,
+        status: OrderStatus,
+    ) -> OrderModel:
+        order.filled_quantity = filled_quantity
+
+        order.remaining_quantity = max(
+            order.quantity - filled_quantity,
+            0.0,
+        )
+
+        order.average_fill_price = average_fill_price
+
+        order.status = status.value
+
+        order.last_synced_at = datetime.now(UTC)
+
+        self._session.commit()
+        self._session.refresh(order)
+
+        return order
+
     def mark_rejected(
         self,
         order: OrderModel,
         *,
         reason: str,
     ) -> OrderModel:
-        order.status = "rejected"
+        order.status = OrderStatus.REJECTED.value
+
         order.rejection_reason = reason
 
+        order.remaining_quantity = order.quantity - order.filled_quantity
+
         self._session.commit()
         self._session.refresh(order)
 
         return order
 
-    def mark_filled(
+    def mark_cancelled(
         self,
         order: OrderModel,
-        *,
-        filled_quantity: float,
-        average_fill_price: float,
     ) -> OrderModel:
-        order.status = "filled"
+        order.status = OrderStatus.CANCELLED.value
 
-        order.filled_quantity = filled_quantity
+        order.cancelled_at = datetime.now(UTC)
 
-        order.average_fill_price = average_fill_price
-
-        order.rejection_reason = None
+        order.last_synced_at = datetime.now(UTC)
 
         self._session.commit()
         self._session.refresh(order)
 
         return order
+
+    def list_open(
+        self,
+    ) -> list[OrderModel]:
+        statement = (
+            select(OrderModel)
+            .where(
+                OrderModel.status.in_(
+                    [
+                        OrderStatus.PENDING.value,
+                        OrderStatus.ACCEPTED.value,
+                        (OrderStatus.PARTIALLY_FILLED.value),
+                    ]
+                )
+            )
+            .order_by(OrderModel.created_at)
+        )
+
+        return list(self._session.scalars(statement).all())
