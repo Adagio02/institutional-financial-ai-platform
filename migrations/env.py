@@ -67,6 +67,9 @@ from finai.infrastructure.database.models.execution_audit import (
 from finai.infrastructure.database.models.trading_control import (
     TradingControlModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.trade_proposal import (
+    TradeProposalModel,  # noqa: F401
+)
 
 config = context.config
 
