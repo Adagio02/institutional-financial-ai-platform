@@ -163,6 +163,7 @@ class ProposalExecutionService:
             quantity=proposal.quantity,
             limit_price=None,
             time_in_force=(TimeInForce.DAY),
+            strategy_key=(proposal.strategy_key),
         )
 
         if order is None:

@@ -32,6 +32,11 @@ class OrderModel(Base):
             name=("uq_orders_account_client_order_id"),
         ),
     )
+    strategy_key: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+        index=True,
+    )
 
     id: Mapped[UUID] = mapped_column(
         PostgreSQLUUID(as_uuid=True),

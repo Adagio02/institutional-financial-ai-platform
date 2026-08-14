@@ -60,6 +60,13 @@ class TradeProposalModel(Base):
         index=True,
     )
 
+    strategy_key: Mapped[str] = mapped_column(
+        String(128),
+        nullable=False,
+        default="default",
+        index=True,
+    )
+
     source_model_id: Mapped[UUID | None] = mapped_column(
         PostgreSQLUUID(as_uuid=True),
         nullable=True,

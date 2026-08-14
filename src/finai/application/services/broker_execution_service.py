@@ -27,6 +27,12 @@ from finai.infrastructure.database.repositories.paper_account_repository import 
 from finai.infrastructure.database.repositories.paper_position_repository import (
     PaperPositionRepository,
 )
+from finai.infrastructure.database.repositories.strategy_attribution_repository import (
+    StrategyAttributionRepository,
+)
+from finai.infrastructure.database.repositories.strategy_position_repository import (
+    StrategyPositionRepository,
+)
 
 
 class BrokerExecutionService:
@@ -45,6 +51,10 @@ class BrokerExecutionService:
         self._fill_repository = ExecutionFillRepository(session)
 
         self._position_repository = PaperPositionRepository(session)
+
+        self._strategy_position_repository = StrategyPositionRepository(session)
+
+        self._strategy_attribution_repository = StrategyAttributionRepository(session)
 
         self._audit_repository = ExecutionAuditRepository(session)
 
@@ -119,25 +129,37 @@ class BrokerExecutionService:
                 average_price=0.0,
             )
 
-        for fill in result.fills:
-            notional = fill.quantity * fill.price
+        strategy_position = None
 
-            self._fill_repository.create(
-                order_id=order.id,
-                quantity=fill.quantity,
-                price=fill.price,
-                notional=notional,
-                commission=(fill.commission),
-                slippage_cost=(fill.slippage_cost),
+        if order.strategy_key:
+            strategy_position = self._strategy_position_repository.get_or_create(
+                account_id=account.id,
+                strategy_key=(order.strategy_key),
+                instrument_id=(order.instrument_id),
+                symbol=order.symbol,
             )
 
-            signed_quantity = fill.quantity if side == OrderSide.BUY else -fill.quantity
+        for broker_fill in result.fills:
+            notional = broker_fill.quantity * broker_fill.price
+
+            fill = self._fill_repository.create(
+                order_id=order.id,
+                quantity=(broker_fill.quantity),
+                price=broker_fill.price,
+                notional=notional,
+                commission=(broker_fill.commission),
+                slippage_cost=(broker_fill.slippage_cost),
+            )
+
+            signed_quantity = (
+                broker_fill.quantity if side == OrderSide.BUY else -broker_fill.quantity
+            )
 
             accounting = apply_fill_to_position(
                 current_quantity=(position.quantity),
                 current_average_price=(position.average_price),
                 fill_quantity=(signed_quantity),
-                fill_price=(fill.price),
+                fill_price=(broker_fill.price),
             )
 
             position.quantity = accounting.quantity
@@ -148,12 +170,43 @@ class BrokerExecutionService:
 
             self._position_repository.save(position)
 
-            if side == OrderSide.BUY:
-                account.cash -= notional + fill.commission
-            else:
-                account.cash += notional - fill.commission
+            if strategy_position is not None:
+                strategy_accounting = apply_fill_to_position(
+                    current_quantity=(strategy_position.quantity),
+                    current_average_price=(strategy_position.average_price),
+                    fill_quantity=(signed_quantity),
+                    fill_price=(broker_fill.price),
+                )
 
-            account.realized_pnl += accounting.realized_pnl_delta - fill.commission
+                strategy_position.quantity = strategy_accounting.quantity
+
+                strategy_position.average_price = strategy_accounting.average_price
+
+                strategy_position.realized_pnl += strategy_accounting.realized_pnl_delta
+
+                (self._strategy_position_repository.save(strategy_position))
+
+                (
+                    self._strategy_attribution_repository.create(
+                        account_id=account.id,
+                        strategy_key=(order.strategy_key),
+                        instrument_id=(order.instrument_id),
+                        order_id=order.id,
+                        fill_id=fill.id,
+                        symbol=order.symbol,
+                        notional=notional,
+                        realized_pnl_delta=(strategy_accounting.realized_pnl_delta),
+                        commission=(broker_fill.commission),
+                    )
+                )
+
+            if side == OrderSide.BUY:
+                account.cash -= notional + broker_fill.commission
+
+            else:
+                account.cash += notional - broker_fill.commission
+
+            account.realized_pnl += accounting.realized_pnl_delta - broker_fill.commission
 
             self._account_repository.update_cash(
                 account,
@@ -167,6 +220,7 @@ class BrokerExecutionService:
 
         if total_filled >= order.quantity:
             status = OrderStatus.FILLED
+
         else:
             status = OrderStatus.PARTIALLY_FILLED
 
@@ -184,6 +238,7 @@ class BrokerExecutionService:
             message=("Sandbox broker execution was applied."),
             event_data={
                 "broker": (self._broker.name),
+                "strategy_key": (order.strategy_key),
                 "status": status.value,
                 "filled_quantity": (total_filled),
                 "remaining_quantity": (

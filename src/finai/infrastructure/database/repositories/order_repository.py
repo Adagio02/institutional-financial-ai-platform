@@ -37,6 +37,7 @@ class OrderRepository:
         reference_price: float,
         reference_price_timestamp: datetime,
         reference_price_provider: str,
+        strategy_key: str | None,
     ) -> OrderModel:
         order = OrderModel(
             account_id=account_id,
@@ -54,6 +55,7 @@ class OrderRepository:
             reference_price_timestamp=(reference_price_timestamp),
             reference_price_provider=(reference_price_provider),
             status=OrderStatus.PENDING.value,
+            strategy_key=strategy_key,
         )
 
         self._session.add(order)

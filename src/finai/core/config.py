@@ -150,6 +150,25 @@ class Settings(BaseSettings):
         extra="ignore",
         case_sensitive=False,
     )
+    # ---------------------------------------------------------
+    # Version 1.3 strategy governance
+    # ---------------------------------------------------------
+
+    strategy_default_capital_budget_fraction: float = 0.25
+
+    strategy_default_maximum_single_proposal_fraction: float = 0.25
+
+    strategy_default_maximum_gross_exposure_fraction: float = 1.0
+
+    strategy_default_maximum_symbol_fraction: float = 0.50
+
+    strategy_default_maximum_daily_loss: float = 1_000.0
+
+    strategy_default_cooldown_seconds: int = 300
+
+    strategy_default_maximum_active_proposals: int = 5
+
+    strategy_competing_signal_resolution_enabled: bool = True
 
 
 @lru_cache

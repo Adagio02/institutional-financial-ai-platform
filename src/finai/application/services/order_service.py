@@ -123,6 +123,7 @@ class OrderService:
         quantity: float,
         limit_price: float | None,
         time_in_force: TimeInForce,
+        strategy_key: str | None = None,
     ):
         self._control_service.assert_trading_allowed()
 
@@ -214,6 +215,7 @@ class OrderService:
             reference_price=(reference_price),
             reference_price_timestamp=(quote.timestamp),
             reference_price_provider=(quote.provider),
+            strategy_key=(strategy_key),
         )
 
         self._audit_repository.create(

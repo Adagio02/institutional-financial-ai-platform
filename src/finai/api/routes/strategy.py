@@ -46,6 +46,7 @@ router = APIRouter(
     tags=["strategy"],
 )
 
+
 DatabaseSession = Annotated[
     Session,
     Depends(get_database_session),
@@ -64,18 +65,13 @@ def build_risk_limits() -> PortfolioRiskLimits:
     )
 
 
-@router.post(
-    "",
-    response_model=TradeProposalResponse,
-    status_code=(status.HTTP_201_CREATED),
-)
-def create_trade_proposal(
-    request: TradeProposalCreate,
-    session: DatabaseSession,
-) -> TradeProposalResponse:
+def build_strategy_proposal_service(
+    *,
+    session: Session,
+) -> StrategyProposalService:
     settings = get_settings()
 
-    service = StrategyProposalService(
+    return StrategyProposalService(
         session=session,
         minimum_confidence=(settings.strategy_minimum_confidence),
         maximum_buy_equity_fraction=(settings.strategy_maximum_buy_equity_fraction),
@@ -84,27 +80,77 @@ def create_trade_proposal(
         maximum_quote_age_seconds=(settings.paper_quote_maximum_age_seconds),
         quote_interval=BarInterval(settings.paper_quote_interval),
         synthetic_spread_bps=(settings.paper_quote_synthetic_spread_bps),
+        default_capital_budget_fraction=(settings.strategy_default_capital_budget_fraction),
+        default_maximum_single_proposal_fraction=(
+            settings.strategy_default_maximum_single_proposal_fraction
+        ),
+        default_maximum_gross_exposure_fraction=(
+            settings.strategy_default_maximum_gross_exposure_fraction
+        ),
+        default_maximum_symbol_fraction=(settings.strategy_default_maximum_symbol_fraction),
+        default_maximum_daily_loss=(settings.strategy_default_maximum_daily_loss),
+        default_cooldown_seconds=(settings.strategy_default_cooldown_seconds),
+        default_maximum_active_proposals=(settings.strategy_default_maximum_active_proposals),
+        competing_signal_resolution_enabled=(settings.strategy_competing_signal_resolution_enabled),
+        # Note: default_* strategy settings provided above; duplicates removed
     )
+
+
+def build_proposal_execution_service(
+    *,
+    session: Session,
+) -> ProposalExecutionService:
+    settings = get_settings()
+
+    return ProposalExecutionService(
+        session=session,
+        commission_bps=(settings.paper_trading_commission_bps),
+        slippage_bps=(settings.paper_trading_slippage_bps),
+        risk_limits=build_risk_limits(),
+        maximum_quote_age_seconds=(settings.paper_quote_maximum_age_seconds),
+        quote_interval=BarInterval(settings.paper_quote_interval),
+        maximum_daily_loss=(settings.paper_maximum_daily_loss),
+        synthetic_spread_bps=(settings.paper_quote_synthetic_spread_bps),
+        partial_fill_enabled=(settings.sandbox_partial_fill_enabled),
+        initial_fill_fraction=(settings.sandbox_initial_fill_fraction),
+        execution_mode=(settings.execution_mode),
+        proposal_maximum_age_seconds=(settings.strategy_proposal_maximum_age_seconds),
+        maximum_price_drift_bps=(settings.strategy_maximum_price_drift_bps),
+        manual_approval_required=(settings.strategy_manual_approval_required),
+    )
+
+
+@router.post(
+    "",
+    response_model=TradeProposalResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_trade_proposal(
+    request: TradeProposalCreate,
+    session: DatabaseSession,
+) -> TradeProposalResponse:
+    service = build_strategy_proposal_service(session=session)
 
     try:
         proposal = service.create(
             account_id=request.account_id,
+            strategy_key=request.strategy_key,
             symbol=request.symbol,
             side=request.side,
-            confidence=(request.confidence),
+            confidence=request.confidence,
             source_model_id=(request.source_model_id),
             source_prediction_id=(request.source_prediction_id),
         )
 
     except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_404_NOT_FOUND),
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
 
     except ValueError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         ) from error
 
@@ -141,7 +187,7 @@ def get_trade_proposal(
 
     if proposal is None:
         raise HTTPException(
-            status_code=(status.HTTP_404_NOT_FOUND),
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=(f"Trade proposal not found: {proposal_id}"),
         )
 
@@ -167,13 +213,13 @@ def approve_trade_proposal(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_404_NOT_FOUND),
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
 
     except ValueError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         ) from error
 
@@ -199,13 +245,13 @@ def reject_trade_proposal(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_404_NOT_FOUND),
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
 
     except ValueError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         ) from error
 
@@ -220,37 +266,20 @@ def execute_trade_proposal(
     proposal_id: UUID,
     session: DatabaseSession,
 ) -> TradeProposalResponse:
-    settings = get_settings()
-
-    service = ProposalExecutionService(
-        session=session,
-        commission_bps=(settings.paper_trading_commission_bps),
-        slippage_bps=(settings.paper_trading_slippage_bps),
-        risk_limits=(build_risk_limits()),
-        maximum_quote_age_seconds=(settings.paper_quote_maximum_age_seconds),
-        quote_interval=BarInterval(settings.paper_quote_interval),
-        maximum_daily_loss=(settings.paper_maximum_daily_loss),
-        synthetic_spread_bps=(settings.paper_quote_synthetic_spread_bps),
-        partial_fill_enabled=(settings.sandbox_partial_fill_enabled),
-        initial_fill_fraction=(settings.sandbox_initial_fill_fraction),
-        execution_mode=(settings.execution_mode),
-        proposal_maximum_age_seconds=(settings.strategy_proposal_maximum_age_seconds),
-        maximum_price_drift_bps=(settings.strategy_maximum_price_drift_bps),
-        manual_approval_required=(settings.strategy_manual_approval_required),
-    )
+    service = build_proposal_execution_service(session=session)
 
     try:
         proposal = service.execute(proposal_id=proposal_id)
 
     except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_404_NOT_FOUND),
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
 
     except ValueError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         ) from error
 

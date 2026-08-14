@@ -1,7 +1,10 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import (
+    func,
+    select,
+)
 from sqlalchemy.orm import Session
 
 from finai.domain.strategy.enums import (
@@ -24,6 +27,7 @@ class TradeProposalRepository:
         *,
         account_id: UUID,
         instrument_id: UUID,
+        strategy_key: str,
         source_model_id: UUID | None,
         source_prediction_id: UUID | None,
         symbol: str,
@@ -41,6 +45,7 @@ class TradeProposalRepository:
         proposal = TradeProposalModel(
             account_id=account_id,
             instrument_id=instrument_id,
+            strategy_key=strategy_key,
             source_model_id=(source_model_id),
             source_prediction_id=(source_prediction_id),
             symbol=symbol.strip().upper(),
@@ -82,6 +87,65 @@ class TradeProposalRepository:
         )
 
         return list(self._session.scalars(statement).all())
+
+    def count_actionable(
+        self,
+        *,
+        account_id: UUID,
+        strategy_key: str,
+    ) -> int:
+        statuses = [
+            TradeProposalStatus.PENDING_APPROVAL.value,
+            TradeProposalStatus.APPROVED.value,
+        ]
+
+        statement = select(func.count(TradeProposalModel.id)).where(
+            TradeProposalModel.account_id == account_id,
+            TradeProposalModel.strategy_key == strategy_key,
+            TradeProposalModel.status.in_(statuses),
+        )
+
+        return int(self._session.scalar(statement) or 0)
+
+    def list_actionable_for_symbol(
+        self,
+        *,
+        account_id: UUID,
+        symbol: str,
+    ) -> list[TradeProposalModel]:
+        statuses = [
+            TradeProposalStatus.PENDING_APPROVAL.value,
+            TradeProposalStatus.APPROVED.value,
+        ]
+
+        statement = select(TradeProposalModel).where(
+            TradeProposalModel.account_id == account_id,
+            TradeProposalModel.symbol == symbol,
+            TradeProposalModel.status.in_(statuses),
+        )
+
+        return list(self._session.scalars(statement).all())
+
+    def latest_executed(
+        self,
+        *,
+        account_id: UUID,
+        strategy_key: str,
+        symbol: str,
+    ) -> TradeProposalModel | None:
+        statement = (
+            select(TradeProposalModel)
+            .where(
+                TradeProposalModel.account_id == account_id,
+                TradeProposalModel.strategy_key == strategy_key,
+                TradeProposalModel.symbol == symbol,
+                TradeProposalModel.status == (TradeProposalStatus.EXECUTED.value),
+            )
+            .order_by(TradeProposalModel.executed_at.desc())
+            .limit(1)
+        )
+
+        return self._session.scalar(statement)
 
     def mark_approved(
         self,
@@ -129,7 +193,6 @@ class TradeProposalRepository:
         proposal.status = TradeProposalStatus.EXECUTED.value
 
         proposal.order_id = order_id
-
         proposal.executed_at = datetime.now(UTC)
 
         self._session.commit()

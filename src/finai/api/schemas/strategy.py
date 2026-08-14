@@ -18,6 +18,12 @@ class TradeProposalCreate(BaseModel):
 
     account_id: UUID
 
+    strategy_key: str = Field(
+        default="default",
+        min_length=1,
+        max_length=128,
+    )
+
     symbol: str = Field(
         min_length=1,
         max_length=32,
@@ -33,6 +39,19 @@ class TradeProposalCreate(BaseModel):
     source_model_id: UUID | None = None
 
     source_prediction_id: UUID | None = None
+
+    @field_validator("strategy_key")
+    @classmethod
+    def normalize_strategy_key(
+        cls,
+        value: str,
+    ) -> str:
+        normalized = value.strip()
+
+        if not normalized:
+            raise ValueError("strategy_key cannot be empty")
+
+        return normalized
 
     @field_validator("symbol")
     @classmethod
@@ -75,6 +94,8 @@ class TradeProposalResponse(BaseModel):
     instrument_id: UUID
 
     order_id: UUID | None
+
+    strategy_key: str
 
     source_model_id: UUID | None
     source_prediction_id: UUID | None
