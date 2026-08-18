@@ -70,6 +70,21 @@ from finai.infrastructure.database.models.trading_control import (
 from finai.infrastructure.database.models.trade_proposal import (
     TradeProposalModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.strategy_attribution import (
+    StrategyAttributionModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.strategy_policy import (
+    StrategyPolicyModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.strategy_position import (
+    StrategyPositionModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.strategy_run import (
+    StrategyRunModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.strategy_run_item import (
+    StrategyRunItemModel,  # noqa: F401
+)
 
 config = context.config
 

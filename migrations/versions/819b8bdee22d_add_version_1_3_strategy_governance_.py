@@ -318,36 +318,28 @@ def upgrade() -> None:
     )
 
     op.create_index(
-        op.f(
-            "ix_strategy_attribution_events_account_id"
-        ),
+        op.f("ix_strategy_attribution_events_account_id"),
         "strategy_attribution_events",
         ["account_id"],
         unique=False,
     )
 
     op.create_index(
-        op.f(
-            "ix_strategy_attribution_events_strategy_key"
-        ),
+        op.f("ix_strategy_attribution_events_strategy_key"),
         "strategy_attribution_events",
         ["strategy_key"],
         unique=False,
     )
 
     op.create_index(
-        op.f(
-            "ix_strategy_attribution_events_order_id"
-        ),
+        op.f("ix_strategy_attribution_events_order_id"),
         "strategy_attribution_events",
         ["order_id"],
         unique=False,
     )
 
     op.create_index(
-        op.f(
-            "ix_strategy_attribution_events_created_at"
-        ),
+        op.f("ix_strategy_attribution_events_created_at"),
         "strategy_attribution_events",
         ["created_at"],
         unique=False,
@@ -360,30 +352,22 @@ def downgrade() -> None:
     # Attribution events first because they depend on other tables.
 
     op.drop_index(
-        op.f(
-            "ix_strategy_attribution_events_created_at"
-        ),
+        op.f("ix_strategy_attribution_events_created_at"),
         table_name="strategy_attribution_events",
     )
 
     op.drop_index(
-        op.f(
-            "ix_strategy_attribution_events_order_id"
-        ),
+        op.f("ix_strategy_attribution_events_order_id"),
         table_name="strategy_attribution_events",
     )
 
     op.drop_index(
-        op.f(
-            "ix_strategy_attribution_events_strategy_key"
-        ),
+        op.f("ix_strategy_attribution_events_strategy_key"),
         table_name="strategy_attribution_events",
     )
 
     op.drop_index(
-        op.f(
-            "ix_strategy_attribution_events_account_id"
-        ),
+        op.f("ix_strategy_attribution_events_account_id"),
         table_name="strategy_attribution_events",
     )
 

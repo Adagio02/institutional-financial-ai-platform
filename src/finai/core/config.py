@@ -170,6 +170,12 @@ class Settings(BaseSettings):
 
     strategy_competing_signal_resolution_enabled: bool = True
 
+    # ---------------------------------------------------------
+    # Version 1.4 strategy runs
+    # ---------------------------------------------------------
+
+    strategy_run_maximum_signals: int = 25
+
 
 @lru_cache
 def get_settings() -> Settings:

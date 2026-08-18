@@ -27,3 +27,6 @@ data/gold/datasets/*.parquet
 !data/gold/datasets/.gitkeep
 data/models/*.joblib
 !data/models/.gitkeep
+if (-not (Select-String -Path ".gitignore" -Pattern "^pytest-temp/$" -Quiet)) {
+    Add-Content -Path ".gitignore" -Value "pytest-temp/"
+}
