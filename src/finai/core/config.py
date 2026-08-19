@@ -190,6 +190,13 @@ class Settings(BaseSettings):
 
     strategy_schedule_maximum_failures: int = 5
 
+        # Version 1.7 scheduler daemon
+    strategy_scheduler_poll_interval_seconds: int = 10
+
+    strategy_scheduler_heartbeat_interval_seconds: int = 15
+
+    strategy_scheduler_worker_stale_seconds: int = 60
+
 
 @lru_cache
 def get_settings() -> Settings:

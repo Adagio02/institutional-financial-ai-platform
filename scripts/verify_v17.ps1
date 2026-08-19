@@ -1,0 +1,152 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$repositoryRoot = Split-Path -Parent $PSScriptRoot
+$originalLocation = Get-Location
+
+$originalTemp = $env:TEMP
+$originalTmp = $env:TMP
+
+try {
+    Set-Location $repositoryRoot
+
+    Write-Host ""
+    Write-Host "Version 1.7 verification" -ForegroundColor Cyan
+    Write-Host ""
+
+    $pytestRoot = "D:\finai-pytest"
+
+    New-Item -ItemType Directory -Path $pytestRoot -Force | Out-Null
+
+    $unitTemp = Join-Path $pytestRoot "v17-unit"
+    $integrationTemp = Join-Path $pytestRoot "v17-integration"
+    $systemTemp = Join-Path $pytestRoot "v17-system"
+
+    New-Item -ItemType Directory -Path $systemTemp -Force | Out-Null
+
+    if (Test-Path $unitTemp) {
+        Remove-Item -Path $unitTemp -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if (Test-Path $integrationTemp) {
+        Remove-Item -Path $integrationTemp -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    $env:TEMP = $systemTemp
+    $env:TMP = $systemTemp
+
+    Write-Host "Checking Python..." -ForegroundColor Cyan
+
+    python --version
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Python check failed."
+    }
+
+    Write-Host "Compiling project..." -ForegroundColor Cyan
+
+    python -m compileall -q src tests migrations scripts
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Compilation failed."
+    }
+
+    Write-Host "Running Ruff..." -ForegroundColor Cyan
+
+    python -m ruff check src tests migrations scripts
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Ruff failed."
+    }
+
+    Write-Host "Checking Docker Compose..." -ForegroundColor Cyan
+
+    docker compose config --quiet
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Docker Compose validation failed."
+    }
+
+    Write-Host "Starting infrastructure..." -ForegroundColor Cyan
+
+    docker compose up -d postgres mlflow
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Docker startup failed."
+    }
+
+    Write-Host "Waiting for PostgreSQL..." -ForegroundColor Cyan
+
+    $databaseReady = $false
+
+    for ($attempt = 1; $attempt -le 30; $attempt++) {
+        docker compose exec -T postgres pg_isready -U finai -d finai 2>$null
+
+        if ($LASTEXITCODE -eq 0) {
+            $databaseReady = $true
+            break
+        }
+
+        Start-Sleep -Seconds 2
+    }
+
+    if (-not $databaseReady) {
+        throw "PostgreSQL did not become ready."
+    }
+
+    Write-Host "Applying migrations..." -ForegroundColor Cyan
+
+    alembic upgrade head
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Alembic upgrade failed."
+    }
+
+    Write-Host "Checking Alembic current..." -ForegroundColor Cyan
+
+    alembic current
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Alembic current failed."
+    }
+
+    Write-Host "Checking Alembic heads..." -ForegroundColor Cyan
+
+    alembic heads
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Alembic heads failed."
+    }
+
+    Write-Host "Running unit tests..." -ForegroundColor Cyan
+
+    python -m pytest tests/unit -v --timeout=120 --basetemp="$unitTemp" -p no:cacheprovider
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unit tests failed."
+    }
+
+    Write-Host "Running integration tests..." -ForegroundColor Cyan
+
+    python -m pytest tests/integration -v --timeout=120 --basetemp="$integrationTemp" -p no:cacheprovider
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Integration tests failed."
+    }
+
+    Write-Host ""
+    Write-Host "Version 1.7 verification passed." -ForegroundColor Green
+}
+catch {
+    Write-Host ""
+    Write-Host "Version 1.7 verification failed." -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+
+    exit 1
+}
+finally {
+    $env:TEMP = $originalTemp
+    $env:TMP = $originalTmp
+
+    Set-Location $originalLocation
+}

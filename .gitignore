@@ -30,3 +30,4 @@ data/models/*.joblib
 pytest-temp/
 pytest-temp-v15/
 pytest-temp-v16/
+pytest-temp-v17/
