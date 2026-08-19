@@ -71,6 +71,9 @@ from finai.api.routes.strategy_governance import (
 from finai.api.routes.strategy_run import (
     router as strategy_run_router,
 )
+from finai.api.routes.strategy_schedule import (
+    router as strategy_schedule_router,
+)
 
 application = FastAPI(
     title="Institutional Financial AI Platform",
@@ -101,6 +104,7 @@ application.include_router(execution_router)
 application.include_router(strategy_router)
 application.include_router(strategy_governance_router)
 application.include_router(strategy_run_router)
+application.include_router(strategy_schedule_router)
 
 register_exception_handlers(application)
 

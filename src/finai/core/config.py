@@ -176,6 +176,9 @@ class Settings(BaseSettings):
 
     strategy_run_maximum_signals: int = 25
 
+        # Version 1.5 strategy schedules
+    strategy_schedule_maximum_per_account: int = 20
+
 
 @lru_cache
 def get_settings() -> Settings:

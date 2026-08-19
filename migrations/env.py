@@ -85,6 +85,15 @@ from finai.infrastructure.database.models.strategy_run import (
 from finai.infrastructure.database.models.strategy_run_item import (
     StrategyRunItemModel,  # noqa: F401
 )
+from finai.infrastructure.database.models.strategy_schedule import (
+    StrategyScheduleModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.strategy_schedule_run import (
+    StrategyScheduleRunModel,  # noqa: F401
+)
+from finai.infrastructure.database.models.strategy_schedule_signal import (
+    StrategyScheduleSignalModel,  # noqa: F401
+)
 
 config = context.config
 
