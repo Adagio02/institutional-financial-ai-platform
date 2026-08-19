@@ -179,6 +179,17 @@ class Settings(BaseSettings):
         # Version 1.5 strategy schedules
     strategy_schedule_maximum_per_account: int = 20
 
+        # Version 1.6 scheduler worker
+    strategy_schedule_lease_seconds: int = 300
+
+    strategy_schedule_worker_batch_size: int = 20
+
+    strategy_schedule_retry_base_seconds: int = 60
+
+    strategy_schedule_retry_maximum_seconds: int = 3600
+
+    strategy_schedule_maximum_failures: int = 5
+
 
 @lru_cache
 def get_settings() -> Settings:

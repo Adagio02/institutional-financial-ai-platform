@@ -11,10 +11,10 @@ try {
     Set-Location $repositoryRoot
 
     Write-Host ""
-    Write-Host "Version 1.5 verification" -ForegroundColor Cyan
+    Write-Host "Version 1.6 verification" -ForegroundColor Cyan
     Write-Host ""
 
-    $testTempRoot = Join-Path $repositoryRoot "pytest-temp-v15"
+    $testTempRoot = Join-Path $repositoryRoot "pytest-temp-v16"
     $systemTempRoot = Join-Path $testTempRoot "system"
     $unitTemp = Join-Path $testTempRoot "unit"
     $integrationTemp = Join-Path $testTempRoot "integration"
@@ -43,7 +43,7 @@ try {
 
     Write-Host "Compiling source..." -ForegroundColor Cyan
 
-    python -m compileall -q src tests migrations
+    python -m compileall -q src tests migrations scripts
 
     if ($LASTEXITCODE -ne 0) {
         throw "Compilation failed."
@@ -51,7 +51,7 @@ try {
 
     Write-Host "Running Ruff..." -ForegroundColor Cyan
 
-    python -m ruff check src tests migrations
+    python -m ruff check src tests migrations scripts
 
     if ($LASTEXITCODE -ne 0) {
         throw "Ruff failed."
@@ -100,13 +100,15 @@ try {
         throw "Alembic migration failed."
     }
 
-    Write-Host "Checking Alembic revision..." -ForegroundColor Cyan
+    Write-Host "Checking Alembic current..." -ForegroundColor Cyan
 
     alembic current
 
     if ($LASTEXITCODE -ne 0) {
         throw "Alembic current failed."
     }
+
+    Write-Host "Checking Alembic heads..." -ForegroundColor Cyan
 
     alembic heads
 
@@ -116,26 +118,28 @@ try {
 
     Write-Host "Running unit tests..." -ForegroundColor Cyan
 
-    python -m pytest tests/unit -v --timeout=120 --basetemp="D:\finai-pytest\unit" -p no:cacheprovider
+New-Item -ItemType Directory -Path "D:\finai-pytest" -Force | Out-Null
 
-    if ($LASTEXITCODE -ne 0) {
-        throw "Unit tests failed."
-    }
+python -m pytest tests/unit -v --timeout=120 --basetemp="D:\finai-pytest\unit" -p no:cacheprovider
 
-    Write-Host "Running integration tests..." -ForegroundColor Cyan
+if ($LASTEXITCODE -ne 0) {
+    throw "Unit tests failed."
+}
 
-    python -m pytest tests/integration -v --timeout=120 --basetemp="D:\finai-pytest\integration" -p no:cacheprovider
+Write-Host "Running integration tests..." -ForegroundColor Cyan
 
-    if ($LASTEXITCODE -ne 0) {
-        throw "Integration tests failed."
-    }
+python -m pytest tests/integration -v --timeout=120 --basetemp="D:\finai-pytest\integration" -p no:cacheprovider
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Integration tests failed."
+}
 
     Write-Host ""
-    Write-Host "Version 1.5 verification passed." -ForegroundColor Green
+    Write-Host "Version 1.6 verification passed." -ForegroundColor Green
 }
 catch {
     Write-Host ""
-    Write-Host "Version 1.5 verification failed." -ForegroundColor Red
+    Write-Host "Version 1.6 verification failed." -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
 
     exit 1

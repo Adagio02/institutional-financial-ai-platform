@@ -16,7 +16,9 @@ from finai.domain.strategy.schedule_enums import (
 )
 
 
-class StrategyScheduleSignalCreate(BaseModel):
+class StrategyScheduleSignalCreate(
+    BaseModel
+):
     model_config = ConfigDict(
         extra="forbid"
     )
@@ -34,7 +36,10 @@ class StrategyScheduleSignalCreate(BaseModel):
     )
 
     source_model_id: UUID | None = None
-    source_prediction_id: UUID | None = None
+
+    source_prediction_id: UUID | None = (
+        None
+    )
 
     @field_validator("symbol")
     @classmethod
@@ -42,7 +47,9 @@ class StrategyScheduleSignalCreate(BaseModel):
         cls,
         value: str,
     ) -> str:
-        normalized = value.strip().upper()
+        normalized = (
+            value.strip().upper()
+        )
 
         if not normalized:
             raise ValueError(
@@ -52,7 +59,9 @@ class StrategyScheduleSignalCreate(BaseModel):
         return normalized
 
 
-class StrategyScheduleCreate(BaseModel):
+class StrategyScheduleCreate(
+    BaseModel
+):
     model_config = ConfigDict(
         extra="forbid"
     )
@@ -81,7 +90,9 @@ class StrategyScheduleCreate(BaseModel):
     )
 
 
-class StrategyScheduleSignalResponse(BaseModel):
+class StrategyScheduleSignalResponse(
+    BaseModel
+):
     model_config = ConfigDict(
         from_attributes=True
     )
@@ -89,27 +100,42 @@ class StrategyScheduleSignalResponse(BaseModel):
     id: UUID
     schedule_id: UUID
     sequence_number: int
+
     symbol: str
     side: str
     confidence: float
+
     source_model_id: UUID | None
     source_prediction_id: UUID | None
+
     created_at: datetime
 
 
-class StrategyScheduleResponse(BaseModel):
+class StrategyScheduleResponse(
+    BaseModel
+):
     model_config = ConfigDict(
         from_attributes=True
     )
 
     id: UUID
     account_id: UUID
+
     strategy_key: str
     name: str
     frequency: str
     enabled: bool
+
     next_run_at: datetime | None
     last_run_at: datetime | None
+
+    lease_owner: str | None
+    lease_expires_at: datetime | None
+
+    failure_count: int
+    retry_at: datetime | None
+    last_error: str | None
+
     created_at: datetime
     updated_at: datetime
 
@@ -120,3 +146,36 @@ class StrategyScheduleDetailResponse(
     signals: list[
         StrategyScheduleSignalResponse
     ]
+
+
+class ScheduleWorkerRequest(
+    BaseModel
+):
+    worker_id: str = Field(
+        min_length=1,
+        max_length=128,
+    )
+
+    @field_validator("worker_id")
+    @classmethod
+    def normalize_worker_id(
+        cls,
+        value: str,
+    ) -> str:
+        normalized = value.strip()
+
+        if not normalized:
+            raise ValueError(
+                "worker_id cannot be blank"
+            )
+
+        return normalized
+
+
+class ScheduleWorkerResultResponse(
+    BaseModel
+):
+    schedule_id: UUID
+    status: str
+    strategy_run_id: UUID | None
+    error_message: str | None

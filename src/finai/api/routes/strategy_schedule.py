@@ -13,6 +13,8 @@ from finai.api.routes.strategy_run import (
     build_run_service,
 )
 from finai.api.schemas.strategy_schedule import (
+    ScheduleWorkerRequest,
+    ScheduleWorkerResultResponse,
     StrategyScheduleCreate,
     StrategyScheduleDetailResponse,
     StrategyScheduleResponse,
@@ -20,6 +22,9 @@ from finai.api.schemas.strategy_schedule import (
 )
 from finai.application.services.strategy_schedule_service import (
     StrategyScheduleService,
+)
+from finai.application.services.strategy_schedule_worker_service import (
+    StrategyScheduleWorkerService,
 )
 from finai.core.config import (
     get_settings,
@@ -56,7 +61,44 @@ def build_schedule_service(
             session=session
         ),
         maximum_schedules_per_account=(
-            settings.strategy_schedule_maximum_per_account
+            settings
+            .strategy_schedule_maximum_per_account
+        ),
+    )
+
+
+def build_worker_service(
+    *,
+    session: Session,
+) -> StrategyScheduleWorkerService:
+    settings = get_settings()
+
+    return StrategyScheduleWorkerService(
+        session=session,
+        schedule_service=(
+            build_schedule_service(
+                session=session
+            )
+        ),
+        lease_seconds=(
+            settings
+            .strategy_schedule_lease_seconds
+        ),
+        batch_size=(
+            settings
+            .strategy_schedule_worker_batch_size
+        ),
+        retry_base_seconds=(
+            settings
+            .strategy_schedule_retry_base_seconds
+        ),
+        retry_maximum_seconds=(
+            settings
+            .strategy_schedule_retry_maximum_seconds
+        ),
+        maximum_failures=(
+            settings
+            .strategy_schedule_maximum_failures
         ),
     )
 
@@ -70,16 +112,16 @@ def build_detail(
         schedule_id=schedule.id
     )
 
-    base = StrategyScheduleResponse.model_validate(
-        schedule
+    base = (
+        StrategyScheduleResponse
+        .model_validate(schedule)
     )
 
     return StrategyScheduleDetailResponse(
         **base.model_dump(),
         signals=[
-            StrategyScheduleSignalResponse.model_validate(
-                signal
-            )
+            StrategyScheduleSignalResponse
+            .model_validate(signal)
             for signal in signals
         ],
     )
@@ -87,7 +129,9 @@ def build_detail(
 
 @router.post(
     "",
-    response_model=StrategyScheduleDetailResponse,
+    response_model=(
+        StrategyScheduleDetailResponse
+    ),
     status_code=status.HTTP_201_CREATED,
 )
 def create_schedule(
@@ -103,7 +147,9 @@ def create_schedule(
             "symbol": signal.symbol,
             "side": signal.side.value,
             "confidence": signal.confidence,
-            "source_model_id": signal.source_model_id,
+            "source_model_id": (
+                signal.source_model_id
+            ),
             "source_prediction_id": (
                 signal.source_prediction_id
             ),
@@ -114,7 +160,9 @@ def create_schedule(
     try:
         schedule = service.create(
             account_id=request.account_id,
-            strategy_key=request.strategy_key,
+            strategy_key=(
+                request.strategy_key
+            ),
             name=request.name,
             frequency=request.frequency,
             enabled=request.enabled,
@@ -123,13 +171,17 @@ def create_schedule(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail=str(error),
         ) from error
 
     except ValueError as error:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
             detail=str(error),
         ) from error
 
@@ -141,29 +193,38 @@ def create_schedule(
 
 @router.get(
     "/account/{account_id}",
-    response_model=list[StrategyScheduleResponse],
+    response_model=list[
+        StrategyScheduleResponse
+    ],
 )
 def list_schedules(
     account_id: UUID,
     session: DatabaseSession,
 ) -> list[StrategyScheduleResponse]:
-    repository = StrategyScheduleRepository(
-        session
+    repository = (
+        StrategyScheduleRepository(
+            session
+        )
+    )
+
+    schedules = (
+        repository.list_for_account(
+            account_id=account_id
+        )
     )
 
     return [
-        StrategyScheduleResponse.model_validate(
-            schedule
-        )
-        for schedule in repository.list_for_account(
-            account_id=account_id
-        )
+        StrategyScheduleResponse
+        .model_validate(schedule)
+        for schedule in schedules
     ]
 
 
 @router.get(
     "/{schedule_id}",
-    response_model=StrategyScheduleDetailResponse,
+    response_model=(
+        StrategyScheduleDetailResponse
+    ),
 )
 def get_schedule(
     schedule_id: UUID,
@@ -180,7 +241,9 @@ def get_schedule(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail=str(error),
         ) from error
 
@@ -192,7 +255,9 @@ def get_schedule(
 
 @router.post(
     "/{schedule_id}/enable",
-    response_model=StrategyScheduleResponse,
+    response_model=(
+        StrategyScheduleResponse
+    ),
 )
 def enable_schedule(
     schedule_id: UUID,
@@ -209,18 +274,23 @@ def enable_schedule(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail=str(error),
         ) from error
 
-    return StrategyScheduleResponse.model_validate(
-        schedule
+    return (
+        StrategyScheduleResponse
+        .model_validate(schedule)
     )
 
 
 @router.post(
     "/{schedule_id}/disable",
-    response_model=StrategyScheduleResponse,
+    response_model=(
+        StrategyScheduleResponse
+    ),
 )
 def disable_schedule(
     schedule_id: UUID,
@@ -237,12 +307,15 @@ def disable_schedule(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail=str(error),
         ) from error
 
-    return StrategyScheduleResponse.model_validate(
-        schedule
+    return (
+        StrategyScheduleResponse
+        .model_validate(schedule)
     )
 
 
@@ -264,25 +337,58 @@ def run_schedule(
 
     except LookupError as error:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail=str(error),
         ) from error
 
     except ValueError as error:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
             detail=str(error),
         ) from error
 
 
 @router.post(
-    "/run-due",
+    "/process-due",
+    response_model=list[
+        ScheduleWorkerResultResponse
+    ],
 )
-def run_due_schedules(
+def process_due_schedules(
+    request: ScheduleWorkerRequest,
     session: DatabaseSession,
-):
-    service = build_schedule_service(
+) -> list[ScheduleWorkerResultResponse]:
+    service = build_worker_service(
         session=session
     )
 
-    return service.run_due()
+    try:
+        results = service.process_due(
+            worker_id=request.worker_id
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
+            detail=str(error),
+        ) from error
+
+    return [
+        ScheduleWorkerResultResponse(
+            schedule_id=result.schedule_id,
+            status=result.status,
+            strategy_run_id=(
+                result.strategy_run_id
+            ),
+            error_message=(
+                result.error_message
+            ),
+        )
+        for result in results
+    ]

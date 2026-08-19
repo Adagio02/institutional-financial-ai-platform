@@ -38,8 +38,10 @@ class StrategyScheduleService:
         run_service: StrategyRunService,
         maximum_schedules_per_account: int,
     ) -> None:
-        self._account_repository = PaperAccountRepository(
-            session
+        self._account_repository = (
+            PaperAccountRepository(
+                session
+            )
         )
 
         self._schedule_repository = (
@@ -76,7 +78,10 @@ class StrategyScheduleService:
         enabled: bool,
         signals: list[dict],
     ):
-        normalized_strategy_key = strategy_key.strip()
+        normalized_strategy_key = (
+            strategy_key.strip()
+        )
+
         normalized_name = name.strip()
 
         if not normalized_strategy_key:
@@ -91,20 +96,26 @@ class StrategyScheduleService:
 
         if not signals:
             raise ValueError(
-                "Schedule requires at least one signal."
+                "Schedule requires at least "
+                "one signal."
             )
 
-        account = self._account_repository.get_by_id(
-            account_id
+        account = (
+            self._account_repository
+            .get_by_id(
+                account_id
+            )
         )
 
         if account is None:
             raise LookupError(
-                f"Paper account not found: {account_id}"
+                "Paper account not found: "
+                f"{account_id}"
             )
 
         existing = (
-            self._schedule_repository.list_for_account(
+            self._schedule_repository
+            .list_for_account(
                 account_id=account_id
             )
         )
@@ -114,7 +125,8 @@ class StrategyScheduleService:
             >= self._maximum_schedules_per_account
         ):
             raise ValueError(
-                "Maximum schedules per account has been reached."
+                "Maximum schedules per account "
+                "has been reached."
             )
 
         now = datetime.now(UTC)
@@ -124,13 +136,17 @@ class StrategyScheduleService:
             from_time=now,
         )
 
-        schedule = self._schedule_repository.create(
-            account_id=account_id,
-            strategy_key=normalized_strategy_key,
-            name=normalized_name,
-            frequency=frequency.value,
-            enabled=enabled,
-            next_run_at=next_run_at,
+        schedule = (
+            self._schedule_repository.create(
+                account_id=account_id,
+                strategy_key=(
+                    normalized_strategy_key
+                ),
+                name=normalized_name,
+                frequency=frequency.value,
+                enabled=enabled,
+                next_run_at=next_run_at,
+            )
         )
 
         self._signal_repository.create_many(
@@ -146,14 +162,16 @@ class StrategyScheduleService:
         schedule_id: UUID,
     ):
         schedule = (
-            self._schedule_repository.get_by_id(
+            self._schedule_repository
+            .get_by_id(
                 schedule_id
             )
         )
 
         if schedule is None:
             raise LookupError(
-                f"Strategy schedule not found: {schedule_id}"
+                "Strategy schedule not found: "
+                f"{schedule_id}"
             )
 
         return schedule
@@ -164,7 +182,8 @@ class StrategyScheduleService:
         schedule_id: UUID,
     ):
         return (
-            self._signal_repository.list_for_schedule(
+            self._signal_repository
+            .list_for_schedule(
                 schedule_id=schedule_id
             )
         )
@@ -178,9 +197,12 @@ class StrategyScheduleService:
             schedule_id=schedule_id
         )
 
-        return self._schedule_repository.set_enabled(
-            schedule,
-            enabled=True,
+        return (
+            self._schedule_repository
+            .set_enabled(
+                schedule,
+                enabled=True,
+            )
         )
 
     def disable(
@@ -192,15 +214,19 @@ class StrategyScheduleService:
             schedule_id=schedule_id
         )
 
-        return self._schedule_repository.set_enabled(
-            schedule,
-            enabled=False,
+        return (
+            self._schedule_repository
+            .set_enabled(
+                schedule,
+                enabled=False,
+            )
         )
 
     def run(
         self,
         *,
         schedule_id: UUID,
+        lease_owner: str | None = None,
     ):
         schedule = self.get(
             schedule_id=schedule_id
@@ -211,17 +237,34 @@ class StrategyScheduleService:
                 "Strategy schedule is disabled."
             )
 
+        now = datetime.now(UTC)
+
+        if (
+            self._schedule_repository
+            .has_active_lease(
+                model=schedule,
+                now=now,
+                expected_owner=lease_owner,
+            )
+        ):
+            raise ValueError(
+                "Strategy schedule is currently "
+                "leased by another worker."
+            )
+
         signals = self.list_signals(
             schedule_id=schedule.id
         )
 
         if not signals:
             raise ValueError(
-                "Strategy schedule contains no signals."
+                "Strategy schedule contains "
+                "no signals."
             )
 
         schedule_run = (
-            self._schedule_run_repository.create_started(
+            self._schedule_run_repository
+            .create_started(
                 schedule_id=schedule.id
             )
         )
@@ -229,9 +272,15 @@ class StrategyScheduleService:
         strategy_signals = [
             StrategySignal(
                 symbol=signal.symbol,
-                side=OrderSide(signal.side),
-                confidence=signal.confidence,
-                source_model_id=signal.source_model_id,
+                side=OrderSide(
+                    signal.side
+                ),
+                confidence=(
+                    signal.confidence
+                ),
+                source_model_id=(
+                    signal.source_model_id
+                ),
                 source_prediction_id=(
                     signal.source_prediction_id
                 ),
@@ -241,64 +290,60 @@ class StrategyScheduleService:
 
         try:
             run = self._run_service.execute(
-                account_id=schedule.account_id,
-                strategy_key=schedule.strategy_key,
+                account_id=(
+                    schedule.account_id
+                ),
+                strategy_key=(
+                    schedule.strategy_key
+                ),
                 idempotency_key=(
-                    f"schedule-{schedule.id}-{uuid4().hex}"
+                    f"schedule-{schedule.id}-"
+                    f"{uuid4().hex}"
                 ),
                 signals=strategy_signals,
             )
 
-        except (LookupError, ValueError) as error:
-            self._schedule_run_repository.mark_failed(
-                schedule_run,
-                error_message=str(error),
+        except Exception as error:  # noqa: BLE001
+            (
+                self._schedule_run_repository
+                .mark_failed(
+                    schedule_run,
+                    error_message=str(
+                        error
+                    ),
+                )
             )
 
             raise
 
-        self._schedule_run_repository.mark_completed(
-            schedule_run,
-            strategy_run_id=run.id,
+        (
+            self._schedule_run_repository
+            .mark_completed(
+                schedule_run,
+                strategy_run_id=run.id,
+            )
         )
 
         completed_at = datetime.now(UTC)
 
-        next_run_at = calculate_next_run_at(
-            frequency=StrategyScheduleFrequency(
+        frequency = (
+            StrategyScheduleFrequency(
                 schedule.frequency
-            ),
-            from_time=completed_at,
-        )
-
-        self._schedule_repository.update_after_run(
-            schedule,
-            completed_at=completed_at,
-            next_run_at=next_run_at,
-        )
-
-        return run
-
-    def run_due(
-        self,
-    ) -> list:
-        schedules = (
-            self._schedule_repository.list_due(
-                now=datetime.now(UTC)
             )
         )
 
-        results = []
+        next_run_at = calculate_next_run_at(
+            frequency=frequency,
+            from_time=completed_at,
+        )
 
-        for schedule in schedules:
-            try:
-                run = self.run(
-                    schedule_id=schedule.id
-                )
+        (
+            self._schedule_repository
+            .update_after_run(
+                schedule,
+                completed_at=completed_at,
+                next_run_at=next_run_at,
+            )
+        )
 
-            except (LookupError, ValueError):
-                continue
-
-            results.append(run)
-
-        return results
+        return run

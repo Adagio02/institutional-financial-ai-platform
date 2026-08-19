@@ -5,7 +5,9 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Integer,
     String,
+    Text,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import (
@@ -29,7 +31,10 @@ class StrategyScheduleModel(Base):
             "account_id",
             "strategy_key",
             "name",
-            name="uq_strategy_schedules_account_strategy_name",
+            name=(
+                "uq_strategy_schedules_"
+                "account_strategy_name"
+            ),
         ),
     )
 
@@ -73,14 +78,55 @@ class StrategyScheduleModel(Base):
         index=True,
     )
 
-    next_run_at: Mapped[datetime | None] = mapped_column(
+    next_run_at: Mapped[
+        datetime | None
+    ] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
         index=True,
     )
 
-    last_run_at: Mapped[datetime | None] = mapped_column(
+    last_run_at: Mapped[
+        datetime | None
+    ] = mapped_column(
         DateTime(timezone=True),
+        nullable=True,
+    )
+
+    lease_owner: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+        index=True,
+    )
+
+    lease_expires_at: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
+
+    failure_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+
+    retry_at: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
+
+    last_error: Mapped[
+        str | None
+    ] = mapped_column(
+        Text,
         nullable=True,
     )
 

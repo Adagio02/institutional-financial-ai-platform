@@ -1,4 +1,4 @@
-﻿Set-StrictMode -Version Latest
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
@@ -116,7 +116,7 @@ try {
 
     Write-Host "Running unit tests..." -ForegroundColor Cyan
 
-    python -m pytest tests/unit -v --timeout=120 --basetemp="D:\finai-pytest\unit" -p no:cacheprovider
+    python -m pytest tests/unit -v --timeout=120 --basetemp="$unitTemp" -p no:cacheprovider
 
     if ($LASTEXITCODE -ne 0) {
         throw "Unit tests failed."
@@ -124,7 +124,7 @@ try {
 
     Write-Host "Running integration tests..." -ForegroundColor Cyan
 
-    python -m pytest tests/integration -v --timeout=120 --basetemp="D:\finai-pytest\integration" -p no:cacheprovider
+    python -m pytest tests/integration -v --timeout=120 --basetemp="$integrationTemp" -p no:cacheprovider
 
     if ($LASTEXITCODE -ne 0) {
         throw "Integration tests failed."

@@ -1,4 +1,8 @@
-from datetime import UTC, datetime
+from datetime import (
+    UTC,
+    datetime,
+    timedelta,
+)
 from uuid import UUID
 
 from sqlalchemy import (
@@ -36,6 +40,7 @@ class StrategyScheduleRepository:
             frequency=frequency,
             enabled=enabled,
             next_run_at=next_run_at,
+            failure_count=0,
         )
 
         self._session.add(model)
@@ -59,17 +64,24 @@ class StrategyScheduleRepository:
         account_id: UUID,
     ) -> list[StrategyScheduleModel]:
         statement = (
-            select(StrategyScheduleModel)
+            select(
+                StrategyScheduleModel
+            )
             .where(
-                StrategyScheduleModel.account_id == account_id
+                StrategyScheduleModel.account_id
+                == account_id
             )
             .order_by(
-                StrategyScheduleModel.created_at.desc()
+                StrategyScheduleModel
+                .created_at
+                .desc()
             )
         )
 
         return list(
-            self._session.scalars(statement).all()
+            self._session.scalars(
+                statement
+            ).all()
         )
 
     def list_due(
@@ -78,22 +90,123 @@ class StrategyScheduleRepository:
         now: datetime,
     ) -> list[StrategyScheduleModel]:
         statement = (
-            select(StrategyScheduleModel)
+            select(
+                StrategyScheduleModel
+            )
             .where(
-                StrategyScheduleModel.enabled.is_(True),
+                StrategyScheduleModel.enabled
+                .is_(True),
                 or_(
-                    StrategyScheduleModel.next_run_at.is_(None),
-                    StrategyScheduleModel.next_run_at <= now,
+                    StrategyScheduleModel.next_run_at
+                    .is_(None),
+                    StrategyScheduleModel.next_run_at
+                    <= now,
+                ),
+                or_(
+                    StrategyScheduleModel.retry_at
+                    .is_(None),
+                    StrategyScheduleModel.retry_at
+                    <= now,
                 ),
             )
             .order_by(
-                StrategyScheduleModel.next_run_at.asc()
+                StrategyScheduleModel
+                .next_run_at
+                .asc()
             )
         )
 
         return list(
-            self._session.scalars(statement).all()
+            self._session.scalars(
+                statement
+            ).all()
         )
+
+    def claim_due(
+        self,
+        *,
+        now: datetime,
+        worker_id: str,
+        lease_seconds: int,
+        limit: int,
+    ) -> list[StrategyScheduleModel]:
+        if not worker_id.strip():
+            raise ValueError(
+                "worker_id cannot be blank."
+            )
+
+        if lease_seconds <= 0:
+            raise ValueError(
+                "lease_seconds must be greater than zero."
+            )
+
+        if limit <= 0:
+            raise ValueError(
+                "limit must be greater than zero."
+            )
+
+        statement = (
+            select(
+                StrategyScheduleModel
+            )
+            .where(
+                StrategyScheduleModel.enabled
+                .is_(True),
+                or_(
+                    StrategyScheduleModel.next_run_at
+                    .is_(None),
+                    StrategyScheduleModel.next_run_at
+                    <= now,
+                ),
+                or_(
+                    StrategyScheduleModel.retry_at
+                    .is_(None),
+                    StrategyScheduleModel.retry_at
+                    <= now,
+                ),
+                or_(
+                    StrategyScheduleModel.lease_expires_at
+                    .is_(None),
+                    StrategyScheduleModel.lease_expires_at
+                    <= now,
+                ),
+            )
+            .order_by(
+                StrategyScheduleModel
+                .next_run_at
+                .asc()
+            )
+            .with_for_update(
+                skip_locked=True
+            )
+            .limit(limit)
+        )
+
+        schedules = list(
+            self._session.scalars(
+                statement
+            ).all()
+        )
+
+        lease_expires_at = (
+            now
+            + timedelta(
+                seconds=lease_seconds
+            )
+        )
+
+        for schedule in schedules:
+            schedule.lease_owner = worker_id
+            schedule.lease_expires_at = (
+                lease_expires_at
+            )
+
+        self._session.commit()
+
+        for schedule in schedules:
+            self._session.refresh(schedule)
+
+        return schedules
 
     def set_enabled(
         self,
@@ -103,6 +216,10 @@ class StrategyScheduleRepository:
     ) -> StrategyScheduleModel:
         model.enabled = enabled
         model.updated_at = datetime.now(UTC)
+
+        if not enabled:
+            model.lease_owner = None
+            model.lease_expires_at = None
 
         self._session.commit()
         self._session.refresh(model)
@@ -124,3 +241,62 @@ class StrategyScheduleRepository:
         self._session.refresh(model)
 
         return model
+
+    def release_success(
+        self,
+        model: StrategyScheduleModel,
+    ) -> StrategyScheduleModel:
+        model.lease_owner = None
+        model.lease_expires_at = None
+        model.failure_count = 0
+        model.retry_at = None
+        model.last_error = None
+        model.updated_at = datetime.now(UTC)
+
+        self._session.commit()
+        self._session.refresh(model)
+
+        return model
+
+    def release_failure(
+        self,
+        model: StrategyScheduleModel,
+        *,
+        failure_count: int,
+        retry_at: datetime | None,
+        error_message: str,
+        disable: bool,
+    ) -> StrategyScheduleModel:
+        model.lease_owner = None
+        model.lease_expires_at = None
+        model.failure_count = failure_count
+        model.retry_at = retry_at
+        model.last_error = error_message
+        model.updated_at = datetime.now(UTC)
+
+        if disable:
+            model.enabled = False
+            model.retry_at = None
+
+        self._session.commit()
+        self._session.refresh(model)
+
+        return model
+
+    def has_active_lease(
+        self,
+        *,
+        model: StrategyScheduleModel,
+        now: datetime,
+        expected_owner: str | None,
+    ) -> bool:
+        if model.lease_expires_at is None:
+            return False
+
+        if model.lease_expires_at <= now:
+            return False
+
+        if expected_owner is None:
+            return True
+
+        return model.lease_owner != expected_owner
