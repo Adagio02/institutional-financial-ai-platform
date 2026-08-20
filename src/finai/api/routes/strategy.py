@@ -104,19 +104,54 @@ def build_proposal_execution_service(
 
     return ProposalExecutionService(
         session=session,
-        commission_bps=(settings.paper_trading_commission_bps),
-        slippage_bps=(settings.paper_trading_slippage_bps),
-        risk_limits=build_risk_limits(),
-        maximum_quote_age_seconds=(settings.paper_quote_maximum_age_seconds),
-        quote_interval=BarInterval(settings.paper_quote_interval),
-        maximum_daily_loss=(settings.paper_maximum_daily_loss),
-        synthetic_spread_bps=(settings.paper_quote_synthetic_spread_bps),
-        partial_fill_enabled=(settings.sandbox_partial_fill_enabled),
-        initial_fill_fraction=(settings.sandbox_initial_fill_fraction),
-        execution_mode=(settings.execution_mode),
-        proposal_maximum_age_seconds=(settings.strategy_proposal_maximum_age_seconds),
-        maximum_price_drift_bps=(settings.strategy_maximum_price_drift_bps),
-        manual_approval_required=(settings.strategy_manual_approval_required),
+        commission_bps=(
+            settings.paper_trading_commission_bps
+        ),
+        slippage_bps=(
+            settings.paper_trading_slippage_bps
+        ),
+        risk_limits=(
+            build_risk_limits()
+        ),
+        maximum_quote_age_seconds=(
+            settings.paper_quote_maximum_age_seconds
+        ),
+        quote_interval=BarInterval(
+            settings.paper_quote_interval
+        ),
+        synthetic_spread_bps=(
+            settings.paper_quote_synthetic_spread_bps
+        ),
+        trading_control_maximum_daily_loss_fraction=(
+            settings.trading_control_maximum_daily_loss_fraction
+        ),
+        trading_control_maximum_gross_exposure_fraction=(
+            settings.trading_control_maximum_gross_exposure_fraction
+        ),
+        trading_control_maximum_symbol_fraction=(
+            settings.trading_control_maximum_symbol_fraction
+        ),
+        trading_control_maximum_order_fraction=(
+            settings.trading_control_maximum_order_fraction
+        ),
+        partial_fill_enabled=(
+            settings.sandbox_partial_fill_enabled
+        ),
+        initial_fill_fraction=(
+            settings.sandbox_initial_fill_fraction
+        ),
+        execution_mode=(
+            settings.execution_mode
+        ),
+        proposal_maximum_age_seconds=(
+            settings.strategy_proposal_maximum_age_seconds
+        ),
+        maximum_price_drift_bps=(
+            settings.strategy_maximum_price_drift_bps
+        ),
+        manual_approval_required=(
+            settings.strategy_manual_approval_required
+        ),
     )
 
 

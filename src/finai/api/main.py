@@ -99,8 +99,6 @@ application.include_router(risk_router)
 application.include_router(paper_account_router)
 application.include_router(order_router)
 application.include_router(portfolio_router)
-application.include_router(trading_control_router)
-
 application.include_router(reconciliation_router)
 application.include_router(execution_audit_router)
 application.include_router(execution_router)
@@ -109,6 +107,7 @@ application.include_router(strategy_governance_router)
 application.include_router(strategy_run_router)
 application.include_router(strategy_schedule_router)
 application.include_router(strategy_worker_router)
+application.include_router(trading_control_router)
 
 register_exception_handlers(application)
 

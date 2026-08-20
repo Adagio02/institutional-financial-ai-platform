@@ -197,6 +197,15 @@ class Settings(BaseSettings):
 
     strategy_scheduler_worker_stale_seconds: int = 60
 
+        # Version 1.8 trading controls
+    trading_control_maximum_daily_loss_fraction: float = 0.05
+
+    trading_control_maximum_gross_exposure_fraction: float = 1.50
+
+    trading_control_maximum_symbol_fraction: float = 0.25
+
+    trading_control_maximum_order_fraction: float = 0.10
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -7,15 +7,27 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
+from finai.api.routes.strategy_run import (
+    build_run_service,
+)
+from finai.application.services.strategy_schedule_service import (
+    StrategyScheduleService,
+)
 from finai.application.services.strategy_schedule_worker_service import (
     StrategyScheduleWorkerService,
 )
 from finai.application.services.strategy_worker_registry_service import (
     StrategyWorkerRegistryService,
 )
+from finai.core.config import (
+    get_settings,
+)
 from finai.domain.strategy.worker_health import (
     validate_heartbeat_interval,
     validate_poll_interval,
+)
+from finai.infrastructure.database.engine import (
+    SessionLocal,
 )
 
 
@@ -102,7 +114,8 @@ class StrategySchedulerDaemon:
         last_heartbeat = datetime.now(UTC)
 
         logger.info(
-            "Strategy scheduler started. worker_id=%s",
+            "Strategy scheduler started. "
+            "worker_id=%s",
             worker_id,
         )
 
@@ -117,21 +130,27 @@ class StrategySchedulerDaemon:
                 successful = sum(
                     1
                     for result in results
-                    if result.status == "completed"
+                    if result.status
+                    == "completed"
                 )
 
                 failed = sum(
                     1
                     for result in results
-                    if result.status == "failed"
+                    if result.status
+                    == "failed"
                 )
 
                 if results:
                     (
                         self._registry_service
                         .record_results(
-                            worker_record_id=worker.id,
-                            processed=len(results),
+                            worker_record_id=(
+                                worker.id
+                            ),
+                            processed=len(
+                                results
+                            ),
                             successful=successful,
                             failed=failed,
                         )
@@ -150,7 +169,9 @@ class StrategySchedulerDaemon:
                     (
                         self._registry_service
                         .heartbeat(
-                            worker_record_id=worker.id
+                            worker_record_id=(
+                                worker.id
+                            )
                         )
                     )
 
@@ -163,19 +184,24 @@ class StrategySchedulerDaemon:
             (
                 self._registry_service
                 .mark_stopping(
-                    worker_record_id=worker.id
+                    worker_record_id=(
+                        worker.id
+                    )
                 )
             )
 
             (
                 self._registry_service
                 .mark_stopped(
-                    worker_record_id=worker.id
+                    worker_record_id=(
+                        worker.id
+                    )
                 )
             )
 
             logger.info(
-                "Strategy scheduler stopped. worker_id=%s",
+                "Strategy scheduler stopped. "
+                "worker_id=%s",
                 worker_id,
             )
 
@@ -188,8 +214,12 @@ class StrategySchedulerDaemon:
                 (
                     self._registry_service
                     .mark_failed(
-                        worker_record_id=worker.id,
-                        error_message=str(error),
+                        worker_record_id=(
+                            worker.id
+                        ),
+                        error_message=str(
+                            error
+                        ),
                     )
                 )
 
@@ -198,3 +228,117 @@ class StrategySchedulerDaemon:
 
         finally:
             self._session.rollback()
+
+
+def build_daemon() -> StrategySchedulerDaemon:
+    settings = get_settings()
+
+    session = SessionLocal()
+
+    try:
+        run_service = build_run_service(
+            session=session
+        )
+
+        schedule_service = (
+            StrategyScheduleService(
+                session=session,
+                run_service=run_service,
+                maximum_schedules_per_account=(
+                    settings
+                    .strategy_schedule_maximum_per_account
+                ),
+            )
+        )
+
+        worker_service = (
+            StrategyScheduleWorkerService(
+                session=session,
+                schedule_service=(
+                    schedule_service
+                ),
+                lease_seconds=(
+                    settings
+                    .strategy_schedule_lease_seconds
+                ),
+                batch_size=(
+                    settings
+                    .strategy_schedule_worker_batch_size
+                ),
+                retry_base_seconds=(
+                    settings
+                    .strategy_schedule_retry_base_seconds
+                ),
+                retry_maximum_seconds=(
+                    settings
+                    .strategy_schedule_retry_maximum_seconds
+                ),
+                maximum_failures=(
+                    settings
+                    .strategy_schedule_maximum_failures
+                ),
+            )
+        )
+
+        registry_service = (
+            StrategyWorkerRegistryService(
+                session=session,
+                stale_after_seconds=(
+                    settings
+                    .strategy_scheduler_worker_stale_seconds
+                ),
+            )
+        )
+
+        return StrategySchedulerDaemon(
+            session=session,
+            worker_service=worker_service,
+            registry_service=(
+                registry_service
+            ),
+            poll_interval_seconds=(
+                settings
+                .strategy_scheduler_poll_interval_seconds
+            ),
+            heartbeat_interval_seconds=(
+                settings
+                .strategy_scheduler_heartbeat_interval_seconds
+            ),
+            stale_after_seconds=(
+                settings
+                .strategy_scheduler_worker_stale_seconds
+            ),
+        )
+
+    except Exception:
+        session.close()
+        raise
+
+
+def main() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format=(
+            "%(asctime)s "
+            "%(levelname)s "
+            "%(name)s - "
+            "%(message)s"
+        ),
+    )
+
+    daemon = build_daemon()
+
+    try:
+        daemon.run()
+
+    except KeyboardInterrupt:
+        logger.info(
+            "Keyboard interrupt received."
+        )
+
+    finally:
+        daemon._session.close()
+
+
+if __name__ == "__main__":
+    main()

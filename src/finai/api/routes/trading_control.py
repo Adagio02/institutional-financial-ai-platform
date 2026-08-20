@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import (
     APIRouter,
@@ -9,12 +10,15 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 from finai.api.schemas.trading_control import (
-    KillSwitchRequest,
     TradingControlResponse,
-    TradingEnabledUpdate,
+    TradingEnabledRequest,
+    TradingHaltRequest,
 )
 from finai.application.services.trading_control_service import (
     TradingControlService,
+)
+from finai.core.config import (
+    get_settings,
 )
 from finai.infrastructure.database.engine import (
     get_database_session,
@@ -22,9 +26,10 @@ from finai.infrastructure.database.engine import (
 
 
 router = APIRouter(
-    prefix="/api/v1/trading-control",
-    tags=["trading-control"],
+    prefix="/api/v1/trading-controls",
+    tags=["trading-controls"],
 )
+
 
 DatabaseSession = Annotated[
     Session,
@@ -32,93 +37,182 @@ DatabaseSession = Annotated[
 ]
 
 
-def _to_response(
-    state,
-) -> TradingControlResponse:
-    return TradingControlResponse(
-        trading_enabled=(state.trading_enabled),
-        kill_switch_active=(state.kill_switch_active),
-        reason=state.reason,
-        can_trade=state.can_trade,
+def build_trading_control_service(
+    *,
+    session: Session,
+) -> TradingControlService:
+    settings = get_settings()
+
+    return TradingControlService(
+        session=session,
+        default_maximum_daily_loss_fraction=(
+            settings
+            .trading_control_maximum_daily_loss_fraction
+        ),
+        default_maximum_gross_exposure_fraction=(
+            settings
+            .trading_control_maximum_gross_exposure_fraction
+        ),
+        default_maximum_symbol_fraction=(
+            settings
+            .trading_control_maximum_symbol_fraction
+        ),
+        default_maximum_order_fraction=(
+            settings
+            .trading_control_maximum_order_fraction
+        ),
     )
 
 
 @router.get(
-    "",
-    response_model=(TradingControlResponse),
+    "/{account_id}",
+    response_model=TradingControlResponse,
 )
 def get_trading_control(
+    account_id: UUID,
     session: DatabaseSession,
 ) -> TradingControlResponse:
-    service = TradingControlService(session=session)
-
-    return _to_response(service.get_state())
-
-
-@router.put(
-    "/enabled",
-    response_model=(TradingControlResponse),
-)
-def set_trading_enabled(
-    request: TradingEnabledUpdate,
-    session: DatabaseSession,
-) -> TradingControlResponse:
-    service = TradingControlService(session=session)
+    service = build_trading_control_service(
+        session=session
+    )
 
     try:
-        state = service.set_trading_enabled(
-            enabled=request.enabled,
+        control = service.ensure_for_account(
+            account_id=account_id
+        )
+
+    except LookupError as error:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail=str(error),
+        ) from error
+
+    return TradingControlResponse.model_validate(
+        control
+    )
+
+
+@router.post(
+    "/{account_id}/halt",
+    response_model=TradingControlResponse,
+)
+def halt_trading(
+    account_id: UUID,
+    request: TradingHaltRequest,
+    session: DatabaseSession,
+) -> TradingControlResponse:
+    service = build_trading_control_service(
+        session=session
+    )
+
+    try:
+        control = service.halt(
+            account_id=account_id,
             reason=request.reason,
         )
 
-    except ValueError as error:
+    except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=404,
             detail=str(error),
         ) from error
 
-    return _to_response(state)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=409,
+            detail=str(error),
+        ) from error
+
+    return TradingControlResponse.model_validate(
+        control
+    )
 
 
 @router.post(
-    "/kill-switch/activate",
-    response_model=(TradingControlResponse),
+    "/{account_id}/resume",
+    response_model=TradingControlResponse,
 )
-def activate_kill_switch(
-    request: KillSwitchRequest,
+def resume_trading(
+    account_id: UUID,
     session: DatabaseSession,
 ) -> TradingControlResponse:
-    service = TradingControlService(session=session)
+    service = build_trading_control_service(
+        session=session
+    )
 
     try:
-        state = service.activate_kill_switch(reason=request.reason)
+        control = service.resume(
+            account_id=account_id
+        )
 
-    except ValueError as error:
+    except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=404,
             detail=str(error),
         ) from error
 
-    return _to_response(state)
+    return TradingControlResponse.model_validate(
+        control
+    )
 
 
 @router.post(
-    "/kill-switch/deactivate",
-    response_model=(TradingControlResponse),
+    "/{account_id}/reset-circuit-breaker",
+    response_model=TradingControlResponse,
 )
-def deactivate_kill_switch(
-    request: KillSwitchRequest,
+def reset_circuit_breaker(
+    account_id: UUID,
     session: DatabaseSession,
 ) -> TradingControlResponse:
-    service = TradingControlService(session=session)
+    service = build_trading_control_service(
+        session=session
+    )
 
     try:
-        state = service.deactivate_kill_switch(reason=request.reason)
+        control = (
+            service.reset_circuit_breaker(
+                account_id=account_id
+            )
+        )
 
-    except ValueError as error:
+    except LookupError as error:
         raise HTTPException(
-            status_code=(status.HTTP_409_CONFLICT),
+            status_code=404,
             detail=str(error),
         ) from error
 
-    return _to_response(state)
+    return TradingControlResponse.model_validate(
+        control
+    )
+
+
+@router.post(
+    "/{account_id}/enabled",
+    response_model=TradingControlResponse,
+)
+def set_trading_enabled(
+    account_id: UUID,
+    request: TradingEnabledRequest,
+    session: DatabaseSession,
+) -> TradingControlResponse:
+    service = build_trading_control_service(
+        session=session
+    )
+
+    try:
+        control = service.set_enabled(
+            account_id=account_id,
+            enabled=request.enabled,
+        )
+
+    except LookupError as error:
+        raise HTTPException(
+            status_code=404,
+            detail=str(error),
+        ) from error
+
+    return TradingControlResponse.model_validate(
+        control
+    )

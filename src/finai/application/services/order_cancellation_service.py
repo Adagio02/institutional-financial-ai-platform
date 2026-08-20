@@ -2,9 +2,6 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from finai.application.services.trading_control_service import (
-    TradingControlService,
-)
 from finai.domain.execution.enums import (
     OrderStatus,
 )
@@ -24,13 +21,17 @@ class OrderCancellationService:
         self,
         *,
         session: Session,
-        broker: SandboxBroker,
+        broker: SandboxBroker | None = None,
     ) -> None:
-        self._order_repository = OrderRepository(session)
+        self._order_repository = OrderRepository(
+            session
+        )
 
-        self._audit_repository = ExecutionAuditRepository(session)
-
-        self._control_service = TradingControlService(session=session)
+        self._audit_repository = (
+            ExecutionAuditRepository(
+                session
+            )
+        )
 
         self._broker = broker
 
@@ -39,10 +40,17 @@ class OrderCancellationService:
         *,
         order_id: UUID,
     ):
-        order = self._order_repository.get_by_id(order_id)
+        order = (
+            self._order_repository
+            .get_by_id(
+                order_id
+            )
+        )
 
         if order is None:
-            raise LookupError(f"Order not found: {order_id}")
+            raise LookupError(
+                f"Order not found: {order_id}"
+            )
 
         terminal_statuses = {
             OrderStatus.FILLED.value,
@@ -51,21 +59,43 @@ class OrderCancellationService:
         }
 
         if order.status in terminal_statuses:
-            raise ValueError("Terminal orders cannot be cancelled.")
+            raise ValueError(
+                "Terminal orders cannot be cancelled."
+            )
 
-        if not order.broker_order_id:
-            raise ValueError("Order has no broker order ID.")
+        broker_order_id = (
+            order.broker_order_id
+        )
 
-        self._broker.cancel(broker_order_id=(order.broker_order_id))
+        if (
+            broker_order_id
+            and self._broker is not None
+        ):
+            self._broker.cancel(
+                broker_order_id=(
+                    broker_order_id
+                )
+            )
 
-        cancelled = self._order_repository.mark_cancelled(order)
+        cancelled = (
+            self._order_repository
+            .mark_cancelled(
+                order
+            )
+        )
 
         self._audit_repository.create(
-            account_id=(order.account_id),
+            account_id=order.account_id,
             order_id=order.id,
-            event_type=("order_cancelled"),
-            message=("Sandbox order was cancelled."),
-            event_data={"broker_order_id": (order.broker_order_id)},
+            event_type="order_cancelled",
+            message=(
+                "Paper order was cancelled."
+            ),
+            event_data={
+                "broker_order_id": (
+                    broker_order_id
+                ),
+            },
         )
 
         return cancelled
