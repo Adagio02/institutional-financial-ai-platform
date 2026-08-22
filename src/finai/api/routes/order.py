@@ -38,6 +38,9 @@ from finai.infrastructure.database.repositories.execution_fill_repository import
 from finai.infrastructure.database.repositories.order_repository import (
     OrderRepository,
 )
+from finai.infrastructure.execution.broker_factory import (
+    create_execution_broker,
+)
 
 
 router = APIRouter(
@@ -115,6 +118,21 @@ def build_order_service(
         execution_mode=(
             settings.execution_mode
         ),
+    )
+
+def build_order_cancellation_service(
+    *,
+    session: Session,
+) -> OrderCancellationService:
+    settings = get_settings()
+
+    broker = create_execution_broker(
+        settings=settings
+    )
+
+    return OrderCancellationService(
+        session=session,
+        broker=broker,
     )
 
 
@@ -257,9 +275,34 @@ def cancel_order(
     session: DatabaseSession,
 ) -> OrderResponse:
     service = (
-        OrderCancellationService(
+        build_order_cancellation_service(
             session=session
         )
+    )
+
+    try:
+        order = service.cancel(
+            order_id=order_id
+        )
+
+    except LookupError as error:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail=str(error),
+        ) from error
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
+            detail=str(error),
+        ) from error
+
+    return OrderResponse.model_validate(
+        order
     )
 
     try:

@@ -206,6 +206,15 @@ class Settings(BaseSettings):
 
     trading_control_maximum_order_fraction: float = 0.10
 
+        # Version 1.9 Alpaca paper broker
+    alpaca_api_key: str = ""
+    alpaca_secret_key: str = ""
+    alpaca_base_url: str = "https://paper-api.alpaca.markets"
+
+    alpaca_request_timeout_seconds: float = 15.0
+
+    alpaca_paper_trading_enabled: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:
