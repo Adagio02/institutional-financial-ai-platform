@@ -14,6 +14,7 @@ from finai.infrastructure.database.repositories.order_repository import (
     OrderRepository,
 )
 from finai.infrastructure.execution.alpaca_broker import (
+    AlpacaOrderSnapshot,
     AlpacaPaperBroker,
 )
 
@@ -92,7 +93,8 @@ class AlpacaOrderExecutionService:
             .mark_submitted(
                 order,
                 broker_order_id=(
-                    result.broker_order_id
+                    result
+                    .broker_order_id
                 ),
                 broker_name=(
                     self._broker.name
@@ -114,7 +116,8 @@ class AlpacaOrderExecutionService:
             ),
             event_data={
                 "broker_order_id": (
-                    result.broker_order_id
+                    result
+                    .broker_order_id
                 ),
                 "broker_name": (
                     self._broker.name
@@ -150,12 +153,51 @@ class AlpacaOrderExecutionService:
             )
 
         snapshot = (
-            self._broker.get_snapshot(
+            self._broker
+            .get_snapshot(
                 broker_order_id=(
-                    order.broker_order_id
+                    order
+                    .broker_order_id
                 )
             )
         )
+
+        return self.sync_from_snapshot(
+            order=order,
+            snapshot=snapshot,
+            source="rest",
+        )
+
+    def sync_from_snapshot(
+        self,
+        *,
+        order,
+        snapshot: AlpacaOrderSnapshot,
+        source: str,
+    ):
+        if not order.broker_order_id:
+            raise ValueError(
+                "Order has no broker "
+                "order ID."
+            )
+
+        if (
+            order.broker_name
+            != self._broker.name
+        ):
+            raise ValueError(
+                "Order does not belong "
+                "to Alpaca paper."
+            )
+
+        if (
+            snapshot.broker_order_id
+            != order.broker_order_id
+        ):
+            raise ValueError(
+                "Broker snapshot does not "
+                "match the FinAI order."
+            )
 
         newly_accounted = (
             self._accounting_service
@@ -184,7 +226,9 @@ class AlpacaOrderExecutionService:
                     snapshot
                     .average_fill_price
                 ),
-                status=snapshot.status,
+                status=(
+                    snapshot.status
+                ),
             )
         )
 
@@ -206,7 +250,8 @@ class AlpacaOrderExecutionService:
                     .broker_order_id
                 ),
                 "raw_status": (
-                    snapshot.raw_status
+                    snapshot
+                    .raw_status
                 ),
                 "filled_quantity": (
                     snapshot
@@ -215,6 +260,7 @@ class AlpacaOrderExecutionService:
                 "newly_accounted_quantity": (
                     newly_accounted
                 ),
+                "source": source,
             },
         )
 

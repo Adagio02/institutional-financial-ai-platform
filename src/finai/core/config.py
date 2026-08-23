@@ -224,6 +224,19 @@ class Settings(BaseSettings):
 
     alpaca_maximum_sync_orders: int = 100
 
+        # Version 2.1 Alpaca trade-update stream
+    alpaca_trade_stream_enabled: bool = False
+
+    alpaca_trade_stream_url: str = (
+        "wss://paper-api.alpaca.markets/stream"
+    )
+
+    alpaca_trade_stream_open_timeout_seconds: float = 10.0
+
+    alpaca_trade_stream_reconnect_initial_seconds: float = 2.0
+
+    alpaca_trade_stream_reconnect_maximum_seconds: float = 30.0
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -73,6 +73,29 @@ class OrderRepository:
             order_id,
         )
 
+    def get_by_broker_order_id(
+        self,
+        broker_order_id: str,
+    ) -> OrderModel | None:
+        normalized = (
+            broker_order_id.strip()
+        )
+
+        if not normalized:
+            return None
+
+        statement = (
+            select(OrderModel)
+            .where(
+                OrderModel.broker_order_id
+                == normalized
+            )
+        )
+
+        return self._session.scalar(
+            statement
+        )
+
     def get_by_client_order_id(
         self,
         *,

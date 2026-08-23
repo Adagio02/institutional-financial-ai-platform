@@ -49,6 +49,7 @@ dependencies = [
   "mlflow",
   "scikit-learn",
   "shap",
+  "websockets>=15,<16",
 ]
 
 [project.optional-dependencies]

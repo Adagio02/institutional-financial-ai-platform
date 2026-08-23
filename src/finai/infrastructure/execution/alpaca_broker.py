@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import (
+    UTC,
+    datetime,
+)
 from uuid import UUID
 
 from finai.domain.execution.broker import (
@@ -31,9 +34,13 @@ class AlpacaOrderSnapshot:
 
     filled_quantity: float
 
-    average_fill_price: float | None
+    average_fill_price: (
+        float | None
+    )
 
-    client_order_id: str | None
+    client_order_id: (
+        str | None
+    )
 
     symbol: str
 
@@ -55,7 +62,9 @@ class AlpacaPaperBroker:
     def account(
         self,
     ) -> dict:
-        return self._client.get_account()
+        return (
+            self._client.get_account()
+        )
 
     def submit(
         self,
@@ -68,14 +77,16 @@ class AlpacaPaperBroker:
         reference_price: float,
         limit_price: float | None,
         time_in_force: str = "day",
-        client_order_id: str | None = None,
+        client_order_id: (
+            str | None
+        ) = None,
     ) -> BrokerExecutionResult:
         del reference_price
 
         if quantity <= 0:
             raise ValueError(
-                "Order quantity must be "
-                "positive."
+                "Order quantity must "
+                "be positive."
             )
 
         resolved_client_order_id = (
@@ -102,21 +113,24 @@ class AlpacaPaperBroker:
         )
 
         snapshot = (
-            self._snapshot_from_response(
+            self.snapshot_from_response(
                 response
             )
         )
 
         return BrokerExecutionResult(
             broker_order_id=(
-                snapshot.broker_order_id
+                snapshot
+                .broker_order_id
             ),
             status=snapshot.status,
             requested_quantity=(
-                snapshot.requested_quantity
+                snapshot
+                .requested_quantity
             ),
             filled_quantity=(
-                snapshot.filled_quantity
+                snapshot
+                .filled_quantity
             ),
             fills=(),
         )
@@ -126,14 +140,18 @@ class AlpacaPaperBroker:
         *,
         broker_order_id: str,
     ) -> AlpacaOrderSnapshot:
-        response = self._client.get_order(
-            broker_order_id=(
-                broker_order_id
+        response = (
+            self._client.get_order(
+                broker_order_id=(
+                    broker_order_id
+                )
             )
         )
 
-        return self._snapshot_from_response(
-            response
+        return (
+            self.snapshot_from_response(
+                response
+            )
         )
 
     def get(
@@ -149,16 +167,21 @@ class AlpacaPaperBroker:
 
         return BrokerOrderState(
             broker_order_id=(
-                snapshot.broker_order_id
+                snapshot
+                .broker_order_id
             ),
             status=snapshot.status,
             requested_quantity=(
-                snapshot.requested_quantity
+                snapshot
+                .requested_quantity
             ),
             filled_quantity=(
-                snapshot.filled_quantity
+                snapshot
+                .filled_quantity
             ),
-            updated_at=datetime.now(UTC),
+            updated_at=(
+                datetime.now(UTC)
+            ),
         )
 
     def cancel(
@@ -180,25 +203,45 @@ class AlpacaPaperBroker:
 
         return BrokerOrderState(
             broker_order_id=(
-                snapshot.broker_order_id
+                snapshot
+                .broker_order_id
             ),
             status=snapshot.status,
             requested_quantity=(
-                snapshot.requested_quantity
+                snapshot
+                .requested_quantity
             ),
             filled_quantity=(
-                snapshot.filled_quantity
+                snapshot
+                .filled_quantity
             ),
-            updated_at=datetime.now(UTC),
+            updated_at=(
+                datetime.now(UTC)
+            ),
         )
 
     @classmethod
-    def _snapshot_from_response(
+    def snapshot_from_response(
         cls,
         response: dict,
     ) -> AlpacaOrderSnapshot:
-        average_fill_raw = response.get(
-            "filled_avg_price"
+        broker_order_id = str(
+            response.get(
+                "id",
+                "",
+            )
+        ).strip()
+
+        if not broker_order_id:
+            raise ValueError(
+                "Alpaca order response "
+                "contains no order ID."
+            )
+
+        average_fill_raw = (
+            response.get(
+                "filled_avg_price"
+            )
         )
 
         average_fill_price = None
@@ -219,8 +262,8 @@ class AlpacaPaperBroker:
         )
 
         return AlpacaOrderSnapshot(
-            broker_order_id=str(
-                response["id"]
+            broker_order_id=(
+                broker_order_id
             ),
             status=cls._map_status(
                 raw_status
@@ -250,7 +293,7 @@ class AlpacaPaperBroker:
                     "symbol",
                     "",
                 )
-            ),
+            ).strip().upper(),
             raw_status=raw_status,
         )
 
@@ -265,9 +308,14 @@ class AlpacaPaperBroker:
         )
 
         if normalized == "filled":
-            return OrderStatus.FILLED
+            return (
+                OrderStatus.FILLED
+            )
 
-        if normalized == "partially_filled":
+        if (
+            normalized
+            == "partially_filled"
+        ):
             return (
                 OrderStatus
                 .PARTIALLY_FILLED
@@ -278,11 +326,17 @@ class AlpacaPaperBroker:
             "cancelled",
             "expired",
         }:
-            return OrderStatus.CANCELLED
+            return (
+                OrderStatus.CANCELLED
+            )
 
         if normalized in {
             "rejected",
         }:
-            return OrderStatus.REJECTED
+            return (
+                OrderStatus.REJECTED
+            )
 
-        return OrderStatus.ACCEPTED
+        return (
+            OrderStatus.ACCEPTED
+        )
