@@ -237,6 +237,17 @@ class Settings(BaseSettings):
 
     alpaca_trade_stream_reconnect_maximum_seconds: float = 30.0
 
+        # Version 2.2 Alpaca reconciliation
+    alpaca_reconciliation_enabled: bool = False
+
+    alpaca_reconciliation_interval_seconds: int = 60
+
+    alpaca_reconciliation_batch_size: int = 100
+
+    alpaca_reconciliation_initial_backoff_seconds: float = 2.0
+
+    alpaca_reconciliation_maximum_backoff_seconds: float = 30.0
+
 
 @lru_cache
 def get_settings() -> Settings:

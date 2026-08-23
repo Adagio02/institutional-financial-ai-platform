@@ -42,8 +42,12 @@ class OrderRepository:
         order = OrderModel(
             account_id=account_id,
             instrument_id=instrument_id,
-            client_order_id=(client_order_id),
-            symbol=symbol.strip().upper(),
+            client_order_id=(
+                client_order_id
+            ),
+            symbol=(
+                symbol.strip().upper()
+            ),
             side=side,
             order_type=order_type,
             quantity=quantity,
@@ -51,16 +55,30 @@ class OrderRepository:
             remaining_quantity=quantity,
             limit_price=limit_price,
             time_in_force=time_in_force,
-            reference_price=reference_price,
-            reference_price_timestamp=(reference_price_timestamp),
-            reference_price_provider=(reference_price_provider),
-            status=OrderStatus.PENDING.value,
+            reference_price=(
+                reference_price
+            ),
+            reference_price_timestamp=(
+                reference_price_timestamp
+            ),
+            reference_price_provider=(
+                reference_price_provider
+            ),
+            status=(
+                OrderStatus.PENDING.value
+            ),
             strategy_key=strategy_key,
         )
 
-        self._session.add(order)
+        self._session.add(
+            order
+        )
+
         self._session.commit()
-        self._session.refresh(order)
+
+        self._session.refresh(
+            order
+        )
 
         return order
 
@@ -102,12 +120,19 @@ class OrderRepository:
         account_id: UUID,
         client_order_id: str,
     ) -> OrderModel | None:
-        statement = select(OrderModel).where(
-            OrderModel.account_id == account_id,
-            OrderModel.client_order_id == client_order_id,
+        statement = (
+            select(OrderModel)
+            .where(
+                OrderModel.account_id
+                == account_id,
+                OrderModel.client_order_id
+                == client_order_id,
+            )
         )
 
-        return self._session.scalar(statement)
+        return self._session.scalar(
+            statement
+        )
 
     def list_for_account(
         self,
@@ -115,91 +140,20 @@ class OrderRepository:
     ) -> list[OrderModel]:
         statement = (
             select(OrderModel)
-            .where(OrderModel.account_id == account_id)
-            .order_by(OrderModel.created_at.desc())
+            .where(
+                OrderModel.account_id
+                == account_id
+            )
+            .order_by(
+                OrderModel.created_at.desc()
+            )
         )
 
-        return list(self._session.scalars(statement).all())
-
-    def mark_submitted(
-        self,
-        order: OrderModel,
-        *,
-        broker_order_id: str,
-        broker_name: str,
-    ) -> OrderModel:
-        order.broker_order_id = broker_order_id
-
-        order.broker_name = broker_name
-
-        order.status = OrderStatus.ACCEPTED.value
-
-        order.submitted_at = datetime.now(UTC)
-
-        order.last_synced_at = datetime.now(UTC)
-
-        self._session.commit()
-        self._session.refresh(order)
-
-        return order
-
-    def update_fill_state(
-        self,
-        order: OrderModel,
-        *,
-        filled_quantity: float,
-        average_fill_price: float | None,
-        status: OrderStatus,
-    ) -> OrderModel:
-        order.filled_quantity = filled_quantity
-
-        order.remaining_quantity = max(
-            order.quantity - filled_quantity,
-            0.0,
+        return list(
+            self._session.scalars(
+                statement
+            ).all()
         )
-
-        order.average_fill_price = average_fill_price
-
-        order.status = status.value
-
-        order.last_synced_at = datetime.now(UTC)
-
-        self._session.commit()
-        self._session.refresh(order)
-
-        return order
-
-    def mark_rejected(
-        self,
-        order: OrderModel,
-        *,
-        reason: str,
-    ) -> OrderModel:
-        order.status = OrderStatus.REJECTED.value
-
-        order.rejection_reason = reason
-
-        order.remaining_quantity = order.quantity - order.filled_quantity
-
-        self._session.commit()
-        self._session.refresh(order)
-
-        return order
-
-    def mark_cancelled(
-        self,
-        order: OrderModel,
-    ) -> OrderModel:
-        order.status = OrderStatus.CANCELLED.value
-
-        order.cancelled_at = datetime.now(UTC)
-
-        order.last_synced_at = datetime.now(UTC)
-
-        self._session.commit()
-        self._session.refresh(order)
-
-        return order
 
     def list_open(
         self,
@@ -209,13 +163,246 @@ class OrderRepository:
             .where(
                 OrderModel.status.in_(
                     [
-                        OrderStatus.PENDING.value,
-                        OrderStatus.ACCEPTED.value,
-                        (OrderStatus.PARTIALLY_FILLED.value),
+                        OrderStatus
+                        .PENDING
+                        .value,
+                        OrderStatus
+                        .ACCEPTED
+                        .value,
+                        OrderStatus
+                        .PARTIALLY_FILLED
+                        .value,
                     ]
                 )
             )
-            .order_by(OrderModel.created_at)
+            .order_by(
+                OrderModel.created_at
+            )
         )
 
-        return list(self._session.scalars(statement).all())
+        return list(
+            self._session.scalars(
+                statement
+            ).all()
+        )
+
+    def list_open_for_broker(
+        self,
+        *,
+        broker_name: str,
+        limit: int,
+    ) -> list[OrderModel]:
+        normalized_broker_name = (
+            broker_name.strip()
+        )
+
+        if not normalized_broker_name:
+            raise ValueError(
+                "broker_name cannot "
+                "be blank."
+            )
+
+        if limit <= 0:
+            raise ValueError(
+                "limit must be positive."
+            )
+
+        statement = (
+            select(OrderModel)
+            .where(
+                OrderModel.broker_name
+                == normalized_broker_name,
+                OrderModel.status.in_(
+                    [
+                        OrderStatus
+                        .PENDING
+                        .value,
+                        OrderStatus
+                        .ACCEPTED
+                        .value,
+                        OrderStatus
+                        .PARTIALLY_FILLED
+                        .value,
+                    ]
+                ),
+            )
+            .order_by(
+                OrderModel.created_at
+            )
+            .limit(limit)
+        )
+
+        return list(
+            self._session.scalars(
+                statement
+            ).all()
+        )
+
+    def mark_submitted(
+        self,
+        order: OrderModel,
+        *,
+        broker_order_id: str,
+        broker_name: str,
+    ) -> OrderModel:
+        order.broker_order_id = (
+            broker_order_id
+        )
+
+        order.broker_name = (
+            broker_name
+        )
+
+        order.status = (
+            OrderStatus.ACCEPTED.value
+        )
+
+        order.submitted_at = (
+            datetime.now(UTC)
+        )
+
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
+
+    def update_fill_state(
+        self,
+        order: OrderModel,
+        *,
+        filled_quantity: float,
+        average_fill_price: (
+            float | None
+        ),
+        status: OrderStatus,
+    ) -> OrderModel:
+        order.filled_quantity = (
+            filled_quantity
+        )
+
+        order.remaining_quantity = max(
+            order.quantity
+            - filled_quantity,
+            0.0,
+        )
+
+        order.average_fill_price = (
+            average_fill_price
+        )
+
+        order.status = (
+            status.value
+        )
+
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
+
+    def mark_filled(
+        self,
+        order: OrderModel,
+        *,
+        filled_quantity: float,
+        average_fill_price: float,
+    ) -> OrderModel:
+        order.filled_quantity = (
+            filled_quantity
+        )
+
+        order.remaining_quantity = (
+            max(
+                order.quantity
+                - filled_quantity,
+                0.0,
+            )
+        )
+
+        order.average_fill_price = (
+            average_fill_price
+        )
+
+        order.status = (
+            OrderStatus.FILLED.value
+        )
+
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
+
+    def mark_rejected(
+        self,
+        order: OrderModel,
+        *,
+        reason: str,
+    ) -> OrderModel:
+        order.status = (
+            OrderStatus.REJECTED.value
+        )
+
+        order.rejection_reason = (
+            reason
+        )
+
+        order.remaining_quantity = (
+            order.quantity
+            - order.filled_quantity
+        )
+
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
+
+    def mark_cancelled(
+        self,
+        order: OrderModel,
+    ) -> OrderModel:
+        order.status = (
+            OrderStatus.CANCELLED.value
+        )
+
+        order.cancelled_at = (
+            datetime.now(UTC)
+        )
+
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
