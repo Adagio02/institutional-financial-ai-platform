@@ -77,6 +77,9 @@ from finai.api.routes.strategy_schedule import (
 from finai.api.routes.strategy_worker import (
     router as strategy_worker_router,
 )
+from finai.api.routes.alpaca_execution import (
+    router as alpaca_execution_router,
+)
 
 application = FastAPI(
     title="Institutional Financial AI Platform",
@@ -108,6 +111,7 @@ application.include_router(strategy_run_router)
 application.include_router(strategy_schedule_router)
 application.include_router(strategy_worker_router)
 application.include_router(trading_control_router)
+application.include_router(alpaca_execution_router)
 
 register_exception_handlers(application)
 

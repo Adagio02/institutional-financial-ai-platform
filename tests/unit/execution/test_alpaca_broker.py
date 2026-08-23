@@ -6,7 +6,7 @@ from finai.infrastructure.execution.alpaca_broker import (
 )
 
 
-def test_alpaca_filled_status() -> None:
+def test_filled_status() -> None:
     assert (
         AlpacaPaperBroker._map_status(
             "filled"
@@ -15,7 +15,7 @@ def test_alpaca_filled_status() -> None:
     )
 
 
-def test_alpaca_partial_status() -> None:
+def test_partial_status() -> None:
     assert (
         AlpacaPaperBroker._map_status(
             "partially_filled"
@@ -27,7 +27,7 @@ def test_alpaca_partial_status() -> None:
     )
 
 
-def test_alpaca_cancelled_status() -> None:
+def test_cancel_status() -> None:
     assert (
         AlpacaPaperBroker._map_status(
             "canceled"
@@ -36,7 +36,16 @@ def test_alpaca_cancelled_status() -> None:
     )
 
 
-def test_alpaca_rejected_status() -> None:
+def test_expired_status() -> None:
+    assert (
+        AlpacaPaperBroker._map_status(
+            "expired"
+        )
+        == OrderStatus.CANCELLED
+    )
+
+
+def test_rejected_status() -> None:
     assert (
         AlpacaPaperBroker._map_status(
             "rejected"
@@ -45,10 +54,19 @@ def test_alpaca_rejected_status() -> None:
     )
 
 
-def test_unknown_status_is_accepted() -> None:
+def test_new_is_accepted() -> None:
     assert (
         AlpacaPaperBroker._map_status(
             "new"
+        )
+        == OrderStatus.ACCEPTED
+    )
+
+
+def test_pending_new_is_accepted() -> None:
+    assert (
+        AlpacaPaperBroker._map_status(
+            "pending_new"
         )
         == OrderStatus.ACCEPTED
     )

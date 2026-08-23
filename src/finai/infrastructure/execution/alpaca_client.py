@@ -59,8 +59,8 @@ class AlpacaPaperClient:
             != ALPACA_PAPER_BASE_URL
         ):
             raise ValueError(
-                "Version 1.9 supports only "
-                "the Alpaca paper endpoint."
+                "Only the Alpaca paper "
+                "endpoint is permitted."
             )
 
         if self._timeout_seconds <= 0:
@@ -90,26 +90,26 @@ class AlpacaPaperClient:
         quantity: float,
         time_in_force: str,
         limit_price: float | None,
-        client_order_id: str | None,
+        client_order_id: str,
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {
-            "symbol": symbol.strip().upper(),
+            "symbol": (
+                symbol.strip().upper()
+            ),
             "side": side,
             "type": order_type,
             "qty": str(quantity),
             "time_in_force": (
                 time_in_force
             ),
+            "client_order_id": (
+                client_order_id
+            ),
         }
 
         if limit_price is not None:
             payload["limit_price"] = str(
                 limit_price
-            )
-
-        if client_order_id:
-            payload["client_order_id"] = (
-                client_order_id
             )
 
         return self._request(
@@ -123,11 +123,11 @@ class AlpacaPaperClient:
         *,
         broker_order_id: str,
     ) -> dict[str, Any]:
-        normalized_id = (
+        normalized = (
             broker_order_id.strip()
         )
 
-        if not normalized_id:
+        if not normalized:
             raise ValueError(
                 "broker_order_id is required."
             )
@@ -135,8 +135,7 @@ class AlpacaPaperClient:
         return self._request(
             method="GET",
             path=(
-                "/v2/orders/"
-                f"{normalized_id}"
+                f"/v2/orders/{normalized}"
             ),
         )
 
@@ -145,11 +144,11 @@ class AlpacaPaperClient:
         *,
         broker_order_id: str,
     ) -> None:
-        normalized_id = (
+        normalized = (
             broker_order_id.strip()
         )
 
-        if not normalized_id:
+        if not normalized:
             raise ValueError(
                 "broker_order_id is required."
             )
@@ -157,8 +156,7 @@ class AlpacaPaperClient:
         self._request(
             method="DELETE",
             path=(
-                "/v2/orders/"
-                f"{normalized_id}"
+                f"/v2/orders/{normalized}"
             ),
             expect_body=False,
         )
@@ -208,21 +206,24 @@ class AlpacaPaperClient:
                     self._timeout_seconds
                 ),
             ) as response:
-                response_body = (
-                    response.read()
-                )
+                raw = response.read()
 
         except HTTPError as error:
-            raw_error = error.read().decode(
-                "utf-8",
-                errors="replace",
+            raw_error = (
+                error.read().decode(
+                    "utf-8",
+                    errors="replace",
+                )
             )
 
-            if error.code == 401:
+            if error.code in {
+                401,
+                403,
+            }:
                 raise (
                     AlpacaAuthenticationError(
                         "Alpaca authentication "
-                        "failed."
+                        "or authorization failed."
                     )
                 ) from error
 
@@ -241,14 +242,12 @@ class AlpacaPaperClient:
         if not expect_body:
             return {}
 
-        if not response_body:
+        if not raw:
             return {}
 
         try:
             parsed = json.loads(
-                response_body.decode(
-                    "utf-8"
-                )
+                raw.decode("utf-8")
             )
 
         except json.JSONDecodeError as error:
@@ -259,7 +258,8 @@ class AlpacaPaperClient:
 
         if not isinstance(parsed, dict):
             raise AlpacaApiError(
-                "Unexpected Alpaca response."
+                "Unexpected Alpaca "
+                "response type."
             )
 
         return parsed

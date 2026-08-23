@@ -1,5 +1,11 @@
 from sqlalchemy.orm import Session
 
+from finai.application.services.alpaca_order_execution_service import (
+    AlpacaOrderExecutionService,
+)
+from finai.core.config import (
+    get_settings,
+)
 from finai.domain.execution.enums import (
     OrderSide,
     OrderStatus,
@@ -23,6 +29,12 @@ from finai.infrastructure.database.repositories.paper_account_repository import 
 from finai.infrastructure.database.repositories.paper_position_repository import (
     PaperPositionRepository,
 )
+from finai.infrastructure.execution.alpaca_broker import (
+    AlpacaPaperBroker,
+)
+from finai.infrastructure.execution.alpaca_client import (
+    AlpacaPaperClient,
+)
 from finai.infrastructure.execution.paper_broker import (
     PaperBroker,
 )
@@ -42,6 +54,8 @@ class PaperExecutionService:
         initial_fill_fraction: float = 1.0,
         execution_mode: str = "paper",
     ) -> None:
+        self._session = session
+
         self._account_repository = (
             PaperAccountRepository(
                 session
@@ -81,19 +95,91 @@ class PaperExecutionService:
         if normalized_execution_mode not in {
             "paper",
             "sandbox",
+            "alpaca_paper",
         }:
             raise ValueError(
-                (
-                    "execution_mode must be "
-                    "'paper' or 'sandbox'."
-                )
+                "execution_mode must be "
+                "'paper', 'sandbox', or "
+                "'alpaca_paper'."
             )
 
         self._execution_mode = (
             normalized_execution_mode
         )
 
+        self._paper_broker: (
+            PaperBroker | None
+        ) = None
+
+        self._sandbox_broker: (
+            SandboxBroker | None
+        ) = None
+
+        self._alpaca_execution_service: (
+            AlpacaOrderExecutionService
+            | None
+        ) = None
+
         if (
+            self._execution_mode
+            == "alpaca_paper"
+        ):
+            settings = get_settings()
+
+            if not (
+                settings
+                .alpaca_paper_trading_enabled
+            ):
+                raise ValueError(
+                    "Alpaca paper integration "
+                    "is disabled."
+                )
+
+            if not (
+                settings
+                .alpaca_execution_enabled
+            ):
+                raise ValueError(
+                    "Alpaca execution is "
+                    "disabled."
+                )
+
+            client = AlpacaPaperClient(
+                api_key=(
+                    settings.alpaca_api_key
+                ),
+                secret_key=(
+                    settings.alpaca_secret_key
+                ),
+                base_url=(
+                    settings.alpaca_base_url
+                ),
+                timeout_seconds=(
+                    settings
+                    .alpaca_request_timeout_seconds
+                ),
+            )
+
+            broker = AlpacaPaperBroker(
+                client=client
+            )
+
+            self._alpaca_execution_service = (
+                AlpacaOrderExecutionService(
+                    session=session,
+                    broker=broker,
+                    commission_bps=(
+                        settings
+                        .alpaca_execution_commission_bps
+                    ),
+                    sync_on_submit=(
+                        settings
+                        .alpaca_sync_on_submit
+                    ),
+                )
+            )
+
+        elif (
             self._execution_mode
             == "sandbox"
         ):
@@ -114,8 +200,6 @@ class PaperExecutionService:
                 )
             )
 
-            self._paper_broker = None
-
         else:
             self._paper_broker = (
                 PaperBroker(
@@ -127,8 +211,6 @@ class PaperExecutionService:
                     ),
                 )
             )
-
-            self._sandbox_broker = None
 
     def execute(
         self,
@@ -145,9 +227,29 @@ class PaperExecutionService:
 
         if account is None:
             raise LookupError(
-                (
-                    "Paper account was "
-                    "not found."
+                "Paper account was not found."
+            )
+
+        if (
+            self._execution_mode
+            == "alpaca_paper"
+        ):
+            if (
+                self._alpaca_execution_service
+                is None
+            ):
+                raise RuntimeError(
+                    "Alpaca execution service "
+                    "is not configured."
+                )
+
+            return (
+                self._alpaca_execution_service
+                .submit(
+                    order=order,
+                    reference_price=(
+                        reference_price
+                    ),
                 )
             )
 
@@ -194,10 +296,7 @@ class PaperExecutionService:
     ):
         if self._paper_broker is None:
             raise RuntimeError(
-                (
-                    "Paper broker is "
-                    "not configured."
-                )
+                "Paper broker is not configured."
             )
 
         fill = (
@@ -216,12 +315,8 @@ class PaperExecutionService:
 
         if fill is None:
             self._audit_repository.create(
-                account_id=(
-                    account.id
-                ),
-                order_id=(
-                    order.id
-                ),
+                account_id=account.id,
+                order_id=order.id,
                 event_type=(
                     "order_not_filled"
                 ),
@@ -237,21 +332,15 @@ class PaperExecutionService:
             account=account,
             order=order,
             side=side,
-            quantity=(
-                fill.quantity
-            ),
-            price=(
-                fill.price
-            ),
-            commission=(
-                fill.commission
-            ),
+            quantity=fill.quantity,
+            price=fill.price,
+            commission=fill.commission,
             slippage_cost=(
                 fill.slippage_cost
             ),
         )
 
-        self._order_repository.update_fill_state(
+        self._order_repository.mark_filled(
             order,
             filled_quantity=(
                 fill.quantity
@@ -259,37 +348,22 @@ class PaperExecutionService:
             average_fill_price=(
                 fill.price
             ),
-            status=(
-                OrderStatus.FILLED
-            ),
         )
 
         self._audit_repository.create(
-            account_id=(
-                account.id
-            ),
-            order_id=(
-                order.id
-            ),
-            event_type=(
-                "order_filled"
-            ),
+            account_id=account.id,
+            order_id=order.id,
+            event_type="order_filled",
             message=(
                 "Paper order was filled."
             ),
             event_data={
-                "symbol": (
-                    order.symbol
-                ),
-                "side": (
-                    order.side
-                ),
+                "symbol": order.symbol,
+                "side": order.side,
                 "quantity": (
                     fill.quantity
                 ),
-                "price": (
-                    fill.price
-                ),
+                "price": fill.price,
                 "commission": (
                     fill.commission
                 ),
@@ -309,25 +383,17 @@ class PaperExecutionService:
     ):
         if self._sandbox_broker is None:
             raise RuntimeError(
-                (
-                    "Sandbox broker is "
-                    "not configured."
-                )
+                "Sandbox broker is not "
+                "configured."
             )
 
         result = (
             self._sandbox_broker.submit(
-                order_id=(
-                    order.id
-                ),
-                symbol=(
-                    order.symbol
-                ),
+                order_id=order.id,
+                symbol=order.symbol,
                 side=side,
                 order_type=order_type,
-                quantity=(
-                    order.quantity
-                ),
+                quantity=order.quantity,
                 reference_price=(
                     reference_price
                 ),
@@ -337,30 +403,61 @@ class PaperExecutionService:
             )
         )
 
-        order = (
-            self._order_repository
-            .mark_submitted(
-                order,
-                broker_order_id=(
-                    result.broker_order_id
-                ),
-                broker_name=(
-                    "sandbox"
-                ),
+        if hasattr(
+            order,
+            "broker_order_id",
+        ):
+            order.broker_order_id = (
+                result.broker_order_id
             )
-        )
+
+        if hasattr(
+            order,
+            "broker_name",
+        ):
+            order.broker_name = (
+                self._sandbox_broker.name
+            )
 
         if (
             result.status
             == OrderStatus.ACCEPTED
         ):
+            if hasattr(
+                order,
+                "status",
+            ):
+                order.status = (
+                    OrderStatus
+                    .ACCEPTED
+                    .value
+                )
+
+            if hasattr(
+                order,
+                "filled_quantity",
+            ):
+                order.filled_quantity = (
+                    0.0
+                )
+
+            if hasattr(
+                order,
+                "remaining_quantity",
+            ):
+                order.remaining_quantity = (
+                    order.quantity
+                )
+
+            self._session.commit()
+
+            self._session.refresh(
+                order
+            )
+
             self._audit_repository.create(
-                account_id=(
-                    account.id
-                ),
-                order_id=(
-                    order.id
-                ),
+                account_id=account.id,
+                order_id=order.id,
                 event_type=(
                     "order_accepted"
                 ),
@@ -370,10 +467,13 @@ class PaperExecutionService:
                 ),
                 event_data={
                     "broker_order_id": (
-                        result.broker_order_id
+                        result
+                        .broker_order_id
                     ),
                     "broker_name": (
-                        "sandbox"
+                        self
+                        ._sandbox_broker
+                        .name
                     ),
                     "symbol": (
                         order.symbol
@@ -388,12 +488,8 @@ class PaperExecutionService:
 
         if not result.fills:
             self._audit_repository.create(
-                account_id=(
-                    account.id
-                ),
-                order_id=(
-                    order.id
-                ),
+                account_id=account.id,
+                order_id=order.id,
                 event_type=(
                     "order_not_filled"
                 ),
@@ -403,10 +499,8 @@ class PaperExecutionService:
                 ),
                 event_data={
                     "broker_order_id": (
-                        result.broker_order_id
-                    ),
-                    "broker_name": (
-                        "sandbox"
+                        result
+                        .broker_order_id
                     ),
                 },
             )
@@ -425,9 +519,7 @@ class PaperExecutionService:
                 quantity=(
                     fill.quantity
                 ),
-                price=(
-                    fill.price
-                ),
+                price=fill.price,
                 commission=(
                     fill.commission
                 ),
@@ -445,15 +537,6 @@ class PaperExecutionService:
                 * fill.price
             )
 
-        if total_filled_quantity <= 0:
-            raise RuntimeError(
-                (
-                    "Sandbox execution returned "
-                    "fills with zero total "
-                    "quantity."
-                )
-            )
-
         average_fill_price = (
             total_fill_notional
             / total_filled_quantity
@@ -463,16 +546,32 @@ class PaperExecutionService:
             result.status
             == OrderStatus.FILLED
         ):
-            self._order_repository.update_fill_state(
+            if hasattr(
+                order,
+                "broker_order_id",
+            ):
+                order.broker_order_id = (
+                    result
+                    .broker_order_id
+                )
+
+            if hasattr(
+                order,
+                "broker_name",
+            ):
+                order.broker_name = (
+                    self
+                    ._sandbox_broker
+                    .name
+                )
+
+            self._order_repository.mark_filled(
                 order,
                 filled_quantity=(
                     total_filled_quantity
                 ),
                 average_fill_price=(
                     average_fill_price
-                ),
-                status=(
-                    OrderStatus.FILLED
                 ),
             )
 
@@ -486,18 +585,27 @@ class PaperExecutionService:
 
         elif (
             result.status
-            == OrderStatus.PARTIALLY_FILLED
+            == (
+                OrderStatus
+                .PARTIALLY_FILLED
+            )
         ):
-            self._order_repository.update_fill_state(
-                order,
+            self._mark_partially_filled(
+                order=order,
+                broker_order_id=(
+                    result
+                    .broker_order_id
+                ),
+                broker_name=(
+                    self
+                    ._sandbox_broker
+                    .name
+                ),
                 filled_quantity=(
                     total_filled_quantity
                 ),
                 average_fill_price=(
                     average_fill_price
-                ),
-                status=(
-                    OrderStatus.PARTIALLY_FILLED
                 ),
             )
 
@@ -512,32 +620,24 @@ class PaperExecutionService:
 
         else:
             raise ValueError(
-                (
-                    "Unsupported sandbox "
-                    "execution status: "
-                    f"{result.status}"
-                )
+                "Unsupported sandbox "
+                "execution status: "
+                f"{result.status}"
             )
 
         self._audit_repository.create(
-            account_id=(
-                account.id
-            ),
-            order_id=(
-                order.id
-            ),
-            event_type=(
-                event_type
-            ),
-            message=(
-                message
-            ),
+            account_id=account.id,
+            order_id=order.id,
+            event_type=event_type,
+            message=message,
             event_data={
                 "broker_order_id": (
                     result.broker_order_id
                 ),
                 "broker_name": (
-                    "sandbox"
+                    self
+                    ._sandbox_broker
+                    .name
                 ),
                 "symbol": (
                     order.symbol
@@ -573,21 +673,11 @@ class PaperExecutionService:
         )
 
         self._fill_repository.create(
-            order_id=(
-                order.id
-            ),
-            quantity=(
-                quantity
-            ),
-            price=(
-                price
-            ),
-            notional=(
-                notional
-            ),
-            commission=(
-                commission
-            ),
+            order_id=order.id,
+            quantity=quantity,
+            price=price,
+            notional=notional,
+            commission=commission,
             slippage_cost=(
                 slippage_cost
             ),
@@ -615,9 +705,7 @@ class PaperExecutionService:
                     instrument_id=(
                         order.instrument_id
                     ),
-                    symbol=(
-                        order.symbol
-                    ),
+                    symbol=order.symbol,
                     quantity=0.0,
                     average_price=0.0,
                 )
@@ -640,9 +728,7 @@ class PaperExecutionService:
                 fill_quantity=(
                     signed_fill_quantity
                 ),
-                fill_price=(
-                    price
-                ),
+                fill_price=price,
             )
         )
 
@@ -651,7 +737,8 @@ class PaperExecutionService:
         )
 
         position.average_price = (
-            accounting_result.average_price
+            accounting_result
+            .average_price
         )
 
         position.realized_pnl += (
@@ -679,16 +766,91 @@ class PaperExecutionService:
 
         new_realized_pnl = (
             account.realized_pnl
-            + accounting_result.realized_pnl_delta
+            + (
+                accounting_result
+                .realized_pnl_delta
+            )
             - commission
         )
 
         self._account_repository.update_cash(
             account,
-            cash=(
-                new_cash
-            ),
+            cash=new_cash,
             realized_pnl=(
                 new_realized_pnl
             ),
+        )
+
+    def _mark_partially_filled(
+        self,
+        *,
+        order,
+        broker_order_id: str,
+        broker_name: str,
+        filled_quantity: float,
+        average_fill_price: float,
+    ) -> None:
+        if not hasattr(
+            order,
+            "status",
+        ):
+            raise AttributeError(
+                "Order model does not "
+                "expose status."
+            )
+
+        order.status = (
+            OrderStatus
+            .PARTIALLY_FILLED
+            .value
+        )
+
+        if hasattr(
+            order,
+            "broker_order_id",
+        ):
+            order.broker_order_id = (
+                broker_order_id
+            )
+
+        if hasattr(
+            order,
+            "broker_name",
+        ):
+            order.broker_name = (
+                broker_name
+            )
+
+        if hasattr(
+            order,
+            "filled_quantity",
+        ):
+            order.filled_quantity = (
+                filled_quantity
+            )
+
+        if hasattr(
+            order,
+            "remaining_quantity",
+        ):
+            order.remaining_quantity = (
+                max(
+                    float(order.quantity)
+                    - filled_quantity,
+                    0.0,
+                )
+            )
+
+        if hasattr(
+            order,
+            "average_fill_price",
+        ):
+            order.average_fill_price = (
+                average_fill_price
+            )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
         )

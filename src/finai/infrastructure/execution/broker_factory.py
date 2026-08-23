@@ -48,8 +48,17 @@ def create_execution_broker(
             .alpaca_paper_trading_enabled
         ):
             raise ValueError(
-                "Alpaca paper trading is "
-                "disabled."
+                "Alpaca paper integration "
+                "is disabled."
+            )
+
+        if not (
+            settings
+            .alpaca_execution_enabled
+        ):
+            raise ValueError(
+                "Alpaca external execution "
+                "is disabled."
             )
 
         client = AlpacaPaperClient(
@@ -73,7 +82,7 @@ def create_execution_broker(
         )
 
     raise ValueError(
-        "Unsupported execution_mode. "
-        "Expected 'sandbox' or "
+        "External broker requires "
+        "execution_mode='sandbox' or "
         "'alpaca_paper'."
     )

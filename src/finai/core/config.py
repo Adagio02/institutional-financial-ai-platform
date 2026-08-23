@@ -215,6 +215,15 @@ class Settings(BaseSettings):
 
     alpaca_paper_trading_enabled: bool = False
 
+        # Version 2.0 external paper execution
+    alpaca_execution_enabled: bool = False
+
+    alpaca_execution_commission_bps: float = 0.0
+
+    alpaca_sync_on_submit: bool = True
+
+    alpaca_maximum_sync_orders: int = 100
+
 
 @lru_cache
 def get_settings() -> Settings:

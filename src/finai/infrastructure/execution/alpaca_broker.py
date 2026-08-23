@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from datetime import (
-    UTC,
-    datetime,
-)
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from uuid import UUID
 
 from finai.domain.execution.broker import (
@@ -18,6 +16,28 @@ from finai.domain.execution.enums import (
 from finai.infrastructure.execution.alpaca_client import (
     AlpacaPaperClient,
 )
+
+
+@dataclass(
+    frozen=True,
+    slots=True,
+)
+class AlpacaOrderSnapshot:
+    broker_order_id: str
+
+    status: OrderStatus
+
+    requested_quantity: float
+
+    filled_quantity: float
+
+    average_fill_price: float | None
+
+    client_order_id: str | None
+
+    symbol: str
+
+    raw_status: str
 
 
 class AlpacaPaperBroker:
@@ -58,6 +78,11 @@ class AlpacaPaperBroker:
                 "positive."
             )
 
+        resolved_client_order_id = (
+            client_order_id
+            or f"finai-{order_id}"
+        )
+
         response = (
             self._client.submit_order(
                 symbol=symbol,
@@ -71,51 +96,44 @@ class AlpacaPaperBroker:
                 ),
                 limit_price=limit_price,
                 client_order_id=(
-                    client_order_id
-                    or f"finai-{order_id}"
+                    resolved_client_order_id
                 ),
             )
         )
 
-        broker_order_id = str(
-            response["id"]
-        )
-
-        requested_quantity = float(
-            response.get(
-                "qty",
-                quantity,
-            )
-        )
-
-        filled_quantity = float(
-            response.get(
-                "filled_qty",
-                0.0,
-            )
-        )
-
-        status = self._map_status(
-            str(
-                response.get(
-                    "status",
-                    "accepted",
-                )
+        snapshot = (
+            self._snapshot_from_response(
+                response
             )
         )
 
         return BrokerExecutionResult(
             broker_order_id=(
-                broker_order_id
+                snapshot.broker_order_id
             ),
-            status=status,
+            status=snapshot.status,
             requested_quantity=(
-                requested_quantity
+                snapshot.requested_quantity
             ),
             filled_quantity=(
-                filled_quantity
+                snapshot.filled_quantity
             ),
             fills=(),
+        )
+
+    def get_snapshot(
+        self,
+        *,
+        broker_order_id: str,
+    ) -> AlpacaOrderSnapshot:
+        response = self._client.get_order(
+            broker_order_id=(
+                broker_order_id
+            )
+        )
+
+        return self._snapshot_from_response(
+            response
         )
 
     def get(
@@ -123,35 +141,22 @@ class AlpacaPaperBroker:
         *,
         broker_order_id: str,
     ) -> BrokerOrderState:
-        response = self._client.get_order(
+        snapshot = self.get_snapshot(
             broker_order_id=(
                 broker_order_id
             )
         )
 
         return BrokerOrderState(
-            broker_order_id=str(
-                response["id"]
+            broker_order_id=(
+                snapshot.broker_order_id
             ),
-            status=self._map_status(
-                str(
-                    response.get(
-                        "status",
-                        "accepted",
-                    )
-                )
+            status=snapshot.status,
+            requested_quantity=(
+                snapshot.requested_quantity
             ),
-            requested_quantity=float(
-                response.get(
-                    "qty",
-                    0.0,
-                )
-            ),
-            filled_quantity=float(
-                response.get(
-                    "filled_qty",
-                    0.0,
-                )
+            filled_quantity=(
+                snapshot.filled_quantity
             ),
             updated_at=datetime.now(UTC),
         )
@@ -167,16 +172,86 @@ class AlpacaPaperBroker:
             )
         )
 
-        return BrokerOrderState(
+        snapshot = self.get_snapshot(
             broker_order_id=(
                 broker_order_id
+            )
+        )
+
+        return BrokerOrderState(
+            broker_order_id=(
+                snapshot.broker_order_id
             ),
-            status=(
-                OrderStatus.CANCELLED
+            status=snapshot.status,
+            requested_quantity=(
+                snapshot.requested_quantity
             ),
-            requested_quantity=0.0,
-            filled_quantity=0.0,
+            filled_quantity=(
+                snapshot.filled_quantity
+            ),
             updated_at=datetime.now(UTC),
+        )
+
+    @classmethod
+    def _snapshot_from_response(
+        cls,
+        response: dict,
+    ) -> AlpacaOrderSnapshot:
+        average_fill_raw = response.get(
+            "filled_avg_price"
+        )
+
+        average_fill_price = None
+
+        if average_fill_raw not in {
+            None,
+            "",
+        }:
+            average_fill_price = float(
+                average_fill_raw
+            )
+
+        raw_status = str(
+            response.get(
+                "status",
+                "accepted",
+            )
+        )
+
+        return AlpacaOrderSnapshot(
+            broker_order_id=str(
+                response["id"]
+            ),
+            status=cls._map_status(
+                raw_status
+            ),
+            requested_quantity=float(
+                response.get(
+                    "qty",
+                    0.0,
+                )
+            ),
+            filled_quantity=float(
+                response.get(
+                    "filled_qty",
+                    0.0,
+                )
+            ),
+            average_fill_price=(
+                average_fill_price
+            ),
+            client_order_id=(
+                response.get(
+                    "client_order_id"
+                )
+            ),
+            symbol=str(
+                response.get(
+                    "symbol",
+                    "",
+                )
+            ),
+            raw_status=raw_status,
         )
 
     @staticmethod
@@ -192,11 +267,10 @@ class AlpacaPaperBroker:
         if normalized == "filled":
             return OrderStatus.FILLED
 
-        if normalized in {
-            "partially_filled",
-        }:
+        if normalized == "partially_filled":
             return (
-                OrderStatus.PARTIALLY_FILLED
+                OrderStatus
+                .PARTIALLY_FILLED
             )
 
         if normalized in {
