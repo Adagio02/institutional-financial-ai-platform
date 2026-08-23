@@ -41,20 +41,28 @@ class OrderRepository:
     ) -> OrderModel:
         order = OrderModel(
             account_id=account_id,
-            instrument_id=instrument_id,
+            instrument_id=(
+                instrument_id
+            ),
             client_order_id=(
                 client_order_id
             ),
             symbol=(
-                symbol.strip().upper()
+                symbol
+                .strip()
+                .upper()
             ),
             side=side,
             order_type=order_type,
             quantity=quantity,
             filled_quantity=0.0,
-            remaining_quantity=quantity,
+            remaining_quantity=(
+                quantity
+            ),
             limit_price=limit_price,
-            time_in_force=time_in_force,
+            time_in_force=(
+                time_in_force
+            ),
             reference_price=(
                 reference_price
             ),
@@ -65,9 +73,13 @@ class OrderRepository:
                 reference_price_provider
             ),
             status=(
-                OrderStatus.PENDING.value
+                OrderStatus
+                .PENDING
+                .value
             ),
-            strategy_key=strategy_key,
+            strategy_key=(
+                strategy_key
+            ),
         )
 
         self._session.add(
@@ -105,7 +117,8 @@ class OrderRepository:
         statement = (
             select(OrderModel)
             .where(
-                OrderModel.broker_order_id
+                OrderModel
+                .broker_order_id
                 == normalized
             )
         )
@@ -145,14 +158,61 @@ class OrderRepository:
                 == account_id
             )
             .order_by(
-                OrderModel.created_at.desc()
+                OrderModel
+                .created_at
+                .desc()
             )
         )
 
         return list(
-            self._session.scalars(
+            self._session
+            .scalars(
                 statement
-            ).all()
+            )
+            .all()
+        )
+
+    def list_for_broker(
+        self,
+        *,
+        broker_name: str,
+        limit: int,
+    ) -> list[OrderModel]:
+        normalized_broker_name = (
+            broker_name.strip()
+        )
+
+        if not normalized_broker_name:
+            raise ValueError(
+                "broker_name cannot "
+                "be blank."
+            )
+
+        if limit <= 0:
+            raise ValueError(
+                "limit must be positive."
+            )
+
+        statement = (
+            select(OrderModel)
+            .where(
+                OrderModel.broker_name
+                == normalized_broker_name
+            )
+            .order_by(
+                OrderModel
+                .created_at
+                .desc()
+            )
+            .limit(limit)
+        )
+
+        return list(
+            self._session
+            .scalars(
+                statement
+            )
+            .all()
         )
 
     def list_open(
@@ -181,9 +241,11 @@ class OrderRepository:
         )
 
         return list(
-            self._session.scalars(
+            self._session
+            .scalars(
                 statement
-            ).all()
+            )
+            .all()
         )
 
     def list_open_for_broker(
@@ -233,9 +295,11 @@ class OrderRepository:
         )
 
         return list(
-            self._session.scalars(
+            self._session
+            .scalars(
                 statement
-            ).all()
+            )
+            .all()
         )
 
     def mark_submitted(
@@ -254,7 +318,9 @@ class OrderRepository:
         )
 
         order.status = (
-            OrderStatus.ACCEPTED.value
+            OrderStatus
+            .ACCEPTED
+            .value
         )
 
         order.submitted_at = (
@@ -313,6 +379,22 @@ class OrderRepository:
 
         return order
 
+    def touch_synced(
+        self,
+        order: OrderModel,
+    ) -> OrderModel:
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
+
     def mark_filled(
         self,
         order: OrderModel,
@@ -324,12 +406,10 @@ class OrderRepository:
             filled_quantity
         )
 
-        order.remaining_quantity = (
-            max(
-                order.quantity
-                - filled_quantity,
-                0.0,
-            )
+        order.remaining_quantity = max(
+            order.quantity
+            - filled_quantity,
+            0.0,
         )
 
         order.average_fill_price = (
@@ -337,7 +417,9 @@ class OrderRepository:
         )
 
         order.status = (
-            OrderStatus.FILLED.value
+            OrderStatus
+            .FILLED
+            .value
         )
 
         order.last_synced_at = (
@@ -359,7 +441,9 @@ class OrderRepository:
         reason: str,
     ) -> OrderModel:
         order.status = (
-            OrderStatus.REJECTED.value
+            OrderStatus
+            .REJECTED
+            .value
         )
 
         order.rejection_reason = (
@@ -388,7 +472,9 @@ class OrderRepository:
         order: OrderModel,
     ) -> OrderModel:
         order.status = (
-            OrderStatus.CANCELLED.value
+            OrderStatus
+            .CANCELLED
+            .value
         )
 
         order.cancelled_at = (

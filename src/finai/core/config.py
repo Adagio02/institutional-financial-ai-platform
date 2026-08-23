@@ -248,6 +248,15 @@ class Settings(BaseSettings):
 
     alpaca_reconciliation_maximum_backoff_seconds: float = 30.0
 
+        # Version 2.3 Alpaca broker discovery
+    alpaca_order_discovery_enabled: bool = False
+
+    alpaca_order_discovery_interval_seconds: int = 300
+
+    alpaca_order_discovery_limit: int = 500
+
+    alpaca_order_discovery_direction: str = "desc"
+
 
 @lru_cache
 def get_settings() -> Settings:
