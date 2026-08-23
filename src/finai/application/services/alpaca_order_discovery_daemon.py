@@ -9,6 +9,9 @@ from finai.application.services.alpaca_order_discovery_service import (
 from finai.application.services.alpaca_order_execution_service import (
     AlpacaOrderExecutionService,
 )
+from finai.application.services.alpaca_orphan_recovery_service import (
+    AlpacaOrphanRecoveryService,
+)
 from finai.core.config import (
     get_settings,
 )
@@ -108,6 +111,7 @@ class AlpacaOrderDiscoveryDaemon:
                     "matched=%s "
                     "synchronized=%s "
                     "refreshed=%s "
+                    "recovered=%s "
                     "broker_only=%s "
                     "local_open_missing=%s",
                     result.remote_orders,
@@ -115,6 +119,7 @@ class AlpacaOrderDiscoveryDaemon:
                     result.matched,
                     result.synchronized,
                     result.refreshed,
+                    result.recovered,
                     len(
                         result.broker_only
                     ),
@@ -128,18 +133,20 @@ class AlpacaOrderDiscoveryDaemon:
                     result.broker_only
                 ):
                     logger.warning(
-                        "Broker-only Alpaca "
-                        "order detected. "
+                        "Unresolved broker-only "
+                        "Alpaca order. "
                         "broker_order_id=%s "
                         "client_order_id=%s "
                         "symbol=%s "
-                        "status=%s",
+                        "status=%s "
+                        "reason=%s",
                         orphan
                         .broker_order_id,
                         orphan
                         .client_order_id,
                         orphan.symbol,
                         orphan.status,
+                        orphan.reason,
                     )
 
                 for order_id in (
@@ -148,7 +155,7 @@ class AlpacaOrderDiscoveryDaemon:
                 ):
                     logger.warning(
                         "Local open Alpaca "
-                        "order is absent from "
+                        "order absent from "
                         "broker open-order list. "
                         "order_id=%s",
                         order_id,
@@ -210,6 +217,30 @@ class AlpacaOrderDiscoveryDaemon:
                 )
             )
 
+            orphan_recovery_service = None
+
+            if (
+                self._settings
+                .alpaca_orphan_recovery_enabled
+            ):
+                orphan_recovery_service = (
+                    AlpacaOrphanRecoveryService(
+                        session=session,
+                        broker=broker,
+                        execution_service=(
+                            execution_service
+                        ),
+                        require_symbol_match=(
+                            self._settings
+                            .alpaca_orphan_recovery_require_symbol_match
+                        ),
+                        require_quantity_match=(
+                            self._settings
+                            .alpaca_orphan_recovery_require_quantity_match
+                        ),
+                    )
+                )
+
             discovery_service = (
                 AlpacaOrderDiscoveryService(
                     session=session,
@@ -224,6 +255,9 @@ class AlpacaOrderDiscoveryDaemon:
                     direction=(
                         self._settings
                         .alpaca_order_discovery_direction
+                    ),
+                    orphan_recovery_service=(
+                        orphan_recovery_service
                     ),
                 )
             )

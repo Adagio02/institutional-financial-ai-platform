@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from finai.application.services.alpaca_order_execution_service import (
     AlpacaOrderExecutionService,
 )
+from finai.application.services.alpaca_orphan_recovery_service import (
+    AlpacaOrphanRecoveryService,
+)
 from finai.infrastructure.database.repositories.order_repository import (
     OrderRepository,
 )
@@ -32,6 +35,8 @@ class BrokerOnlyOrder:
 
     status: str
 
+    reason: str
+
 
 @dataclass(
     frozen=True,
@@ -49,6 +54,8 @@ class AlpacaOrderDiscoveryResult:
     synchronized: int
 
     refreshed: int
+
+    recovered: int
 
     broker_only: tuple[
         BrokerOnlyOrder,
@@ -73,6 +80,10 @@ class AlpacaOrderDiscoveryService:
         ),
         limit: int,
         direction: str,
+        orphan_recovery_service: (
+            AlpacaOrphanRecoveryService
+            | None
+        ) = None,
     ) -> None:
         if not (
             1
@@ -115,6 +126,10 @@ class AlpacaOrderDiscoveryService:
 
         self._direction = (
             normalized_direction
+        )
+
+        self._orphan_recovery_service = (
+            orphan_recovery_service
         )
 
     def discover(
@@ -171,6 +186,7 @@ class AlpacaOrderDiscoveryService:
         matched = 0
         synchronized = 0
         refreshed = 0
+        recovered = 0
 
         broker_only: list[
             BrokerOnlyOrder
@@ -186,9 +202,40 @@ class AlpacaOrderDiscoveryService:
             )
 
             if order is None:
+                recovery_result = (
+                    self._try_recover(
+                        snapshot=snapshot
+                    )
+                )
+
+                if (
+                    recovery_result
+                    is not None
+                    and (
+                        recovery_result
+                        .recovered
+                    )
+                ):
+                    recovered += 1
+                    matched += 1
+                    synchronized += 1
+                    continue
+
+                reason = (
+                    "No local FinAI "
+                    "order matched."
+                )
+
+                if recovery_result is not None:
+                    reason = (
+                        recovery_result
+                        .reason
+                    )
+
                 broker_only.append(
                     self._to_broker_only(
-                        snapshot
+                        snapshot,
+                        reason=reason,
                     )
                 )
 
@@ -273,6 +320,7 @@ class AlpacaOrderDiscoveryService:
                     synchronized
                 ),
                 refreshed=refreshed,
+                recovered=recovered,
                 broker_only=tuple(
                     broker_only
                 ),
@@ -284,6 +332,24 @@ class AlpacaOrderDiscoveryService:
                 remote_open_truncated=(
                     remote_open_truncated
                 ),
+            )
+        )
+
+    def _try_recover(
+        self,
+        *,
+        snapshot: AlpacaOrderSnapshot,
+    ):
+        if (
+            self._orphan_recovery_service
+            is None
+        ):
+            return None
+
+        return (
+            self._orphan_recovery_service
+            .recover(
+                snapshot=snapshot
             )
         )
 
@@ -339,6 +405,8 @@ class AlpacaOrderDiscoveryService:
     @staticmethod
     def _to_broker_only(
         snapshot: AlpacaOrderSnapshot,
+        *,
+        reason: str,
     ) -> BrokerOnlyOrder:
         return BrokerOnlyOrder(
             broker_order_id=(
@@ -355,4 +423,5 @@ class AlpacaOrderDiscoveryService:
             status=(
                 snapshot.raw_status
             ),
+            reason=reason,
         )

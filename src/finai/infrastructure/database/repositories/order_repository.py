@@ -147,6 +147,37 @@ class OrderRepository:
             statement
         )
 
+    def list_by_client_order_id(
+        self,
+        client_order_id: str,
+    ) -> list[OrderModel]:
+        normalized = (
+            client_order_id.strip()
+        )
+
+        if not normalized:
+            return []
+
+        statement = (
+            select(OrderModel)
+            .where(
+                OrderModel
+                .client_order_id
+                == normalized
+            )
+            .order_by(
+                OrderModel.created_at
+            )
+        )
+
+        return list(
+            self._session
+            .scalars(
+                statement
+            )
+            .all()
+        )
+
     def list_for_account(
         self,
         account_id: UUID,
@@ -178,11 +209,11 @@ class OrderRepository:
         broker_name: str,
         limit: int,
     ) -> list[OrderModel]:
-        normalized_broker_name = (
+        normalized = (
             broker_name.strip()
         )
 
-        if not normalized_broker_name:
+        if not normalized:
             raise ValueError(
                 "broker_name cannot "
                 "be blank."
@@ -197,7 +228,7 @@ class OrderRepository:
             select(OrderModel)
             .where(
                 OrderModel.broker_name
-                == normalized_broker_name
+                == normalized
             )
             .order_by(
                 OrderModel
@@ -254,11 +285,11 @@ class OrderRepository:
         broker_name: str,
         limit: int,
     ) -> list[OrderModel]:
-        normalized_broker_name = (
+        normalized = (
             broker_name.strip()
         )
 
-        if not normalized_broker_name:
+        if not normalized:
             raise ValueError(
                 "broker_name cannot "
                 "be blank."
@@ -273,7 +304,7 @@ class OrderRepository:
             select(OrderModel)
             .where(
                 OrderModel.broker_name
-                == normalized_broker_name,
+                == normalized,
                 OrderModel.status.in_(
                     [
                         OrderStatus
@@ -301,6 +332,90 @@ class OrderRepository:
             )
             .all()
         )
+
+    def attach_broker_identity(
+        self,
+        order: OrderModel,
+        *,
+        broker_order_id: str,
+        broker_name: str,
+    ) -> OrderModel:
+        normalized_order_id = (
+            broker_order_id.strip()
+        )
+
+        normalized_broker_name = (
+            broker_name.strip()
+        )
+
+        if not normalized_order_id:
+            raise ValueError(
+                "broker_order_id cannot "
+                "be blank."
+            )
+
+        if not normalized_broker_name:
+            raise ValueError(
+                "broker_name cannot "
+                "be blank."
+            )
+
+        if (
+            order.broker_order_id
+            is not None
+            and order.broker_order_id
+            != normalized_order_id
+        ):
+            raise ValueError(
+                "Order already belongs "
+                "to another broker order."
+            )
+
+        if (
+            order.broker_name
+            is not None
+            and order.broker_name
+            != normalized_broker_name
+        ):
+            raise ValueError(
+                "Order already belongs "
+                "to another broker."
+            )
+
+        order.broker_order_id = (
+            normalized_order_id
+        )
+
+        order.broker_name = (
+            normalized_broker_name
+        )
+
+        if order.submitted_at is None:
+            order.submitted_at = (
+                datetime.now(UTC)
+            )
+
+        if (
+            order.status
+            == OrderStatus.PENDING.value
+        ):
+            order.status = (
+                OrderStatus
+                .ACCEPTED
+                .value
+            )
+
+        order.last_synced_at = (
+            datetime.now(UTC)
+        )
+
+        self._session.commit()
+
+        self._session.refresh(
+            order
+        )
+
+        return order
 
     def mark_submitted(
         self,

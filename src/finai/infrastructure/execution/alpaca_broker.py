@@ -46,6 +46,12 @@ class AlpacaOrderSnapshot:
 
     raw_status: str
 
+    side: str | None = None
+
+    order_type: str | None = None
+
+    time_in_force: str | None = None
+
 
 class AlpacaPaperBroker:
     def __init__(
@@ -197,9 +203,7 @@ class AlpacaPaperBroker:
             .list_orders(
                 status=status,
                 limit=limit,
-                direction=(
-                    direction
-                ),
+                direction=direction,
                 nested=False,
             )
         )
@@ -327,6 +331,20 @@ class AlpacaPaperBroker:
             )
         )
 
+        side_raw = response.get(
+            "side"
+        )
+
+        type_raw = response.get(
+            "type"
+        )
+
+        time_in_force_raw = (
+            response.get(
+                "time_in_force"
+            )
+        )
+
         return AlpacaOrderSnapshot(
             broker_order_id=(
                 broker_order_id
@@ -367,6 +385,36 @@ class AlpacaPaperBroker:
             raw_status=(
                 raw_status
             ),
+            side=(
+                None
+                if side_raw is None
+                else str(
+                    side_raw
+                )
+                .strip()
+                .lower()
+            ),
+            order_type=(
+                None
+                if type_raw is None
+                else str(
+                    type_raw
+                )
+                .strip()
+                .lower()
+            ),
+            time_in_force=(
+                None
+                if (
+                    time_in_force_raw
+                    is None
+                )
+                else str(
+                    time_in_force_raw
+                )
+                .strip()
+                .lower()
+            ),
         )
 
     @staticmethod
@@ -379,10 +427,7 @@ class AlpacaPaperBroker:
             .lower()
         )
 
-        if (
-            normalized
-            == "filled"
-        ):
+        if normalized == "filled":
             return (
                 OrderStatus.FILLED
             )
@@ -405,9 +450,7 @@ class AlpacaPaperBroker:
                 OrderStatus.CANCELLED
             )
 
-        if normalized in {
-            "rejected",
-        }:
+        if normalized == "rejected":
             return (
                 OrderStatus.REJECTED
             )

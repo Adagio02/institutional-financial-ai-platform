@@ -257,6 +257,13 @@ class Settings(BaseSettings):
 
     alpaca_order_discovery_direction: str = "desc"
 
+        # Version 2.4 safe Alpaca orphan recovery
+    alpaca_orphan_recovery_enabled: bool = False
+
+    alpaca_orphan_recovery_require_symbol_match: bool = True
+
+    alpaca_orphan_recovery_require_quantity_match: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:
