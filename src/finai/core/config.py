@@ -264,6 +264,15 @@ class Settings(BaseSettings):
 
     alpaca_orphan_recovery_require_quantity_match: bool = True
 
+        # Version 2.5 Alpaca account preflight guard
+    alpaca_account_guard_enabled: bool = True
+
+    alpaca_account_guard_require_active: bool = True
+
+    alpaca_account_guard_maximum_buying_power_fraction: float = 0.10
+
+    alpaca_account_guard_require_positive_buying_power: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:

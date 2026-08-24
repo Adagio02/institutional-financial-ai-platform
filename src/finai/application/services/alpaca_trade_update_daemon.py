@@ -15,11 +15,8 @@ from finai.core.config import (
 from finai.infrastructure.database.engine import (
     SessionLocal,
 )
-from finai.infrastructure.execution.alpaca_broker import (
-    AlpacaPaperBroker,
-)
-from finai.infrastructure.execution.alpaca_client import (
-    AlpacaPaperClient,
+from finai.infrastructure.execution.alpaca_broker_factory import (
+    create_alpaca_paper_broker,
 )
 from finai.infrastructure.execution.alpaca_trade_update_stream import (
     AlpacaTradeUpdateStream,
@@ -135,27 +132,12 @@ class AlpacaTradeUpdateDaemon:
         session = SessionLocal()
 
         try:
-            client = AlpacaPaperClient(
-                api_key=(
-                    self._settings
-                    .alpaca_api_key
-                ),
-                secret_key=(
-                    self._settings
-                    .alpaca_secret_key
-                ),
-                base_url=(
-                    self._settings
-                    .alpaca_base_url
-                ),
-                timeout_seconds=(
-                    self._settings
-                    .alpaca_request_timeout_seconds
-                ),
-            )
-
-            broker = AlpacaPaperBroker(
-                client=client
+            broker = (
+                create_alpaca_paper_broker(
+                    settings=(
+                        self._settings
+                    )
+                )
             )
 
             execution_service = (

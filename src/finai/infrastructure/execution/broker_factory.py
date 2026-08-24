@@ -1,11 +1,10 @@
+from __future__ import annotations
+
 from finai.core.config import (
     Settings,
 )
-from finai.infrastructure.execution.alpaca_broker import (
-    AlpacaPaperBroker,
-)
-from finai.infrastructure.execution.alpaca_client import (
-    AlpacaPaperClient,
+from finai.infrastructure.execution.alpaca_broker_factory import (
+    create_alpaca_paper_broker,
 )
 from finai.infrastructure.execution.sandbox_broker import (
     SandboxBroker,
@@ -16,13 +15,13 @@ def create_execution_broker(
     *,
     settings: Settings,
 ):
-    mode = (
+    execution_mode = (
         settings.execution_mode
         .strip()
         .lower()
     )
 
-    if mode == "sandbox":
+    if execution_mode == "sandbox":
         return SandboxBroker(
             commission_bps=(
                 settings
@@ -42,13 +41,13 @@ def create_execution_broker(
             ),
         )
 
-    if mode == "alpaca_paper":
+    if execution_mode == "alpaca_paper":
         if not (
             settings
             .alpaca_paper_trading_enabled
         ):
             raise ValueError(
-                "Alpaca paper integration "
+                "Alpaca paper trading "
                 "is disabled."
             )
 
@@ -57,32 +56,17 @@ def create_execution_broker(
             .alpaca_execution_enabled
         ):
             raise ValueError(
-                "Alpaca external execution "
+                "Alpaca execution "
                 "is disabled."
             )
 
-        client = AlpacaPaperClient(
-            api_key=(
-                settings.alpaca_api_key
-            ),
-            secret_key=(
-                settings.alpaca_secret_key
-            ),
-            base_url=(
-                settings.alpaca_base_url
-            ),
-            timeout_seconds=(
-                settings
-                .alpaca_request_timeout_seconds
-            ),
-        )
-
-        return AlpacaPaperBroker(
-            client=client
+        return (
+            create_alpaca_paper_broker(
+                settings=settings
+            )
         )
 
     raise ValueError(
-        "External broker requires "
-        "execution_mode='sandbox' or "
-        "'alpaca_paper'."
+        "Unsupported execution mode: "
+        f"{settings.execution_mode}"
     )

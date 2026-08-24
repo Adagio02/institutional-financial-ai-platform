@@ -7,6 +7,10 @@ from datetime import (
 )
 from uuid import UUID
 
+from finai.domain.execution.alpaca_account_guard import (
+    AlpacaAccountGuard,
+    AlpacaAccountGuardResult,
+)
 from finai.domain.execution.broker import (
     BrokerExecutionResult,
     BrokerOrderState,
@@ -58,8 +62,16 @@ class AlpacaPaperBroker:
         self,
         *,
         client: AlpacaPaperClient,
+        account_guard: (
+            AlpacaAccountGuard
+            | None
+        ) = None,
     ) -> None:
         self._client = client
+
+        self._account_guard = (
+            account_guard
+        )
 
     @property
     def name(
@@ -73,6 +85,36 @@ class AlpacaPaperBroker:
         return (
             self._client
             .get_account()
+        )
+
+    def validate_submission(
+        self,
+        *,
+        side: OrderSide,
+        quantity: float,
+        reference_price: float,
+    ) -> (
+        AlpacaAccountGuardResult
+        | None
+    ):
+        if (
+            self._account_guard
+            is None
+        ):
+            return None
+
+        account = self.account()
+
+        return (
+            self._account_guard
+            .validate_order(
+                account=account,
+                side=side,
+                quantity=quantity,
+                reference_price=(
+                    reference_price
+                ),
+            )
         )
 
     def submit(
@@ -90,13 +132,19 @@ class AlpacaPaperBroker:
             str | None
         ) = None,
     ) -> BrokerExecutionResult:
-        del reference_price
-
         if quantity <= 0:
             raise ValueError(
                 "Order quantity must "
                 "be positive."
             )
+
+        self.validate_submission(
+            side=side,
+            quantity=quantity,
+            reference_price=(
+                reference_price
+            ),
+        )
 
         resolved_client_order_id = (
             client_order_id

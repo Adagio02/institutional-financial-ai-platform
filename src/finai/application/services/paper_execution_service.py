@@ -29,11 +29,8 @@ from finai.infrastructure.database.repositories.paper_account_repository import 
 from finai.infrastructure.database.repositories.paper_position_repository import (
     PaperPositionRepository,
 )
-from finai.infrastructure.execution.alpaca_broker import (
-    AlpacaPaperBroker,
-)
-from finai.infrastructure.execution.alpaca_client import (
-    AlpacaPaperClient,
+from finai.infrastructure.execution.alpaca_broker_factory import (
+    create_alpaca_paper_broker,
 )
 from finai.infrastructure.execution.paper_broker import (
     PaperBroker,
@@ -144,24 +141,10 @@ class PaperExecutionService:
                     "disabled."
                 )
 
-            client = AlpacaPaperClient(
-                api_key=(
-                    settings.alpaca_api_key
-                ),
-                secret_key=(
-                    settings.alpaca_secret_key
-                ),
-                base_url=(
-                    settings.alpaca_base_url
-                ),
-                timeout_seconds=(
-                    settings
-                    .alpaca_request_timeout_seconds
-                ),
-            )
-
-            broker = AlpacaPaperBroker(
-                client=client
+            broker = (
+                create_alpaca_paper_broker(
+                    settings=settings
+                )
             )
 
             self._alpaca_execution_service = (

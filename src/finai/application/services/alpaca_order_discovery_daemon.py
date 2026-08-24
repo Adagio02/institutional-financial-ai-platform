@@ -18,11 +18,8 @@ from finai.core.config import (
 from finai.infrastructure.database.engine import (
     SessionLocal,
 )
-from finai.infrastructure.execution.alpaca_broker import (
-    AlpacaPaperBroker,
-)
-from finai.infrastructure.execution.alpaca_client import (
-    AlpacaPaperClient,
+from finai.infrastructure.execution.alpaca_broker_factory import (
+    create_alpaca_paper_broker,
 )
 
 
@@ -35,9 +32,7 @@ class AlpacaOrderDiscoveryDaemon:
     def __init__(
         self,
         *,
-        shutdown_event: (
-            Event | None
-        ) = None,
+        shutdown_event: Event | None = None,
     ) -> None:
         self._settings = (
             get_settings()
@@ -61,11 +56,12 @@ class AlpacaOrderDiscoveryDaemon:
                 "is disabled."
             )
 
-        if (
+        interval = (
             self._settings
             .alpaca_order_discovery_interval_seconds
-            <= 0
-        ):
+        )
+
+        if interval <= 0:
             raise ValueError(
                 "Discovery interval "
                 "must be positive."
@@ -182,27 +178,12 @@ class AlpacaOrderDiscoveryDaemon:
         session = SessionLocal()
 
         try:
-            client = AlpacaPaperClient(
-                api_key=(
-                    self._settings
-                    .alpaca_api_key
-                ),
-                secret_key=(
-                    self._settings
-                    .alpaca_secret_key
-                ),
-                base_url=(
-                    self._settings
-                    .alpaca_base_url
-                ),
-                timeout_seconds=(
-                    self._settings
-                    .alpaca_request_timeout_seconds
-                ),
-            )
-
-            broker = AlpacaPaperBroker(
-                client=client
+            broker = (
+                create_alpaca_paper_broker(
+                    settings=(
+                        self._settings
+                    )
+                )
             )
 
             execution_service = (
@@ -241,7 +222,7 @@ class AlpacaOrderDiscoveryDaemon:
                     )
                 )
 
-            discovery_service = (
+            service = (
                 AlpacaOrderDiscoveryService(
                     session=session,
                     broker=broker,
@@ -262,10 +243,11 @@ class AlpacaOrderDiscoveryDaemon:
                 )
             )
 
-            return (
-                discovery_service
-                .discover()
-            )
+            return service.discover()
+
+        except Exception:
+            session.rollback()
+            raise
 
         finally:
             session.close()

@@ -15,11 +15,8 @@ from finai.core.config import (
 from finai.infrastructure.database.engine import (
     SessionLocal,
 )
-from finai.infrastructure.execution.alpaca_broker import (
-    AlpacaPaperBroker,
-)
-from finai.infrastructure.execution.alpaca_client import (
-    AlpacaPaperClient,
+from finai.infrastructure.execution.alpaca_broker_factory import (
+    create_alpaca_paper_broker,
 )
 
 
@@ -56,11 +53,12 @@ class AlpacaReconciliationDaemon:
                 "is disabled."
             )
 
-        if (
+        interval = (
             self._settings
             .alpaca_reconciliation_interval_seconds
-            <= 0
-        ):
+        )
+
+        if interval <= 0:
             raise ValueError(
                 "Reconciliation interval "
                 "must be positive."
@@ -90,7 +88,8 @@ class AlpacaReconciliationDaemon:
         )
 
         while not (
-            self._shutdown_event.is_set()
+            self._shutdown_event
+            .is_set()
         ):
             try:
                 result = (
@@ -143,27 +142,12 @@ class AlpacaReconciliationDaemon:
         session = SessionLocal()
 
         try:
-            client = AlpacaPaperClient(
-                api_key=(
-                    self._settings
-                    .alpaca_api_key
-                ),
-                secret_key=(
-                    self._settings
-                    .alpaca_secret_key
-                ),
-                base_url=(
-                    self._settings
-                    .alpaca_base_url
-                ),
-                timeout_seconds=(
-                    self._settings
-                    .alpaca_request_timeout_seconds
-                ),
-            )
-
-            broker = AlpacaPaperBroker(
-                client=client
+            broker = (
+                create_alpaca_paper_broker(
+                    settings=(
+                        self._settings
+                    )
+                )
             )
 
             execution_service = (
@@ -178,7 +162,7 @@ class AlpacaReconciliationDaemon:
                 )
             )
 
-            reconciliation_service = (
+            service = (
                 AlpacaReconciliationService(
                     session=session,
                     execution_service=(
@@ -192,9 +176,13 @@ class AlpacaReconciliationDaemon:
             )
 
             return (
-                reconciliation_service
+                service
                 .reconcile_open_orders()
             )
+
+        except Exception:
+            session.rollback()
+            raise
 
         finally:
             session.close()
