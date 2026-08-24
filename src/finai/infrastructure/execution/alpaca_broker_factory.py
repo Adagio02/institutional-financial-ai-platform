@@ -6,6 +6,9 @@ from finai.core.config import (
 from finai.domain.execution.alpaca_account_guard import (
     AlpacaAccountGuard,
 )
+from finai.domain.execution.alpaca_market_guard import (
+    AlpacaMarketGuard,
+)
 from finai.infrastructure.execution.alpaca_broker import (
     AlpacaPaperBroker,
 )
@@ -57,9 +60,39 @@ def create_alpaca_paper_broker(
             )
         )
 
+    market_guard = None
+
+    if (
+        settings
+        .alpaca_market_guard_enabled
+    ):
+        market_guard = (
+            AlpacaMarketGuard(
+                require_active_asset=(
+                    settings
+                    .alpaca_market_guard_require_active_asset
+                ),
+                require_tradable_asset=(
+                    settings
+                    .alpaca_market_guard_require_tradable_asset
+                ),
+                require_market_open=(
+                    settings
+                    .alpaca_market_guard_require_market_open
+                ),
+                require_fractionable=(
+                    settings
+                    .alpaca_market_guard_require_fractionable
+                ),
+            )
+        )
+
     return AlpacaPaperBroker(
         client=client,
         account_guard=(
             account_guard
+        ),
+        market_guard=(
+            market_guard
         ),
     )

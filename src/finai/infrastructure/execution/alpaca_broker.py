@@ -11,6 +11,10 @@ from finai.domain.execution.alpaca_account_guard import (
     AlpacaAccountGuard,
     AlpacaAccountGuardResult,
 )
+from finai.domain.execution.alpaca_market_guard import (
+    AlpacaMarketGuard,
+    AlpacaMarketGuardResult,
+)
 from finai.domain.execution.broker import (
     BrokerExecutionResult,
     BrokerOrderState,
@@ -66,11 +70,19 @@ class AlpacaPaperBroker:
             AlpacaAccountGuard
             | None
         ) = None,
+        market_guard: (
+            AlpacaMarketGuard
+            | None
+        ) = None,
     ) -> None:
         self._client = client
 
         self._account_guard = (
             account_guard
+        )
+
+        self._market_guard = (
+            market_guard
         )
 
     @property
@@ -87,7 +99,7 @@ class AlpacaPaperBroker:
             .get_account()
         )
 
-    def validate_submission(
+    def validate_account_submission(
         self,
         *,
         side: OrderSide,
@@ -117,6 +129,82 @@ class AlpacaPaperBroker:
             )
         )
 
+    def validate_market_submission(
+        self,
+        *,
+        symbol: str,
+        quantity: float,
+    ) -> (
+        AlpacaMarketGuardResult
+        | None
+    ):
+        if (
+            self._market_guard
+            is None
+        ):
+            return None
+
+        asset = (
+            self._client
+            .get_asset(
+                symbol=symbol
+            )
+        )
+
+        clock = (
+            self._client
+            .get_clock()
+        )
+
+        return (
+            self._market_guard
+            .validate_order(
+                asset=asset,
+                clock=clock,
+                symbol=symbol,
+                quantity=quantity,
+            )
+        )
+
+    def validate_submission(
+        self,
+        *,
+        symbol: str,
+        side: OrderSide,
+        quantity: float,
+        reference_price: float,
+    ) -> tuple[
+        (
+            AlpacaAccountGuardResult
+            | None
+        ),
+        (
+            AlpacaMarketGuardResult
+            | None
+        ),
+    ]:
+        market_result = (
+            self.validate_market_submission(
+                symbol=symbol,
+                quantity=quantity,
+            )
+        )
+
+        account_result = (
+            self.validate_account_submission(
+                side=side,
+                quantity=quantity,
+                reference_price=(
+                    reference_price
+                ),
+            )
+        )
+
+        return (
+            account_result,
+            market_result,
+        )
+
     def submit(
         self,
         *,
@@ -139,6 +227,7 @@ class AlpacaPaperBroker:
             )
 
         self.validate_submission(
+            symbol=symbol,
             side=side,
             quantity=quantity,
             reference_price=(
@@ -453,10 +542,8 @@ class AlpacaPaperBroker:
             ),
             time_in_force=(
                 None
-                if (
-                    time_in_force_raw
-                    is None
-                )
+                if time_in_force_raw
+                is None
                 else str(
                     time_in_force_raw
                 )

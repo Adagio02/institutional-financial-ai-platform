@@ -6,7 +6,10 @@ from urllib.error import (
     HTTPError,
     URLError,
 )
-from urllib.parse import urlencode
+from urllib.parse import (
+    quote,
+    urlencode,
+)
 from urllib.request import (
     Request,
     urlopen,
@@ -110,6 +113,65 @@ class AlpacaPaperClient:
 
         return response
 
+    def get_asset(
+        self,
+        *,
+        symbol: str,
+    ) -> dict[str, Any]:
+        normalized = (
+            symbol
+            .strip()
+            .upper()
+        )
+
+        if not normalized:
+            raise ValueError(
+                "symbol is required."
+            )
+
+        encoded_symbol = quote(
+            normalized,
+            safe="",
+        )
+
+        response = self._request(
+            method="GET",
+            path=(
+                f"/v2/assets/"
+                f"{encoded_symbol}"
+            ),
+        )
+
+        if not isinstance(
+            response,
+            dict,
+        ):
+            raise AlpacaApiError(
+                "Unexpected Alpaca "
+                "asset response."
+            )
+
+        return response
+
+    def get_clock(
+        self,
+    ) -> dict[str, Any]:
+        response = self._request(
+            method="GET",
+            path="/v2/clock",
+        )
+
+        if not isinstance(
+            response,
+            dict,
+        ):
+            raise AlpacaApiError(
+                "Unexpected Alpaca "
+                "clock response."
+            )
+
+        return response
+
     def submit_order(
         self,
         *,
@@ -123,11 +185,15 @@ class AlpacaPaperClient:
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "symbol": (
-                symbol.strip().upper()
+                symbol
+                .strip()
+                .upper()
             ),
             "side": side,
             "type": order_type,
-            "qty": str(quantity),
+            "qty": str(
+                quantity
+            ),
             "time_in_force": (
                 time_in_force
             ),
@@ -137,7 +203,9 @@ class AlpacaPaperClient:
         }
 
         if limit_price is not None:
-            payload["limit_price"] = str(
+            payload[
+                "limit_price"
+            ] = str(
                 limit_price
             )
 
@@ -164,7 +232,8 @@ class AlpacaPaperClient:
         broker_order_id: str,
     ) -> dict[str, Any]:
         normalized = (
-            broker_order_id.strip()
+            broker_order_id
+            .strip()
         )
 
         if not normalized:
@@ -175,7 +244,8 @@ class AlpacaPaperClient:
         response = self._request(
             method="GET",
             path=(
-                f"/v2/orders/{normalized}"
+                f"/v2/orders/"
+                f"{normalized}"
             ),
         )
 
@@ -196,7 +266,8 @@ class AlpacaPaperClient:
         client_order_id: str,
     ) -> dict[str, Any]:
         normalized = (
-            client_order_id.strip()
+            client_order_id
+            .strip()
         )
 
         if not normalized:
@@ -239,7 +310,9 @@ class AlpacaPaperClient:
         limit: int = 500,
         direction: str = "desc",
         nested: bool = False,
-    ) -> list[dict[str, Any]]:
+    ) -> list[
+        dict[str, Any]
+    ]:
         normalized_status = (
             status
             .strip()
@@ -253,7 +326,8 @@ class AlpacaPaperClient:
         }:
             raise ValueError(
                 "status must be "
-                "'open', 'closed', or 'all'."
+                "'open', 'closed', "
+                "or 'all'."
             )
 
         if not (
@@ -340,7 +414,8 @@ class AlpacaPaperClient:
         broker_order_id: str,
     ) -> None:
         normalized = (
-            broker_order_id.strip()
+            broker_order_id
+            .strip()
         )
 
         if not normalized:
@@ -351,7 +426,8 @@ class AlpacaPaperClient:
         self._request(
             method="DELETE",
             path=(
-                f"/v2/orders/{normalized}"
+                f"/v2/orders/"
+                f"{normalized}"
             ),
             expect_body=False,
         )
@@ -396,7 +472,8 @@ class AlpacaPaperClient:
 
         request = Request(
             url=(
-                f"{self._base_url}{path}"
+                f"{self._base_url}"
+                f"{path}"
             ),
             data=body,
             headers=headers,
@@ -411,7 +488,9 @@ class AlpacaPaperClient:
                     ._timeout_seconds
                 ),
             ) as response:
-                raw = response.read()
+                raw = (
+                    response.read()
+                )
 
         except HTTPError as error:
             raw_error = (

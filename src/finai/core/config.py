@@ -273,6 +273,17 @@ class Settings(BaseSettings):
 
     alpaca_account_guard_require_positive_buying_power: bool = True
 
+        # Version 2.6 Alpaca asset and session guard
+    alpaca_market_guard_enabled: bool = True
+
+    alpaca_market_guard_require_active_asset: bool = True
+
+    alpaca_market_guard_require_tradable_asset: bool = True
+
+    alpaca_market_guard_require_market_open: bool = True
+
+    alpaca_market_guard_require_fractionable: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:
