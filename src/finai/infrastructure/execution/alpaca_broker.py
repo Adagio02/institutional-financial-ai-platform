@@ -11,6 +11,9 @@ from finai.domain.execution.alpaca_account_guard import (
     AlpacaAccountGuard,
     AlpacaAccountGuardResult,
 )
+from finai.domain.execution.alpaca_idempotency_guard import (
+    AlpacaIdempotencyGuard,
+)
 from finai.domain.execution.alpaca_market_guard import (
     AlpacaMarketGuard,
     AlpacaMarketGuardResult,
@@ -25,7 +28,9 @@ from finai.domain.execution.enums import (
     OrderType,
 )
 from finai.infrastructure.execution.alpaca_client import (
+    AlpacaOrderNotFoundError,
     AlpacaPaperClient,
+    AlpacaTransportError,
 )
 
 
@@ -74,6 +79,12 @@ class AlpacaPaperBroker:
             AlpacaMarketGuard
             | None
         ) = None,
+        idempotency_guard: (
+            AlpacaIdempotencyGuard
+            | None
+        ) = None,
+        lookup_before_submit: bool = True,
+        recover_after_transport_error: bool = True,
     ) -> None:
         self._client = client
 
@@ -83,6 +94,18 @@ class AlpacaPaperBroker:
 
         self._market_guard = (
             market_guard
+        )
+
+        self._idempotency_guard = (
+            idempotency_guard
+        )
+
+        self._lookup_before_submit = (
+            lookup_before_submit
+        )
+
+        self._recover_after_transport_error = (
+            recover_after_transport_error
         )
 
     @property
@@ -226,6 +249,54 @@ class AlpacaPaperBroker:
                 "be positive."
             )
 
+        resolved_client_order_id = (
+            client_order_id
+            or f"finai-{order_id}"
+        )
+
+        if (
+            self._idempotency_guard
+            is not None
+        ):
+            resolved_client_order_id = (
+                self._idempotency_guard
+                .validate_client_order_id(
+                    resolved_client_order_id
+                )
+            )
+
+        if (
+            self._idempotency_guard
+            is not None
+            and self._lookup_before_submit
+        ):
+            existing = (
+                self._find_existing_order(
+                    client_order_id=(
+                        resolved_client_order_id
+                    )
+                )
+            )
+
+            if existing is not None:
+                return (
+                    self._recover_existing(
+                        existing_order=existing,
+                        client_order_id=(
+                            resolved_client_order_id
+                        ),
+                        symbol=symbol,
+                        side=side,
+                        order_type=(
+                            order_type
+                        ),
+                        quantity=quantity,
+                        time_in_force=(
+                            time_in_force
+                        ),
+                    )
+                )
+
         self.validate_submission(
             symbol=symbol,
             side=side,
@@ -235,14 +306,121 @@ class AlpacaPaperBroker:
             ),
         )
 
-        resolved_client_order_id = (
-            client_order_id
-            or f"finai-{order_id}"
+        try:
+            response = (
+                self._client
+                .submit_order(
+                    symbol=symbol,
+                    side=side.value,
+                    order_type=(
+                        order_type.value
+                    ),
+                    quantity=quantity,
+                    time_in_force=(
+                        time_in_force
+                    ),
+                    limit_price=(
+                        limit_price
+                    ),
+                    client_order_id=(
+                        resolved_client_order_id
+                    ),
+                )
+            )
+
+        except AlpacaTransportError:
+            if not (
+                self._idempotency_guard
+                is not None
+                and (
+                    self
+                    ._recover_after_transport_error
+                )
+            ):
+                raise
+
+            existing = (
+                self._find_existing_order(
+                    client_order_id=(
+                        resolved_client_order_id
+                    )
+                )
+            )
+
+            if existing is None:
+                raise
+
+            return (
+                self._recover_existing(
+                    existing_order=existing,
+                    client_order_id=(
+                        resolved_client_order_id
+                    ),
+                    symbol=symbol,
+                    side=side,
+                    order_type=(
+                        order_type
+                    ),
+                    quantity=quantity,
+                    time_in_force=(
+                        time_in_force
+                    ),
+                )
+            )
+
+        return (
+            self._execution_result_from_response(
+                response
+            )
         )
 
-        response = (
-            self._client
-            .submit_order(
+    def _find_existing_order(
+        self,
+        *,
+        client_order_id: str,
+    ) -> dict | None:
+        try:
+            return (
+                self._client
+                .get_order_by_client_order_id(
+                    client_order_id=(
+                        client_order_id
+                    )
+                )
+            )
+
+        except AlpacaOrderNotFoundError:
+            return None
+
+    def _recover_existing(
+        self,
+        *,
+        existing_order: dict,
+        client_order_id: str,
+        symbol: str,
+        side: OrderSide,
+        order_type: OrderType,
+        quantity: float,
+        time_in_force: str,
+    ) -> BrokerExecutionResult:
+        if (
+            self._idempotency_guard
+            is None
+        ):
+            raise RuntimeError(
+                "Alpaca idempotency guard "
+                "is not configured."
+            )
+
+        (
+            self._idempotency_guard
+            .validate_existing_order(
+                existing_order=(
+                    existing_order
+                ),
+                client_order_id=(
+                    client_order_id
+                ),
                 symbol=symbol,
                 side=side.value,
                 order_type=(
@@ -252,15 +430,19 @@ class AlpacaPaperBroker:
                 time_in_force=(
                     time_in_force
                 ),
-                limit_price=(
-                    limit_price
-                ),
-                client_order_id=(
-                    resolved_client_order_id
-                ),
             )
         )
 
+        return (
+            self._execution_result_from_response(
+                existing_order
+            )
+        )
+
+    def _execution_result_from_response(
+        self,
+        response: dict,
+    ) -> BrokerExecutionResult:
         snapshot = (
             self.snapshot_from_response(
                 response
@@ -269,19 +451,16 @@ class AlpacaPaperBroker:
 
         return BrokerExecutionResult(
             broker_order_id=(
-                snapshot
-                .broker_order_id
+                snapshot.broker_order_id
             ),
             status=(
                 snapshot.status
             ),
             requested_quantity=(
-                snapshot
-                .requested_quantity
+                snapshot.requested_quantity
             ),
             filled_quantity=(
-                snapshot
-                .filled_quantity
+                snapshot.filled_quantity
             ),
             fills=(),
         )
@@ -368,19 +547,16 @@ class AlpacaPaperBroker:
 
         return BrokerOrderState(
             broker_order_id=(
-                snapshot
-                .broker_order_id
+                snapshot.broker_order_id
             ),
             status=(
                 snapshot.status
             ),
             requested_quantity=(
-                snapshot
-                .requested_quantity
+                snapshot.requested_quantity
             ),
             filled_quantity=(
-                snapshot
-                .filled_quantity
+                snapshot.filled_quantity
             ),
             updated_at=(
                 datetime.now(UTC)
@@ -408,19 +584,16 @@ class AlpacaPaperBroker:
 
         return BrokerOrderState(
             broker_order_id=(
-                snapshot
-                .broker_order_id
+                snapshot.broker_order_id
             ),
             status=(
                 snapshot.status
             ),
             requested_quantity=(
-                snapshot
-                .requested_quantity
+                snapshot.requested_quantity
             ),
             filled_quantity=(
-                snapshot
-                .filled_quantity
+                snapshot.filled_quantity
             ),
             updated_at=(
                 datetime.now(UTC)
@@ -563,9 +736,7 @@ class AlpacaPaperBroker:
         )
 
         if normalized == "filled":
-            return (
-                OrderStatus.FILLED
-            )
+            return OrderStatus.FILLED
 
         if (
             normalized
@@ -586,10 +757,6 @@ class AlpacaPaperBroker:
             )
 
         if normalized == "rejected":
-            return (
-                OrderStatus.REJECTED
-            )
+            return OrderStatus.REJECTED
 
-        return (
-            OrderStatus.ACCEPTED
-        )
+        return OrderStatus.ACCEPTED

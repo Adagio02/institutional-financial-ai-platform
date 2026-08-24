@@ -284,6 +284,15 @@ class Settings(BaseSettings):
 
     alpaca_market_guard_require_fractionable: bool = True
 
+        # Version 2.7 Alpaca idempotent submission
+    alpaca_idempotency_guard_enabled: bool = True
+
+    alpaca_idempotency_lookup_before_submit: bool = True
+
+    alpaca_idempotency_recover_after_transport_error: bool = True
+
+    alpaca_idempotency_require_order_match: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:

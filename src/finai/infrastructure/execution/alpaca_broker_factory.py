@@ -6,6 +6,9 @@ from finai.core.config import (
 from finai.domain.execution.alpaca_account_guard import (
     AlpacaAccountGuard,
 )
+from finai.domain.execution.alpaca_idempotency_guard import (
+    AlpacaIdempotencyGuard,
+)
 from finai.domain.execution.alpaca_market_guard import (
     AlpacaMarketGuard,
 )
@@ -87,6 +90,21 @@ def create_alpaca_paper_broker(
             )
         )
 
+    idempotency_guard = None
+
+    if (
+        settings
+        .alpaca_idempotency_guard_enabled
+    ):
+        idempotency_guard = (
+            AlpacaIdempotencyGuard(
+                require_order_match=(
+                    settings
+                    .alpaca_idempotency_require_order_match
+                )
+            )
+        )
+
     return AlpacaPaperBroker(
         client=client,
         account_guard=(
@@ -94,5 +112,16 @@ def create_alpaca_paper_broker(
         ),
         market_guard=(
             market_guard
+        ),
+        idempotency_guard=(
+            idempotency_guard
+        ),
+        lookup_before_submit=(
+            settings
+            .alpaca_idempotency_lookup_before_submit
+        ),
+        recover_after_transport_error=(
+            settings
+            .alpaca_idempotency_recover_after_transport_error
         ),
     )

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import socket
 from typing import Any
 from urllib.error import (
     HTTPError,
@@ -28,6 +29,18 @@ class AlpacaApiError(
 
 
 class AlpacaAuthenticationError(
+    AlpacaApiError
+):
+    pass
+
+
+class AlpacaOrderNotFoundError(
+    AlpacaApiError
+):
+    pass
+
+
+class AlpacaTransportError(
     AlpacaApiError
 ):
     pass
@@ -102,16 +115,10 @@ class AlpacaPaperClient:
             path="/v2/account",
         )
 
-        if not isinstance(
+        return self._require_dict(
             response,
-            dict,
-        ):
-            raise AlpacaApiError(
-                "Unexpected Alpaca "
-                "account response."
-            )
-
-        return response
+            name="account",
+        )
 
     def get_asset(
         self,
@@ -142,16 +149,10 @@ class AlpacaPaperClient:
             ),
         )
 
-        if not isinstance(
+        return self._require_dict(
             response,
-            dict,
-        ):
-            raise AlpacaApiError(
-                "Unexpected Alpaca "
-                "asset response."
-            )
-
-        return response
+            name="asset",
+        )
 
     def get_clock(
         self,
@@ -161,16 +162,10 @@ class AlpacaPaperClient:
             path="/v2/clock",
         )
 
-        if not isinstance(
+        return self._require_dict(
             response,
-            dict,
-        ):
-            raise AlpacaApiError(
-                "Unexpected Alpaca "
-                "clock response."
-            )
-
-        return response
+            name="clock",
+        )
 
     def submit_order(
         self,
@@ -215,16 +210,10 @@ class AlpacaPaperClient:
             payload=payload,
         )
 
-        if not isinstance(
+        return self._require_dict(
             response,
-            dict,
-        ):
-            raise AlpacaApiError(
-                "Unexpected Alpaca "
-                "order response."
-            )
-
-        return response
+            name="order",
+        )
 
     def get_order(
         self,
@@ -232,8 +221,7 @@ class AlpacaPaperClient:
         broker_order_id: str,
     ) -> dict[str, Any]:
         normalized = (
-            broker_order_id
-            .strip()
+            broker_order_id.strip()
         )
 
         if not normalized:
@@ -247,18 +235,13 @@ class AlpacaPaperClient:
                 f"/v2/orders/"
                 f"{normalized}"
             ),
+            order_not_found=True,
         )
 
-        if not isinstance(
+        return self._require_dict(
             response,
-            dict,
-        ):
-            raise AlpacaApiError(
-                "Unexpected Alpaca "
-                "order response."
-            )
-
-        return response
+            name="order",
+        )
 
     def get_order_by_client_order_id(
         self,
@@ -266,8 +249,7 @@ class AlpacaPaperClient:
         client_order_id: str,
     ) -> dict[str, Any]:
         normalized = (
-            client_order_id
-            .strip()
+            client_order_id.strip()
         )
 
         if not normalized:
@@ -290,18 +272,13 @@ class AlpacaPaperClient:
                 "by_client_order_id"
                 f"?{query}"
             ),
+            order_not_found=True,
         )
 
-        if not isinstance(
+        return self._require_dict(
             response,
-            dict,
-        ):
-            raise AlpacaApiError(
-                "Unexpected Alpaca "
-                "order response."
-            )
-
-        return response
+            name="order",
+        )
 
     def list_orders(
         self,
@@ -310,13 +287,9 @@ class AlpacaPaperClient:
         limit: int = 500,
         direction: str = "desc",
         nested: bool = False,
-    ) -> list[
-        dict[str, Any]
-    ]:
+    ) -> list[dict[str, Any]]:
         normalized_status = (
-            status
-            .strip()
-            .lower()
+            status.strip().lower()
         )
 
         if normalized_status not in {
@@ -331,9 +304,7 @@ class AlpacaPaperClient:
             )
 
         if not (
-            1
-            <= limit
-            <= 500
+            1 <= limit <= 500
         ):
             raise ValueError(
                 "limit must be between "
@@ -341,9 +312,7 @@ class AlpacaPaperClient:
             )
 
         normalized_direction = (
-            direction
-            .strip()
-            .lower()
+            direction.strip().lower()
         )
 
         if normalized_direction not in {
@@ -414,8 +383,7 @@ class AlpacaPaperClient:
         broker_order_id: str,
     ) -> None:
         normalized = (
-            broker_order_id
-            .strip()
+            broker_order_id.strip()
         )
 
         if not normalized:
@@ -442,6 +410,7 @@ class AlpacaPaperClient:
             | None
         ) = None,
         expect_body: bool = True,
+        order_not_found: bool = False,
     ) -> Any:
         body: bytes | None = None
 
@@ -484,23 +453,29 @@ class AlpacaPaperClient:
             with urlopen(
                 request,
                 timeout=(
-                    self
-                    ._timeout_seconds
+                    self._timeout_seconds
                 ),
             ) as response:
-                raw = (
-                    response.read()
-                )
+                raw = response.read()
 
         except HTTPError as error:
             raw_error = (
-                error
-                .read()
-                .decode(
+                error.read().decode(
                     "utf-8",
                     errors="replace",
                 )
             )
+
+            if (
+                error.code == 404
+                and order_not_found
+            ):
+                raise (
+                    AlpacaOrderNotFoundError(
+                        "Alpaca order was "
+                        "not found."
+                    )
+                ) from error
 
             if error.code in {
                 401,
@@ -519,10 +494,16 @@ class AlpacaPaperClient:
                 f"body={raw_error}"
             ) from error
 
-        except URLError as error:
-            raise AlpacaApiError(
-                "Could not connect "
-                "to Alpaca."
+        except (
+            URLError,
+            TimeoutError,
+            socket.timeout,
+        ) as error:
+            raise AlpacaTransportError(
+                "Could not complete "
+                "the Alpaca request "
+                "because of a transport "
+                "failure."
             ) from error
 
         if not expect_body:
@@ -543,3 +524,20 @@ class AlpacaPaperClient:
                 "Alpaca returned "
                 "invalid JSON."
             ) from error
+
+    @staticmethod
+    def _require_dict(
+        response: Any,
+        *,
+        name: str,
+    ) -> dict[str, Any]:
+        if not isinstance(
+            response,
+            dict,
+        ):
+            raise AlpacaApiError(
+                "Unexpected Alpaca "
+                f"{name} response."
+            )
+
+        return response
