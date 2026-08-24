@@ -211,9 +211,7 @@ def test_oversized_order_is_rejected() -> None:
         account["id"]
     )
 
-    symbol = (
-        create_instrument_with_data()
-    )
+    symbol = create_instrument_with_data()
 
     response = create_market_order(
         account_id=account["id"],
@@ -221,19 +219,20 @@ def test_oversized_order_is_rejected() -> None:
         quantity=1_000_000.0,
     )
 
-    assert response.status_code == 201, (
+    assert response.status_code == 409, (
         response.text
     )
 
-    order = response.json()
+    detail = response.json()["detail"]
 
     assert (
-        order["status"]
-        == "rejected"
+        "Pre-trade risk rejected order"
+        in detail
     )
 
-    assert order.get(
-        "rejection_reason"
+    assert (
+        "Order quantity exceeds"
+        in detail
     )
 
 

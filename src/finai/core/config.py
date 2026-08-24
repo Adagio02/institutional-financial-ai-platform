@@ -308,6 +308,16 @@ class Settings(BaseSettings):
 
     alpaca_quote_guard_maximum_reference_deviation_bps: float = 250.0
 
+    pre_trade_risk_enabled: bool = True
+
+    pre_trade_maximum_order_quantity: float = 100.0
+
+    pre_trade_maximum_order_notional: float = 25_000.0
+
+    pre_trade_maximum_position_notional: float = 50_000.0
+
+    pre_trade_maximum_buying_power_fraction: float = 0.10
+
 
 @lru_cache
 def get_settings() -> Settings:

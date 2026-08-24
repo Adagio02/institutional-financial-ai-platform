@@ -120,7 +120,22 @@ def build_order_service(
             settings.sandbox_initial_fill_fraction
         ),
         execution_mode=(
-            settings.execution_mode
+        settings.execution_mode
+        ),
+        pre_trade_risk_enabled=(
+            settings.pre_trade_risk_enabled
+        ),
+        pre_trade_maximum_order_quantity=(
+            settings.pre_trade_maximum_order_quantity
+        ),
+        pre_trade_maximum_order_notional=(
+            settings.pre_trade_maximum_order_notional
+        ),
+        pre_trade_maximum_position_notional=(
+            settings.pre_trade_maximum_position_notional
+        ),
+        pre_trade_maximum_buying_power_fraction=(
+            settings.pre_trade_maximum_buying_power_fraction
         ),
     )
 

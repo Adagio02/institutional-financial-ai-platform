@@ -1,66 +1,75 @@
 from finai.application.services.pre_trade_risk_service import (
     PreTradeRiskService,
 )
-from finai.domain.portfolio.risk_limits import (
-    PortfolioRiskLimits,
-)
 
 
-def create_limits() -> PortfolioRiskLimits:
-    return PortfolioRiskLimits(
+def make_service() -> PreTradeRiskService:
+    return PreTradeRiskService(
+        enabled=True,
+        maximum_order_quantity=100.0,
         maximum_order_notional=25_000.0,
         maximum_position_notional=50_000.0,
-        maximum_gross_exposure=100_000.0,
-        maximum_position_fraction=0.50,
-        minimum_cash_reserve_fraction=0.05,
+        maximum_buying_power_fraction=0.10,
     )
 
 
 def test_valid_order_is_approved() -> None:
-    service = PreTradeRiskService()
+    service = make_service()
 
     result = service.evaluate(
-        order_notional=10_000.0,
-        current_position_notional=0.0,
-        current_gross_exposure=0.0,
-        account_equity=100_000.0,
-        account_cash=100_000.0,
-        is_buy=True,
-        limits=create_limits(),
+        symbol="AAPL",
+        side="buy",
+        quantity=10.0,
+        reference_price=200.0,
+        current_position_quantity=0.0,
+        buying_power=100_000.0,
     )
 
     assert result.approved is True
+    assert result.reason is None
+    assert result.symbol == "AAPL"
+    assert result.order_notional == 2_000.0
+    assert (
+        result.projected_position_quantity
+        == 10.0
+    )
+    assert (
+        result.projected_position_notional
+        == 2_000.0
+    )
 
 
 def test_large_order_is_rejected() -> None:
-    service = PreTradeRiskService()
+    service = make_service()
 
     result = service.evaluate(
-        order_notional=30_000.0,
-        current_position_notional=0.0,
-        current_gross_exposure=0.0,
-        account_equity=100_000.0,
-        account_cash=100_000.0,
-        is_buy=True,
-        limits=create_limits(),
+        symbol="AAPL",
+        side="buy",
+        quantity=60.0,
+        reference_price=500.0,
+        current_position_quantity=0.0,
+        buying_power=1_000_000.0,
     )
 
     assert result.approved is False
-    assert "order notional" in (result.reason or "").lower()
+    assert result.reason is not None
+    assert "order notional" in result.reason.lower()
+    assert result.order_notional == 30_000.0
 
 
-def test_cash_reserve_is_enforced() -> None:
-    service = PreTradeRiskService()
+def test_buying_power_limit_is_enforced() -> None:
+    service = make_service()
 
     result = service.evaluate(
-        order_notional=20_000.0,
-        current_position_notional=0.0,
-        current_gross_exposure=0.0,
-        account_equity=100_000.0,
-        account_cash=22_000.0,
-        is_buy=True,
-        limits=create_limits(),
+        symbol="AAPL",
+        side="buy",
+        quantity=10.0,
+        reference_price=200.0,
+        current_position_quantity=0.0,
+        buying_power=10_000.0,
     )
 
     assert result.approved is False
-    assert "cash reserve" in (result.reason or "").lower()
+    assert result.reason is not None
+    assert "buying-power" in result.reason.lower()
+    assert result.order_notional == 2_000.0

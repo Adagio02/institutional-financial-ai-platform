@@ -66,54 +66,100 @@ class OrderService:
         partial_fill_enabled: bool = False,
         initial_fill_fraction: float = 1.0,
         execution_mode: str = "paper",
+        pre_trade_risk_enabled: bool = True,
+        pre_trade_maximum_order_quantity: float = 100.0,
+        pre_trade_maximum_order_notional: float = 25_000.0,
+        pre_trade_maximum_position_notional: float = 50_000.0,
+        pre_trade_maximum_buying_power_fraction: float = 0.10,
     ) -> None:
-        self._instrument_repository = InstrumentRepository(
-            session
+        self._instrument_repository = (
+            InstrumentRepository(
+                session
+            )
         )
 
-        self._account_repository = PaperAccountRepository(
-            session
+        self._account_repository = (
+            PaperAccountRepository(
+                session
+            )
         )
 
-        self._order_repository = OrderRepository(
-            session
+        self._order_repository = (
+            OrderRepository(
+                session
+            )
         )
 
-        self._position_repository = PaperPositionRepository(
-            session
+        self._position_repository = (
+            PaperPositionRepository(
+                session
+            )
         )
 
-        self._portfolio_service = PortfolioService(
-            session=session
+        self._portfolio_service = (
+            PortfolioService(
+                session=session
+            )
         )
 
-        self._risk_service = PreTradeRiskService()
-
-        self._market_quote_service = MarketQuoteService(
-            session=session,
-            maximum_quote_age_seconds=(
-                maximum_quote_age_seconds
-            ),
-            quote_interval=quote_interval,
-            synthetic_spread_bps=(
-                synthetic_spread_bps
-            ),
-            execution_mode=(
-                execution_mode
-            ),
+        # V2.9 deterministic pre-trade risk service.
+        self._pre_trade_risk_service = (
+            PreTradeRiskService(
+                enabled=(
+                    pre_trade_risk_enabled
+                ),
+                maximum_order_quantity=(
+                    pre_trade_maximum_order_quantity
+                ),
+                maximum_order_notional=(
+                    pre_trade_maximum_order_notional
+                ),
+                maximum_position_notional=(
+                    pre_trade_maximum_position_notional
+                ),
+                maximum_buying_power_fraction=(
+                    pre_trade_maximum_buying_power_fraction
+                ),
+            )
         )
 
-        self._execution_service = PaperExecutionService(
-            session=session,
-            commission_bps=commission_bps,
-            slippage_bps=slippage_bps,
-            partial_fill_enabled=(
-                partial_fill_enabled
-            ),
-            initial_fill_fraction=(
-                initial_fill_fraction
-            ),
-            execution_mode=execution_mode,
+        self._market_quote_service = (
+            MarketQuoteService(
+                session=session,
+                maximum_quote_age_seconds=(
+                    maximum_quote_age_seconds
+                ),
+                quote_interval=(
+                    quote_interval
+                ),
+                synthetic_spread_bps=(
+                    synthetic_spread_bps
+                ),
+                execution_mode=(
+                    execution_mode
+                ),
+            )
+        )
+
+        self._execution_service = (
+            PaperExecutionService(
+                session=session,
+                commission_bps=(
+                    commission_bps
+                ),
+                slippage_bps=(
+                    slippage_bps
+                ),
+                partial_fill_enabled=(
+                    partial_fill_enabled
+                ),
+                initial_fill_fraction=(
+                    initial_fill_fraction
+                ),
+                execution_mode=(
+                    execution_mode
+                ),
+            )
         )
 
         self._trading_control_service = (
@@ -134,6 +180,8 @@ class OrderService:
             )
         )
 
+        # Keep this because other callers may still pass the
+        # existing portfolio-risk configuration to OrderService.
         self._risk_limits = risk_limits
 
     def submit(
@@ -156,6 +204,10 @@ class OrderService:
             limit_price=limit_price,
         )
 
+        # --------------------------------------------------
+        # Account
+        # --------------------------------------------------
+
         account = (
             self._account_repository
             .get_by_id(
@@ -165,7 +217,8 @@ class OrderService:
 
         if account is None:
             raise LookupError(
-                f"Paper account not found: {account_id}"
+                "Paper account not found: "
+                f"{account_id}"
             )
 
         # --------------------------------------------------
@@ -176,7 +229,8 @@ class OrderService:
 
         if client_order_id is not None:
             normalized_client_order_id = (
-                client_order_id.strip()
+                client_order_id
+                .strip()
             )
 
             if not normalized_client_order_id:
@@ -186,7 +240,9 @@ class OrderService:
             existing_order = (
                 self._order_repository
                 .get_by_client_order_id(
-                    account_id=account.id,
+                    account_id=(
+                        account.id
+                    ),
                     client_order_id=(
                         normalized_client_order_id
                     ),
@@ -196,9 +252,20 @@ class OrderService:
             if existing_order is not None:
                 return existing_order
 
+        # --------------------------------------------------
+        # Instrument
+        # --------------------------------------------------
+
         normalized_symbol = (
-            symbol.strip().upper()
+            symbol
+            .strip()
+            .upper()
         )
+
+        if not normalized_symbol:
+            raise ValueError(
+                "Symbol cannot be empty."
+            )
 
         instrument = (
             self._instrument_repository
@@ -209,13 +276,20 @@ class OrderService:
 
         if instrument is None:
             raise LookupError(
-                f"Instrument not found: {normalized_symbol}"
+                "Instrument not found: "
+                f"{normalized_symbol}"
             )
+
+        # --------------------------------------------------
+        # Quote
+        # --------------------------------------------------
 
         quote = (
             self._market_quote_service
             .get_quote(
-                symbol=instrument.symbol
+                symbol=(
+                    instrument.symbol
+                )
             )
         )
 
@@ -227,22 +301,84 @@ class OrderService:
         )
 
         # --------------------------------------------------
-        # Persist order before risk/execution decisions
+        # Existing position
+        # --------------------------------------------------
+
+        position = (
+            self._position_repository
+            .get(
+                account_id=(
+                    account.id
+                ),
+                instrument_id=(
+                    instrument.id
+                ),
+            )
+        )
+
+        current_position_quantity = 0.0
+
+        if position is not None:
+            current_position_quantity = float(
+                position.quantity
+            )
+
+        # --------------------------------------------------
+        # V2.9 PRE-TRADE RISK GATE
+        #
+        # This must happen before order persistence and
+        # before broker execution.
+        # --------------------------------------------------
+
+        self._pre_trade_risk_service.require_approval(
+            symbol=(
+                normalized_symbol
+            ),
+            side=(
+                side.value
+            ),
+            quantity=(
+                quantity
+            ),
+            reference_price=(
+                reference_price
+            ),
+            current_position_quantity=(
+                current_position_quantity
+            ),
+        )
+
+        # --------------------------------------------------
+        # Persist accepted pre-trade order
         # --------------------------------------------------
 
         order = (
             self._order_repository
             .create(
-                account_id=account.id,
-                instrument_id=instrument.id,
+                account_id=(
+                    account.id
+                ),
+                instrument_id=(
+                    instrument.id
+                ),
                 client_order_id=(
                     normalized_client_order_id
                 ),
-                symbol=instrument.symbol,
-                side=side.value,
-                order_type=order_type.value,
-                quantity=quantity,
-                limit_price=limit_price,
+                symbol=(
+                    instrument.symbol
+                ),
+                side=(
+                    side.value
+                ),
+                order_type=(
+                    order_type.value
+                ),
+                quantity=(
+                    quantity
+                ),
+                limit_price=(
+                    limit_price
+                ),
                 time_in_force=(
                     time_in_force.value
                 ),
@@ -255,14 +391,22 @@ class OrderService:
                 reference_price_provider=(
                     quote.provider
                 ),
-                strategy_key=strategy_key,
+                strategy_key=(
+                    strategy_key
+                ),
             )
         )
+
+        # --------------------------------------------------
+        # Portfolio state
+        # --------------------------------------------------
 
         portfolio = (
             self._portfolio_service
             .summarize(
-                account_id=account.id,
+                account_id=(
+                    account.id
+                ),
                 prices={
                     instrument.symbol: (
                         quote.midpoint
@@ -271,21 +415,10 @@ class OrderService:
             )
         )
 
-        position = (
-            self._position_repository
-            .get(
-                account_id=account.id,
-                instrument_id=instrument.id,
-            )
+        current_position_notional = (
+            current_position_quantity
+            * reference_price
         )
-
-        current_position_notional = 0.0
-
-        if position is not None:
-            current_position_notional = (
-                position.quantity
-                * reference_price
-            )
 
         current_symbol_exposure = abs(
             current_position_notional
@@ -297,15 +430,19 @@ class OrderService:
         )
 
         # --------------------------------------------------
-        # V1.8 centralized trading controls
+        # Existing centralized trading controls
         # --------------------------------------------------
 
         control_decision = (
             self._trading_control_service
             .evaluate(
-                account_id=account.id,
+                account_id=(
+                    account.id
+                ),
                 current_equity=(
-                    portfolio["equity"]
+                    portfolio[
+                        "equity"
+                    ]
                 ),
                 current_gross_exposure=(
                     portfolio[
@@ -337,55 +474,7 @@ class OrderService:
             )
 
         # --------------------------------------------------
-        # Existing portfolio risk controls
-        # --------------------------------------------------
-
-        signed_notional = (
-            quantity
-            * reference_price
-        )
-
-        if side == OrderSide.SELL:
-            signed_notional *= -1
-
-        risk_decision = (
-            self._risk_service.evaluate(
-                order_notional=(
-                    signed_notional
-                ),
-                current_position_notional=(
-                    current_position_notional
-                ),
-                current_gross_exposure=(
-                    portfolio[
-                        "gross_exposure"
-                    ]
-                ),
-                account_equity=(
-                    portfolio["equity"]
-                ),
-                account_cash=account.cash,
-                is_buy=(
-                    side == OrderSide.BUY
-                ),
-                limits=self._risk_limits,
-            )
-        )
-
-        if not risk_decision.approved:
-            return (
-                self._order_repository
-                .mark_rejected(
-                    order,
-                    reason=(
-                        risk_decision.reason
-                        or "Risk rejected order."
-                    ),
-                )
-            )
-
-        # --------------------------------------------------
-        # Execute
+        # Broker execution
         # --------------------------------------------------
 
         self._execution_service.execute(
@@ -404,10 +493,9 @@ class OrderService:
 
         if refreshed_order is None:
             raise LookupError(
-                (
-                    "Order not found after "
-                    f"execution: {order.id}"
-                )
+                "Order not found after "
+                "execution: "
+                f"{order.id}"
             )
 
         return refreshed_order
