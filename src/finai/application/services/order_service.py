@@ -98,6 +98,9 @@ class OrderService:
             synthetic_spread_bps=(
                 synthetic_spread_bps
             ),
+            execution_mode=(
+                execution_mode
+            ),
         )
 
         self._execution_service = PaperExecutionService(

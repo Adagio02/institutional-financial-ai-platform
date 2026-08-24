@@ -293,6 +293,21 @@ class Settings(BaseSettings):
 
     alpaca_idempotency_require_order_match: bool = True
 
+        # Version 2.8 Alpaca live quote integrity guard
+    alpaca_data_base_url: str = (
+        "https://data.alpaca.markets"
+    )
+
+    alpaca_market_data_feed: str = "iex"
+
+    alpaca_quote_guard_enabled: bool = True
+
+    alpaca_quote_guard_maximum_age_seconds: int = 60
+
+    alpaca_quote_guard_maximum_spread_bps: float = 100.0
+
+    alpaca_quote_guard_maximum_reference_deviation_bps: float = 250.0
+
 
 @lru_cache
 def get_settings() -> Settings:

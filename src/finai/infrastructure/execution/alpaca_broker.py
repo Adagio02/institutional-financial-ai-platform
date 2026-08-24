@@ -18,6 +18,10 @@ from finai.domain.execution.alpaca_market_guard import (
     AlpacaMarketGuard,
     AlpacaMarketGuardResult,
 )
+from finai.domain.execution.alpaca_quote_guard import (
+    AlpacaQuoteGuard,
+    AlpacaQuoteGuardResult,
+)
 from finai.domain.execution.broker import (
     BrokerExecutionResult,
     BrokerOrderState,
@@ -31,6 +35,9 @@ from finai.infrastructure.execution.alpaca_client import (
     AlpacaOrderNotFoundError,
     AlpacaPaperClient,
     AlpacaTransportError,
+)
+from finai.infrastructure.market_data.alpaca_market_data_client import (
+    AlpacaMarketDataClient,
 )
 
 
@@ -83,6 +90,14 @@ class AlpacaPaperBroker:
             AlpacaIdempotencyGuard
             | None
         ) = None,
+        market_data_client: (
+            AlpacaMarketDataClient
+            | None
+        ) = None,
+        quote_guard: (
+            AlpacaQuoteGuard
+            | None
+        ) = None,
         lookup_before_submit: bool = True,
         recover_after_transport_error: bool = True,
     ) -> None:
@@ -100,6 +115,14 @@ class AlpacaPaperBroker:
             idempotency_guard
         )
 
+        self._market_data_client = (
+            market_data_client
+        )
+
+        self._quote_guard = (
+            quote_guard
+        )
+
         self._lookup_before_submit = (
             lookup_before_submit
         )
@@ -107,6 +130,19 @@ class AlpacaPaperBroker:
         self._recover_after_transport_error = (
             recover_after_transport_error
         )
+
+        if (
+            self._quote_guard is not None
+            and (
+                self._market_data_client
+                is None
+            )
+        ):
+            raise ValueError(
+                "Alpaca quote guard "
+                "requires an Alpaca "
+                "market-data client."
+            )
 
     @property
     def name(
@@ -138,12 +174,10 @@ class AlpacaPaperBroker:
         ):
             return None
 
-        account = self.account()
-
         return (
             self._account_guard
             .validate_order(
-                account=account,
+                account=self.account(),
                 side=side,
                 quantity=quantity,
                 reference_price=(
@@ -189,6 +223,45 @@ class AlpacaPaperBroker:
             )
         )
 
+    def validate_quote_submission(
+        self,
+        *,
+        symbol: str,
+        reference_price: float,
+    ) -> (
+        AlpacaQuoteGuardResult
+        | None
+    ):
+        if self._quote_guard is None:
+            return None
+
+        if (
+            self._market_data_client
+            is None
+        ):
+            raise RuntimeError(
+                "Alpaca market-data client "
+                "is not configured."
+            )
+
+        quote = (
+            self._market_data_client
+            .get_latest_quote(
+                symbol=symbol
+            )
+        )
+
+        return (
+            self._quote_guard
+            .validate_quote(
+                symbol=symbol,
+                quote=quote,
+                reference_price=(
+                    reference_price
+                ),
+            )
+        )
+
     def validate_submission(
         self,
         *,
@@ -205,11 +278,24 @@ class AlpacaPaperBroker:
             AlpacaMarketGuardResult
             | None
         ),
+        (
+            AlpacaQuoteGuardResult
+            | None
+        ),
     ]:
         market_result = (
             self.validate_market_submission(
                 symbol=symbol,
                 quantity=quantity,
+            )
+        )
+
+        quote_result = (
+            self.validate_quote_submission(
+                symbol=symbol,
+                reference_price=(
+                    reference_price
+                ),
             )
         )
 
@@ -226,6 +312,7 @@ class AlpacaPaperBroker:
         return (
             account_result,
             market_result,
+            quote_result,
         )
 
     def submit(
@@ -281,7 +368,9 @@ class AlpacaPaperBroker:
             if existing is not None:
                 return (
                     self._recover_existing(
-                        existing_order=existing,
+                        existing_order=(
+                            existing
+                        ),
                         client_order_id=(
                             resolved_client_order_id
                         ),
@@ -352,7 +441,9 @@ class AlpacaPaperBroker:
 
             return (
                 self._recover_existing(
-                    existing_order=existing,
+                    existing_order=(
+                        existing
+                    ),
                     client_order_id=(
                         resolved_client_order_id
                     ),
