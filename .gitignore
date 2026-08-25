@@ -31,3 +31,5 @@ pytest-temp/
 pytest-temp-v15/
 pytest-temp-v16/
 pytest-temp-v17/
+artifacts/
+Reports/v30_*

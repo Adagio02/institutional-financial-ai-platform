@@ -318,6 +318,84 @@ class Settings(BaseSettings):
 
     pre_trade_maximum_buying_power_fraction: float = 0.10
 
+        # Version 3.0 adaptive learning
+    v30_learning_enabled: bool = True
+
+    v30_learning_symbol: str = "AAPL"
+
+    v30_learning_interval: str = "1m"
+
+    v30_learning_minimum_rows: int = 500
+
+    v30_learning_validation_fraction: float = 0.20
+
+    v30_learning_minimum_score: float = 0.50
+
+    v30_learning_minimum_promotion_improvement: float = 0.01
+
+    v30_learning_retrain_interval_seconds: int = 21_600
+
+    v30_signal_interval_seconds: int = 300
+
+    v30_signal_probability_threshold: float = 0.55
+
+    v30_learning_artifact_directory: str = (
+        "artifacts/v30"
+    )
+
+    v30_learning_require_non_mock_data: bool = True
+
+    v30_mlflow_tracking_uri: str = (
+        "http://127.0.0.1:5000"
+    )
+
+    v30_mlflow_experiment_name: str = (
+        "finai-v30-adaptive-learning"
+    )
+
+        # Version 3.1 walk-forward,
+    # cost-aware adaptive learning
+    v31_learning_enabled: bool = True
+
+    v31_learning_symbol: str = "AAPL"
+    v31_learning_interval: str = "1m"
+
+    v31_learning_artifact_directory: str = (
+        "artifacts/v31"
+    )
+
+    v31_learning_minimum_rows: int = 2_000
+
+    v31_forward_horizon_bars: int = 5
+
+    v31_target_minimum_edge_bps: float = 8.0
+
+    v31_round_trip_cost_bps: float = 4.0
+
+    v31_walk_forward_folds: int = 5
+
+    v31_minimum_balanced_accuracy: float = 0.34
+
+    v31_minimum_macro_f1: float = 0.30
+
+    v31_minimum_net_return: float = 0.0
+
+    v31_minimum_trades: int = 20
+
+    v31_minimum_promotion_improvement: float = 0.0025
+
+    v31_signal_probability_threshold: float = 0.55
+
+    v31_learning_require_non_mock_data: bool = True
+
+    v31_mlflow_tracking_uri: str = (
+        "http://127.0.0.1:5000"
+    )
+
+    v31_mlflow_experiment_name: str = (
+        "finai-v31-walk-forward-learning"
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

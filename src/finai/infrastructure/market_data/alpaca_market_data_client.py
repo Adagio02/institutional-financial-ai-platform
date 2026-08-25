@@ -183,6 +183,99 @@ class AlpacaMarketDataClient:
 
         return quote_data
 
+    def get_historical_bars(
+        self,
+        *,
+        symbol: str,
+        timeframe: str,
+        start: str,
+        end: str,
+        limit: int = 10_000,
+        page_token: str | None = None,
+    ) -> dict[str, Any]:
+        normalized_symbol = (
+            symbol
+            .strip()
+            .upper()
+        )
+
+        if not normalized_symbol:
+            raise ValueError(
+                "symbol cannot be blank."
+            )
+
+        normalized_timeframe = (
+            timeframe
+            .strip()
+        )
+
+        if not normalized_timeframe:
+            raise ValueError(
+                "timeframe cannot be blank."
+            )
+
+        if limit <= 0:
+            raise ValueError(
+                "limit must be greater than zero."
+            )
+
+        encoded_symbol = quote(
+            normalized_symbol,
+            safe="",
+        )
+
+        parameters = {
+            "timeframe": normalized_timeframe,
+            "start": start,
+            "end": end,
+            "limit": str(limit),
+            "adjustment": "raw",
+            "feed": self._feed,
+            "sort": "asc",
+        }
+
+        if page_token:
+            parameters["page_token"] = (
+                page_token
+            )
+
+        query = urlencode(
+            parameters
+        )
+
+        response = self._request(
+            path=(
+                f"/v2/stocks/"
+                f"{encoded_symbol}"
+                f"/bars?"
+                f"{query}"
+            )
+        )
+
+        if not isinstance(
+            response,
+            dict,
+        ):
+            raise AlpacaMarketDataError(
+                "Unexpected Alpaca "
+                "historical-bars response."
+            )
+
+        bars = response.get(
+            "bars"
+        )
+
+        if not isinstance(
+            bars,
+            list,
+        ):
+            raise AlpacaMarketDataError(
+                "Alpaca historical-bars "
+                "response contains no bars."
+            )
+
+        return response
+
     def _request(
         self,
         *,
