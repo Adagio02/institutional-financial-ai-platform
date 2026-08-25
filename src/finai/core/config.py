@@ -396,6 +396,58 @@ class Settings(BaseSettings):
         "finai-v31-walk-forward-learning"
     )
 
+        # Version 3.2 research-grade adaptive learning
+    v32_learning_enabled: bool = True
+
+    v32_learning_symbol: str = "AAPL"
+    v32_learning_interval: str = "1m"
+
+    v32_learning_artifact_directory: str = (
+        "artifacts/v32"
+    )
+
+    v32_learning_minimum_rows: int = 4_000
+
+    v32_forward_horizon_bars: int = 5
+
+    v32_target_minimum_edge_bps: float = 8.0
+
+    v32_round_trip_cost_bps: float = 4.0
+
+    v32_walk_forward_folds: int = 5
+
+    v32_holdout_fraction: float = 0.20
+
+    v32_signal_probability_threshold: float = 0.60
+
+    v32_minimum_balanced_accuracy: float = 0.34
+
+    v32_minimum_macro_f1: float = 0.30
+
+    v32_minimum_net_return: float = 0.0
+
+    v32_minimum_trades: int = 20
+
+    v32_maximum_drawdown: float = 0.10
+
+    v32_minimum_sharpe_like: float = 0.0
+
+    v32_minimum_fold_positive_fraction: float = 0.60
+
+    v32_minimum_baseline_improvement: float = 0.0025
+
+    v32_minimum_promotion_improvement: float = 0.005
+
+    v32_learning_require_non_mock_data: bool = True
+
+    v32_mlflow_tracking_uri: str = (
+        "http://127.0.0.1:5000"
+    )
+
+    v32_mlflow_experiment_name: str = (
+        "finai-v32-research-grade-learning"
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
