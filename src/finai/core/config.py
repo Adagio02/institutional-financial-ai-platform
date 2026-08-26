@@ -681,6 +681,78 @@ class Settings(BaseSettings):
     v36_outcome_log_path: str = (
         "artifacts/v36/outcomes.jsonl"
     )
+        # Version 3.7 autonomous paper platform
+    v37_autonomous_enabled: bool = True
+
+    # V3.7 is intentionally paper-only.
+    v37_live_money_enabled: bool = False
+
+    v37_symbol: str = "AAPL"
+    v37_interval: str = "1m"
+
+    v37_artifact_directory: str = (
+        "artifacts/v37"
+    )
+
+    # Runtime cadence
+    v37_ingestion_interval_seconds: int = 30
+    v37_execution_interval_seconds: int = 60
+    v37_attribution_interval_seconds: int = 60
+    v37_health_interval_seconds: int = 30
+
+    # Adaptive learning cadence.
+    # 21,600 seconds = 6 hours.
+    v37_learning_interval_seconds: int = 21_600
+
+    # Do not retrain unless meaningful new data exists.
+    v37_learning_minimum_new_bars: int = 250
+
+    # Historical refresh used by each incremental ingestion.
+    v37_ingestion_lookback_days: int = 2
+
+    # Recovery/backoff
+    v37_initial_backoff_seconds: int = 15
+    v37_maximum_backoff_seconds: int = 300
+
+    # Health
+    v37_market_data_warning_age_seconds: int = 180
+    v37_market_data_failure_age_seconds: int = 600
+
+    # Persisted runtime state.
+    v37_state_path: str = (
+        "artifacts/v37/state.json"
+    )
+
+    v37_health_path: str = (
+        "artifacts/v37/health.json"
+    )
+
+    v37_event_log_path: str = (
+        "artifacts/v37/events.jsonl"
+    )
+
+    # Presence of this file stops autonomous work.
+    v37_kill_switch_path: str = (
+        "artifacts/v37/STOP"
+    )
+
+    # Current research generation that can create
+    # the champion V3.6 consumes.
+    v37_learning_script: str = (
+        "scripts/run_v34_learning_cycle.py"
+    )
+
+    v37_ingestion_script: str = (
+        "scripts/ingest_alpaca_history_v30.py"
+    )
+
+    v37_execution_script: str = (
+        "scripts/run_v36_paper_cycle.py"
+    )
+
+    v37_attribution_script: str = (
+        "scripts/attribute_v36_outcomes.py"
+    )
 
 @lru_cache
 def get_settings() -> Settings:
