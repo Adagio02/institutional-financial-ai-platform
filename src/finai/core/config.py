@@ -591,6 +591,39 @@ class Settings(BaseSettings):
 
     v34_learning_minimum_new_bars: int = 250
 
+        # Version 3.5 live inference and shadow trading
+    v35_inference_enabled: bool = True
+
+    v35_inference_symbol: str = "AAPL"
+
+    v35_inference_interval: str = "1m"
+
+    v35_artifact_directory: str = (
+        "artifacts/v35"
+    )
+
+    v35_champion_directory: str = (
+        "artifacts/v34"
+    )
+
+    v35_minimum_confidence: float = 0.55
+
+    v35_shadow_trading_enabled: bool = True
+
+    v35_broker_submission_enabled: bool = False
+
+    v35_prediction_log_path: str = (
+        "artifacts/v35/predictions.jsonl"
+    )
+
+    v35_signal_log_path: str = (
+        "artifacts/v35/shadow_signals.jsonl"
+    )
+
+    v35_maximum_feature_age_seconds: int = 180
+
+    v35_require_alpaca_data: bool = True
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
