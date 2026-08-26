@@ -510,6 +510,86 @@ class Settings(BaseSettings):
         "finai-v33-profit-aware-learning"
     )
 
+    # Version 3.4 real-world regime-aware learning
+    v34_learning_enabled: bool = True
+
+    v34_learning_symbol: str = "AAPL"
+    v34_learning_interval: str = "1m"
+
+    v34_learning_artifact_directory: str = (
+        "artifacts/v34"
+    )
+
+    v34_learning_minimum_rows: int = 20_000
+
+    v34_holdout_fraction: float = 0.20
+
+    v34_forward_horizon_bars: int = 5
+
+    v34_target_volatility_multiplier: float = 0.35
+
+    v34_round_trip_cost_bps: float = 4.0
+
+    v34_walk_forward_folds: int = 5
+
+    v34_purge_bars: int = 10
+
+    v34_inner_calibration_fraction: float = 0.20
+
+    v34_long_probability_thresholds: str = (
+        "0.34,0.36,0.38,0.40,0.42,"
+        "0.44,0.46,0.48,0.50,0.525,"
+        "0.55,0.575,0.60"
+    )
+
+    v34_short_probability_thresholds: str = (
+        "0.34,0.36,0.38,0.40,0.42,"
+        "0.44,0.46,0.48,0.50,0.525,"
+        "0.55,0.575,0.60"
+    )
+
+    v34_threshold_search_minimum_trades: int = 5
+
+    v34_minimum_balanced_accuracy: float = 0.34
+
+    v34_minimum_macro_f1: float = 0.28
+
+    v34_minimum_net_return: float = 0.0
+
+    v34_minimum_trades: int = 20
+
+    v34_maximum_drawdown: float = 0.15
+
+    v34_minimum_positive_fold_fraction: float = 0.60
+
+    v34_minimum_worst_fold_return: float = -0.05
+
+    v34_maximum_threshold_std: float = 0.10
+
+    v34_minimum_regime_return: float = -0.05
+
+    v34_minimum_baseline_improvement: float = 0.0
+
+    v34_minimum_promotion_improvement: float = 0.005
+
+    v34_learning_require_non_mock_data: bool = True
+
+    v34_mlflow_tracking_uri: str = (
+        "http://127.0.0.1:5000"
+    )
+
+    v34_mlflow_experiment_name: str = (
+        "finai-v34-real-world-learning"
+    )
+
+    # Real-data daemon
+    v34_ingestion_refresh_seconds: int = 300
+
+    v34_ingestion_lookback_days: int = 5
+
+    v34_learning_refresh_seconds: int = 21_600
+
+    v34_learning_minimum_new_bars: int = 250
 
 @lru_cache
 def get_settings() -> Settings:
