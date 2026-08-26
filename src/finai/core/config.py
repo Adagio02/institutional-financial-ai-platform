@@ -448,6 +448,68 @@ class Settings(BaseSettings):
         "finai-v32-research-grade-learning"
     )
 
+        # Version 3.3 profit-aware champion search
+    v33_learning_enabled: bool = True
+
+    v33_learning_symbol: str = "AAPL"
+    v33_learning_interval: str = "1m"
+
+    v33_learning_artifact_directory: str = (
+        "artifacts/v33"
+    )
+
+    v33_learning_minimum_rows: int = 10_000
+
+    v33_holdout_fraction: float = 0.20
+
+    v33_forward_horizon_bars: int = 5
+
+    v33_target_volatility_multiplier: float = 0.35
+
+    v33_round_trip_cost_bps: float = 4.0
+
+    v33_walk_forward_folds: int = 5
+
+    v33_purge_bars: int = 10
+
+    v33_long_probability_thresholds: str = (
+        "0.34,0.36,0.38,0.40,0.42,"
+        "0.44,0.46,0.48,0.50,0.525,"
+        "0.55,0.575,0.60"
+    )
+
+    v33_short_probability_thresholds: str = (
+        "0.34,0.36,0.38,0.40,0.42,"
+        "0.44,0.46,0.48,0.50,0.525,"
+        "0.55,0.575,0.60"
+    )
+
+    v33_minimum_balanced_accuracy: float = 0.34
+
+    v33_minimum_macro_f1: float = 0.28
+
+    v33_minimum_net_return: float = 0.0
+
+    v33_minimum_trades: int = 20
+
+    v33_maximum_drawdown: float = 0.10
+
+    v33_minimum_positive_fold_fraction: float = 0.60
+
+    v33_minimum_baseline_improvement: float = 0.0
+
+    v33_minimum_promotion_improvement: float = 0.005
+
+    v33_learning_require_non_mock_data: bool = True
+
+    v33_mlflow_tracking_uri: str = (
+        "http://127.0.0.1:5000"
+    )
+
+    v33_mlflow_experiment_name: str = (
+        "finai-v33-profit-aware-learning"
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
