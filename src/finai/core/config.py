@@ -624,6 +624,64 @@ class Settings(BaseSettings):
 
     v35_require_alpaca_data: bool = True
 
+        # Version 3.6 continuous paper execution
+    v36_execution_enabled: bool = True
+
+    # Must remain paper-only for V3.6.
+    v36_live_money_enabled: bool = False
+
+    v36_symbol: str = "AAPL"
+    v36_interval: str = "1m"
+
+    v36_artifact_directory: str = (
+        "artifacts/v36"
+    )
+
+    # Champion produced by V3.4/V3.5 research pipeline.
+    v36_champion_directory: str = (
+        "artifacts/v34"
+    )
+
+    # Paper order endpoint already protected by
+    # V2.5-V2.9 execution guards.
+    v36_paper_order_url: str = (
+        "http://127.0.0.1:8000/"
+        "api/v1/paper/orders"
+    )
+
+    v36_account_id: str = ""
+
+    # Execution sizing.
+    v36_order_quantity: float = 1.0
+
+    # Require high-confidence champion predictions.
+    v36_minimum_execution_confidence: float = 0.60
+
+    # Avoid rapid repeat orders.
+    v36_signal_cooldown_seconds: int = 300
+
+    # Never execute on data older than this.
+    v36_maximum_market_data_age_seconds: int = 180
+
+    # Runtime polling.
+    v36_cycle_interval_seconds: int = 60
+
+    # Attribution horizon.
+    v36_outcome_horizon_bars: int = 5
+
+    # Files intentionally live under ignored artifacts/.
+    v36_decision_log_path: str = (
+        "artifacts/v36/decisions.jsonl"
+    )
+
+    v36_execution_log_path: str = (
+        "artifacts/v36/executions.jsonl"
+    )
+
+    v36_outcome_log_path: str = (
+        "artifacts/v36/outcomes.jsonl"
+    )
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
