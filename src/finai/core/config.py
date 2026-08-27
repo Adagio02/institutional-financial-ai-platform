@@ -914,6 +914,73 @@ class Settings(BaseSettings):
         "artifacts/v39/executions.jsonl"
     )
 
+        # =========================================================
+    # V4.0 - prospective shadow validation
+    # =========================================================
+
+    v40_learning_enabled: bool = True
+
+    v40_learning_symbol: str = "AAPL"
+    v40_learning_interval: str = "1m"
+
+    v40_learning_artifact_directory: str = (
+        "artifacts/v40"
+    )
+
+    v40_shadow_directory: str = (
+        "artifacts/v40/shadow"
+    )
+
+    v40_minimum_rows: int = 50_000
+
+    v40_forward_horizon_bars: int = 5
+
+    v40_target_minimum_edge_bps: float = 8.0
+
+    v40_holdout_fraction: float = 0.20
+
+    v40_walk_forward_folds: int = 5
+
+    v40_purge_rows: int = 10
+
+    v40_round_trip_cost_bps: float = 2.0
+
+    v40_long_probability_thresholds: str = (
+        "0.34,0.38,0.42,0.46,0.50,"
+        "0.54,0.58,0.62"
+    )
+
+    v40_short_probability_thresholds: str = (
+        "0.34,0.38,0.42,0.46,0.50,"
+        "0.54,0.58,0.62"
+    )
+
+    v40_inner_calibration_fraction: float = 0.20
+
+    v40_minimum_balanced_accuracy: float = 0.36
+
+    v40_minimum_macro_f1: float = 0.28
+
+    v40_minimum_net_return: float = 0.0
+
+    v40_minimum_positive_fold_fraction: float = 0.60
+
+    v40_minimum_trades: int = 100
+
+    v40_maximum_holdout_drawdown: float = 0.35
+
+    v40_minimum_promotion_improvement: float = 0.01
+
+    v40_minimum_regime_rows: int = 500
+
+    v40_shadow_minimum_observations: int = 1_000
+
+    v40_shadow_minimum_trades: int = 25
+
+    v40_shadow_minimum_net_return: float = 0.0
+
+    v40_shadow_maximum_drawdown: float = 0.15
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
