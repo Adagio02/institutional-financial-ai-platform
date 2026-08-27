@@ -1527,6 +1527,11 @@ class V38LearningService:
             candidate_score,
         )
 
+    def create_model_templates(
+        self,
+    ) -> dict[str, Any]:
+        return create_v38_models()
+
     def run_learning_cycle(
         self,
         *,
@@ -1593,8 +1598,8 @@ class V38LearningService:
         evaluations = []
 
         model_templates = (
-            create_v38_models()
-        )
+    self.create_model_templates()
+)
 
         for model_name, template in (
             model_templates.items()

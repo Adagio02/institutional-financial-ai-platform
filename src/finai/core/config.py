@@ -835,6 +835,84 @@ class Settings(BaseSettings):
     v38_execution_log_path: str = (
         "artifacts/v38/executions.jsonl"
     )
+        # Version 3.9 regime-aware ensemble learning
+
+    v39_learning_enabled: bool = True
+
+    v39_learning_symbol: str = "AAPL"
+
+    v39_learning_interval: str = "1m"
+
+    v39_learning_artifact_directory: str = (
+        "artifacts/v39"
+    )
+
+    v39_minimum_rows: int = 10_000
+
+    v39_forward_horizon_bars: int = 10
+
+    v39_target_minimum_edge_bps: float = 5.0
+
+    v39_holdout_fraction: float = 0.20
+
+    v39_walk_forward_folds: int = 5
+
+    v39_purge_rows: int = 10
+
+    v39_round_trip_cost_bps: float = 4.0
+
+    v39_long_probability_thresholds: str = (
+        "0.40,0.45,0.50,0.55,0.60,0.65"
+    )
+
+    v39_short_probability_thresholds: str = (
+        "0.40,0.45,0.50,0.55,0.60,0.65"
+    )
+
+    v39_inner_calibration_fraction: float = 0.20
+
+    # Each market regime needs enough observations
+    # before receiving its own fitted estimator.
+    v39_minimum_regime_rows: int = 1_000
+
+    # Promotion gates
+    v39_minimum_balanced_accuracy: float = 0.35
+
+    v39_minimum_macro_f1: float = 0.30
+
+    v39_minimum_net_return: float = 0.0
+
+    v39_minimum_positive_fold_fraction: float = 0.60
+
+    v39_minimum_trades: int = 20
+
+    v39_maximum_holdout_drawdown: float = 0.20
+
+    v39_minimum_promotion_improvement: float = 0.01
+
+    # Execution remains paper-only.
+    v39_execution_enabled: bool = True
+
+    v39_live_money_enabled: bool = False
+
+    v39_order_quantity: float = 1.0
+
+    v39_paper_order_url: str = (
+        "http://127.0.0.1:8000/"
+        "api/v1/paper/orders"
+    )
+
+    v39_account_id: str = ""
+
+    v39_maximum_market_data_age_seconds: int = 180
+
+    v39_decision_log_path: str = (
+        "artifacts/v39/decisions.jsonl"
+    )
+
+    v39_execution_log_path: str = (
+        "artifacts/v39/executions.jsonl"
+    )
 
 @lru_cache
 def get_settings() -> Settings:
