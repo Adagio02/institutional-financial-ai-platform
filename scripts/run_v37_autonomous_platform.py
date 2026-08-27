@@ -384,30 +384,11 @@ class V37AutonomousPlatform:
             name="market_ingestion",
             arguments=[
                 (
-                    self
-                    ._settings
-                    .v37_ingestion_script
-                ),
-                "--symbol",
-                (
-                    self
-                    ._settings
-                    .v37_symbol
-                ),
-                "--interval",
-                (
-                    self
-                    ._settings
-                    .v37_interval
-                ),
-                "--days",
-                str(
-                    self
-                    ._settings
-                    .v37_ingestion_lookback_days
+                    "scripts/"
+                    "run_v38_ingestion_cycle.py"
                 ),
             ],
-            timeout_seconds=300,
+            timeout_seconds=900,
         )
 
     def _execute(

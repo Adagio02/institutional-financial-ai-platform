@@ -754,6 +754,88 @@ class Settings(BaseSettings):
         "scripts/attribute_v36_outcomes.py"
     )
 
+        # Version 3.8 multi-market learning
+
+    v38_learning_enabled: bool = True
+
+    v38_learning_symbol: str = "AAPL"
+
+    v38_context_symbols: str = "SPY,QQQ"
+
+    v38_learning_interval: str = "1m"
+
+    v38_learning_artifact_directory: str = (
+        "artifacts/v38"
+    )
+
+    v38_minimum_rows: int = 10_000
+
+    v38_forward_horizon_bars: int = 10
+
+    v38_target_minimum_edge_bps: float = 5.0
+
+    v38_holdout_fraction: float = 0.20
+
+    v38_walk_forward_folds: int = 5
+
+    v38_purge_rows: int = 10
+
+    v38_round_trip_cost_bps: float = 4.0
+
+    v38_minimum_balanced_accuracy: float = 0.35
+
+    v38_minimum_macro_f1: float = 0.30
+
+    v38_minimum_net_return: float = 0.0
+
+    v38_minimum_positive_fold_fraction: float = 0.60
+
+    v38_minimum_trades: int = 20
+
+    v38_maximum_holdout_drawdown: float = 0.20
+
+    v38_minimum_promotion_improvement: float = 0.01
+
+    v38_mlflow_tracking_uri: str = (
+        "http://127.0.0.1:5000"
+    )
+
+    v38_mlflow_experiment_name: str = (
+        "finai-v38-multimarket-learning"
+    )
+    v38_long_probability_thresholds: str = (
+        "0.40,0.45,0.50,0.55,0.60,0.65"
+    )
+
+    v38_short_probability_thresholds: str = (
+        "0.40,0.45,0.50,0.55,0.60,0.65"
+    )
+
+    v38_inner_calibration_fraction: float = 0.20
+
+    v38_execution_enabled: bool = True
+
+    v38_live_money_enabled: bool = False
+
+    v38_order_quantity: float = 1.0
+
+    v38_paper_order_url: str = (
+        "http://127.0.0.1:8000/"
+        "api/v1/paper/orders"
+    )
+
+    v38_account_id: str = ""
+
+    v38_maximum_market_data_age_seconds: int = 180
+
+    v38_decision_log_path: str = (
+        "artifacts/v38/decisions.jsonl"
+    )
+
+    v38_execution_log_path: str = (
+        "artifacts/v38/executions.jsonl"
+    )
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
