@@ -981,6 +981,65 @@ class Settings(BaseSettings):
 
     v40_shadow_maximum_drawdown: float = 0.15
 
+    v41_learning_symbol: str = "AAPL"
+
+    v41_learning_interval: str = "1m"
+
+    v41_learning_artifact_directory: str = (
+        "artifacts/v41"
+    )
+    v41_shadow_directory: str = (
+        "artifacts/v41/shadow"
+    )
+
+    v41_minimum_rows: int = 45_000
+
+    v41_forward_horizon_bars: int = 15
+
+    v41_target_minimum_edge_bps: float = 3.0
+
+    v41_round_trip_cost_bps: float = 2.0
+
+    v41_holdout_fraction: float = 0.20
+
+    v41_walk_forward_folds: int = 5
+
+    v41_purge_rows: int = 20
+
+    v41_inner_calibration_fraction: float = 0.20
+
+    v41_long_probability_thresholds: str = (
+        "0.36,0.40,0.44,0.48,0.52,0.56"
+    )
+
+    v41_short_probability_thresholds: str = (
+        "0.36,0.40,0.44,0.48,0.52,0.56"
+    )
+
+    v41_minimum_balanced_accuracy: float = 0.36
+
+    v41_minimum_macro_f1: float = 0.28
+
+    v41_minimum_net_return: float = 0.0
+
+    v41_minimum_positive_fold_fraction: float = 0.60
+
+    v41_minimum_trades: int = 100
+
+    v41_maximum_holdout_drawdown: float = 0.35
+
+    v41_minimum_promotion_improvement: float = 0.01
+
+    v41_minimum_regime_rows: int = 1_000
+
+    v41_shadow_minimum_observations: int = 100
+
+    v41_shadow_minimum_net_return: float = 0.0
+
+    v41_shadow_maximum_drawdown: float = 0.20
+
+    v41_shadow_minimum_win_rate: float = 0.50
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
