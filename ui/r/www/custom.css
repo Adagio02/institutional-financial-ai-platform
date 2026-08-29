@@ -1,70 +1,965 @@
+/* ==========================================================
+   FINAI V4.2
+   Institutional Research Dashboard
+   ========================================================== */
+
+
+:root {
+    --finai-bg: #07101c;
+    --finai-bg-secondary: #0b1524;
+    --finai-panel: #0f1b2d;
+    --finai-panel-hover: #132238;
+    --finai-border: #1e3048;
+
+    --finai-text: #e5edf7;
+    --finai-muted: #8494a9;
+
+    --finai-cyan: #22d3ee;
+    --finai-blue: #3b82f6;
+    --finai-green: #22c55e;
+    --finai-yellow: #eab308;
+    --finai-red: #ef4444;
+    --finai-purple: #a78bfa;
+
+    --finai-radius: 12px;
+}
+
+
+/* ==========================================================
+   GLOBAL
+   ========================================================== */
+
+
+html,
 body {
+    background: var(--finai-bg) !important;
+    color: var(--finai-text);
     font-family:
         Inter,
+        -apple-system,
+        BlinkMacSystemFont,
         "Segoe UI",
+        Roboto,
+        Helvetica,
         Arial,
         sans-serif;
 }
 
+
 .content-wrapper,
 .right-side {
-    background: #0f1117;
+    background:
+        radial-gradient(circle at top right,
+            rgba(34, 211, 238, 0.04),
+            transparent 28%),
+        var(--finai-bg) !important;
 }
+
+
+.content {
+    padding: 22px 28px 40px 28px;
+}
+
+
+a {
+    color: var(--finai-cyan);
+}
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
 
 .main-header .logo {
-    font-weight: 700;
-    letter-spacing: 0.4px;
+    background: #07101c !important;
+    border-right: 1px solid var(--finai-border);
+    height: 56px;
+    line-height: 56px;
 }
 
-.box {
-    border-radius: 8px;
-    border-top-width: 2px;
-    box-shadow:
-        0 6px 24px
-        rgba(0, 0, 0, 0.18);
+
+.main-header .navbar {
+    background: #07101c !important;
+    border-bottom: 1px solid var(--finai-border);
+    min-height: 56px;
 }
 
-.box-header {
-    padding: 14px 16px;
+
+.main-header .sidebar-toggle {
+    color: var(--finai-muted) !important;
+    height: 56px;
+    padding-top: 18px;
 }
 
-.box-title {
+
+.main-header .sidebar-toggle:hover {
+    background: #0f1b2d !important;
+    color: white !important;
+}
+
+
+.brand-title {
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: white;
+}
+
+
+.brand-version {
+    margin-left: 7px;
+    font-size: 11px;
+    color: var(--finai-cyan);
+    letter-spacing: 0.8px;
+}
+
+
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
+
+
+.main-sidebar {
+    background: #08111e !important;
+    border-right: 1px solid var(--finai-border);
+    padding-top: 56px;
+}
+
+
+.sidebar-platform-label {
+    color: #52647b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    padding: 24px 20px 12px 20px;
+}
+
+
+.sidebar-menu>li>a {
+    color: #8191a6 !important;
     font-weight: 600;
+    border-left: 3px solid transparent !important;
+    margin: 3px 10px;
+    border-radius: 7px;
 }
 
-.small-box {
-    border-radius: 8px;
+
+.sidebar-menu>li>a:hover {
+    color: white !important;
+    background: #101d30 !important;
+}
+
+
+.sidebar-menu>li.active>a {
+    background: rgba(34, 211, 238, 0.08) !important;
+    color: var(--finai-cyan) !important;
+    border-left-color: var(--finai-cyan) !important;
+}
+
+
+.sidebar-menu .fa {
+    width: 22px;
+}
+
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 22px;
+    left: 22px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    color: #6e8198;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--finai-green);
+    border-radius: 100%;
     box-shadow:
-        0 6px 24px
-        rgba(0, 0, 0, 0.18);
+        0 0 9px rgba(34, 197, 94, 0.7);
 }
 
-.small-box h3 {
+
+/* ==========================================================
+   STATUS STRIP
+   ========================================================== */
+
+
+.top-status-strip {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+
+    min-height: 46px;
+    padding: 0 28px;
+
+    background: #0a1421;
+    border-bottom: 1px solid var(--finai-border);
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+}
+
+
+.status-label {
+    margin-right: 8px;
+
+    color: #506178;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+
+.status-value {
+    color: #a9bbd0;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+/* ==========================================================
+   PAGE TITLES
+   ========================================================== */
+
+
+.section-header {
+    margin:
+        5px 0 22px 0;
+}
+
+
+.section-header h2 {
+    margin: 0 0 5px 0;
+
+    color: #f8fafc;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+}
+
+
+.section-header p {
+    margin: 0;
+
+    color: var(--finai-muted);
+    font-size: 13px;
+}
+
+
+/* ==========================================================
+   METRIC CARDS
+   ========================================================== */
+
+
+.metric-card {
+    position: relative;
+    overflow: hidden;
+
+    min-height: 125px;
+    margin-bottom: 22px;
+    padding: 19px 20px;
+
+    background:
+        linear-gradient(145deg,
+            rgba(15, 27, 45, 0.98),
+            rgba(9, 19, 32, 0.98));
+
+    border: 1px solid var(--finai-border);
+    border-radius: var(--finai-radius);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.12);
+
+    transition:
+        transform 0.16s ease,
+        border-color 0.16s ease;
+}
+
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    border-color: #31506e;
+}
+
+
+.metric-card::after {
+    content: "";
+
+    position: absolute;
+    width: 120px;
+    height: 120px;
+
+    right: -55px;
+    top: -65px;
+
+    background:
+        radial-gradient(circle,
+            rgba(34, 211, 238, 0.08),
+            transparent 65%);
+}
+
+
+.metric-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.metric-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 31px;
+    height: 31px;
+
+    color: var(--finai-cyan);
+
+    background:
+        rgba(34, 211, 238, 0.09);
+
+    border:
+        1px solid rgba(34, 211, 238, 0.18);
+
+    border-radius: 8px;
+}
+
+
+.metric-title {
+    color: var(--finai-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
+
+.metric-value {
+    margin-top: 17px;
+
+    color: #f8fafc;
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
     font-size: 24px;
     font-weight: 700;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.sidebar-menu > li > a {
-    padding-top: 14px;
-    padding-bottom: 14px;
+
+/* ==========================================================
+   PANELS
+   ========================================================== */
+
+
+.dashboard-panel {
+    margin-bottom: 22px;
+    padding: 20px 20px 14px 20px;
+
+    background:
+        linear-gradient(145deg,
+            rgba(15, 27, 45, 0.98),
+            rgba(10, 20, 34, 0.98));
+
+    border: 1px solid var(--finai-border);
+    border-radius: var(--finai-radius);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
-.architecture pre {
-    background: #111827;
-    color: #d1d5db;
-    border: 1px solid #374151;
+
+.panel-header {
+    margin-bottom: 17px;
+}
+
+
+.panel-header h3 {
+    margin: 0;
+
+    color: #edf3fb;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+.panel-header span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--finai-muted);
+    font-size: 11px;
+}
+
+
+/* ==========================================================
+   PLOTLY
+   ========================================================== */
+
+
+.js-plotly-plot,
+.plot-container,
+.svg-container {
+    background: transparent !important;
+}
+
+
+.modebar {
+    opacity: 0.35;
+    transition: opacity 0.2s ease;
+}
+
+
+.modebar:hover {
+    opacity: 1;
+}
+
+
+/* ==========================================================
+   GOVERNANCE PIPELINE
+   ========================================================== */
+
+
+.pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    margin-bottom: 11px;
+    padding: 13px 14px;
+
+    border: 1px solid var(--finai-border);
+    border-radius: 9px;
+
+    background: #0b1727;
+}
+
+
+.pipeline-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 31px;
+    height: 31px;
+
+    border-radius: 7px;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+.pipeline-stage h4 {
+    margin: 0;
+
+    color: #e6eef8;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.pipeline-stage p {
+    margin: 3px 0 0 0;
+
+    color: #6f8299;
+    font-size: 10px;
+}
+
+
+.pipeline-active .pipeline-number {
+    color: var(--finai-cyan);
+    background: rgba(34, 211, 238, 0.10);
+}
+
+
+.pipeline-pass {
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+
+.pipeline-pass .pipeline-number {
+    color: var(--finai-green);
+    background: rgba(34, 197, 94, 0.10);
+}
+
+
+.pipeline-blocked {
+    border-color: rgba(234, 179, 8, 0.25);
+}
+
+
+.pipeline-blocked .pipeline-number {
+    color: var(--finai-yellow);
+    background: rgba(234, 179, 8, 0.10);
+}
+
+
+.pipeline-muted {
+    opacity: 0.52;
+}
+
+
+/* ==========================================================
+   GOVERNANCE DETAIL
+   ========================================================== */
+
+
+.governance-detail-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 15px;
+}
+
+
+.governance-detail-card {
+    min-height: 150px;
+    padding: 17px;
+
+    background: #0b1727;
+
+    border:
+        1px solid var(--finai-border);
+
+    border-radius: 10px;
+}
+
+
+.governance-detail-card h4 {
+    color: #8193aa;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+}
+
+
+.governance-detail-card h3 {
+    margin:
+        12px 0 8px 0;
+
+    color: #f1f5f9;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 18px;
+}
+
+
+.governance-detail-card p {
+    color: #778aa1;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+
+.state-pass {
+    border-color:
+        rgba(34, 197, 94, 0.35);
+}
+
+
+.state-block {
+    border-color:
+        rgba(234, 179, 8, 0.35);
+}
+
+
+.paper-only-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 15px;
+    padding: 13px 16px;
+
+    color: #a7b7c9;
+
+    background:
+        rgba(59, 130, 246, 0.06);
+
+    border:
+        1px solid rgba(59, 130, 246, 0.22);
+
     border-radius: 8px;
-    padding: 24px;
-    font-size: 16px;
+
+    font-size: 11px;
+}
+
+
+/* ==========================================================
+   METHODOLOGY
+   ========================================================== */
+
+
+.methodology-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+}
+
+
+.method-card {
+    min-height: 130px;
+
+    padding: 18px;
+
+    background: #0a1626;
+
+    border: 1px solid var(--finai-border);
+
+    border-radius: 9px;
+}
+
+
+.method-card h4 {
+    margin-top: 0;
+
+    color: var(--finai-cyan);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.method-card p {
+    color: #8092a8;
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================
+   ARCHITECTURE
+   ========================================================== */
+
+
+.architecture-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin:
+        22px 0 30px 0;
+}
+
+
+.architecture-flow.second-row {
+    margin-top: 5px;
+}
+
+
+.architecture-node {
+    flex: 1;
+
+    min-width: 130px;
+    min-height: 112px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 16px;
+
+    background:
+        linear-gradient(145deg,
+            #0c192a,
+            #091522);
+
+    border:
+        1px solid #213752;
+
+    border-radius: 10px;
+
+    text-align: center;
+}
+
+
+.architecture-node h4 {
+    margin:
+        0 0 7px 0;
+
+    color: #edf5ff;
+
+    font-size: 13px;
+}
+
+
+.architecture-node p {
+    margin: 0;
+
+    color: #768aa1;
+
+    font-size: 10px;
+
     line-height: 1.45;
 }
 
-table {
-    color: #222;
+
+.architecture-arrow {
+    color: #355776;
+
+    font-size: 22px;
 }
 
+
+.safety-banner {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 20px;
+
+    border:
+        1px solid rgba(34, 211, 238, 0.19);
+
+    border-radius: 10px;
+
+    background:
+        rgba(34, 211, 238, 0.04);
+}
+
+
+.safety-banner .fa {
+    color: var(--finai-cyan);
+    font-size: 28px;
+}
+
+
+.safety-banner h3 {
+    margin:
+        0 0 5px 0;
+
+    color: #e8f3fc;
+
+    font-size: 14px;
+}
+
+
+.safety-banner p {
+    margin: 0;
+
+    color: #8497ad;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+}
+
+
+/* ==========================================================
+   DATATABLE
+   ========================================================== */
+
+
 .dataTables_wrapper {
-    background: white;
-    padding: 10px;
-    border-radius: 6px;
+    color: #9aacc1 !important;
+}
+
+
+table.dataTable {
+    border-collapse: collapse !important;
+
+    background: transparent !important;
+
+    color: #c8d4e2 !important;
+
+    font-size: 11px;
+}
+
+
+table.dataTable thead th {
+    background: #0b1726 !important;
+
+    color: #8799af !important;
+
+    border-bottom:
+        1px solid #26394f !important;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+table.dataTable tbody td {
+    border-top:
+        1px solid #17273a !important;
+}
+
+
+table.dataTable tbody tr {
+    background: transparent !important;
+}
+
+
+table.dataTable tbody tr:hover {
+    background:
+        rgba(34, 211, 238, 0.035) !important;
+}
+
+
+.dataTables_wrapper input,
+.dataTables_wrapper select {
+    background: #091522 !important;
+
+    color: #cbd5e1 !important;
+
+    border:
+        1px solid #273b52 !important;
+
+    border-radius: 5px;
+}
+
+
+/* ==========================================================
+   REMOVE DEFAULT SHINYDASHBOARD VISUALS
+   ========================================================== */
+
+
+.box {
+    background: transparent !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+}
+
+
+.box-header {
+    display: none;
+}
+
+
+.box-body {
+    padding: 0;
+}
+
+
+.skin-black .wrapper,
+.skin-black .main-sidebar,
+.skin-black .left-side {
+    background-color: #08111e !important;
+}
+
+
+/* ==========================================================
+   SCROLLBAR
+   ========================================================== */
+
+
+::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+
+::-webkit-scrollbar-track {
+    background: #07101c;
+}
+
+
+::-webkit-scrollbar-thumb {
+    background: #253950;
+    border-radius: 10px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background: #36516e;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+
+@media (max-width: 1100px) {
+    .methodology-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .architecture-flow {
+        flex-wrap: wrap;
+    }
+
+    .architecture-arrow {
+        display: none;
+    }
+
+    .architecture-node {
+        min-width: 45%;
+    }
+}
+
+
+@media (max-width: 767px) {
+    .content {
+        padding:
+            16px 15px 30px 15px;
+    }
+
+    .top-status-strip {
+        display: none;
+    }
+
+    .governance-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .methodology-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .architecture-node {
+        min-width: 100%;
+    }
+
+    .section-header h2 {
+        font-size: 21px;
+    }
 }

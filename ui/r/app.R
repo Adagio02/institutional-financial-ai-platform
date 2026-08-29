@@ -2,6 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(jsonlite)
 library(ggplot2)
+library(plotly)
 library(dplyr)
 library(DT)
 library(scales)
@@ -9,11 +10,23 @@ library(lubridate)
 library(tidyr)
 
 
+# ============================================================
+# FINAI V4.2 INTERVIEW DASHBOARD
+# ============================================================
+
+
 `%||%` <- function(x, default) {
   if (
     is.null(x) ||
-    length(x) == 0 ||
-    identical(x, "")
+      length(x) == 0
+  ) {
+    return(default)
+  }
+
+  if (
+    length(x) == 1 &&
+      is.character(x) &&
+      identical(x, "")
   ) {
     return(default)
   }
@@ -33,52 +46,11 @@ v41_directory <- file.path(
   "v41"
 )
 
+
 v40_directory <- file.path(
   artifact_root,
   "v40"
 )
-
-
-safe_read_json <- function(path) {
-  if (!file.exists(path)) {
-    return(NULL)
-  }
-
-  tryCatch(
-    fromJSON(
-      path,
-      simplifyVector = FALSE
-    ),
-    error = function(error) {
-      NULL
-    }
-  )
-}
-
-
-latest_evaluation_path <- function() {
-  if (!dir.exists(v41_directory)) {
-    return(NULL)
-  }
-
-  files <- list.files(
-    v41_directory,
-    pattern = "^evaluation_.*\\.json$",
-    full.names = TRUE
-  )
-
-  if (length(files) == 0) {
-    return(NULL)
-  }
-
-  info <- file.info(files)
-
-  files[
-    which.max(
-      info$mtime
-    )
-  ]
-}
 
 
 latest_learning_path <- file.path(
@@ -106,6 +78,66 @@ shadow_path <- file.path(
 )
 
 
+# ============================================================
+# HELPERS
+# ============================================================
+
+
+safe_read_json <- function(path) {
+  if (
+    is.null(path) ||
+      !file.exists(path)
+  ) {
+    return(NULL)
+  }
+
+  tryCatch(
+    jsonlite::fromJSON(
+      path,
+      simplifyVector = FALSE
+    ),
+    error = function(error) {
+      message(
+        paste(
+          "Could not read JSON:",
+          path,
+          error$message
+        )
+      )
+
+      NULL
+    }
+  )
+}
+
+
+latest_evaluation_path <- function() {
+  if (!dir.exists(v41_directory)) {
+    return(NULL)
+  }
+
+  files <- list.files(
+    v41_directory,
+    pattern = "^evaluation_.*\\.json$",
+    full.names = TRUE
+  )
+
+  if (length(files) == 0) {
+    return(NULL)
+  }
+
+  info <- file.info(
+    files
+  )
+
+  files[
+    which.max(
+      info$mtime
+    )
+  ]
+}
+
+
 read_latest_learning <- function() {
   safe_read_json(
     latest_learning_path
@@ -120,19 +152,42 @@ read_evaluations <- function() {
     return(NULL)
   }
 
-  safe_read_json(
+  raw <- safe_read_json(
     path
   )
+
+  if (is.null(raw)) {
+    return(NULL)
+  }
+
+  # Supports either:
+  # [
+  #   {...model...},
+  #   {...model...}
+  # ]
+  #
+  # or:
+  # {
+  #   "models": [...]
+  # }
+
+  if (!is.null(raw$models)) {
+    return(
+      raw$models
+    )
+  }
+
+  raw
 }
 
 
 read_champion <- function() {
-  v41 <- safe_read_json(
+  champion <- safe_read_json(
     v41_champion_path
   )
 
-  if (!is.null(v41)) {
-    return(v41)
+  if (!is.null(champion)) {
+    return(champion)
   }
 
   safe_read_json(
@@ -157,23 +212,110 @@ number_or_zero <- function(value) {
 
   if (
     length(result) == 0 ||
-    is.na(result)
+      is.na(result[1]) ||
+      is.infinite(result[1])
   ) {
     return(0)
   }
 
-  result
+  result[1]
+}
+
+
+safe_character <- function(
+  value,
+  default = "N/A"
+) {
+  value <- value %||% default
+
+  if (length(value) == 0) {
+    return(default)
+  }
+
+  as.character(
+    value[1]
+  )
 }
 
 
 percent_text <- function(value) {
-  value <- number_or_zero(
-    value
+  scales::percent(
+    number_or_zero(value),
+    accuracy = 0.01
+  )
+}
+
+
+decimal_text <- function(
+  value,
+  digits = 3
+) {
+  formatC(
+    number_or_zero(value),
+    digits = digits,
+    format = "f"
+  )
+}
+
+
+integer_text <- function(value) {
+  format(
+    round(
+      number_or_zero(value)
+    ),
+    big.mark = ",",
+    scientific = FALSE
+  )
+}
+
+
+artifact_age <- function(path) {
+  if (!file.exists(path)) {
+    return("Unavailable")
+  }
+
+  modified <- file.info(
+    path
+  )$mtime
+
+  seconds <- as.numeric(
+    difftime(
+      Sys.time(),
+      modified,
+      units = "secs"
+    )
   )
 
-  percent(
-    value,
-    accuracy = 0.01
+  if (seconds < 60) {
+    return(
+      paste0(
+        round(seconds),
+        " sec ago"
+      )
+    )
+  }
+
+  if (seconds < 3600) {
+    return(
+      paste0(
+        round(seconds / 60),
+        " min ago"
+      )
+    )
+  }
+
+  if (seconds < 86400) {
+    return(
+      paste0(
+        round(seconds / 3600, 1),
+        " hr ago"
+      )
+    )
+  }
+
+  paste0(
+    round(seconds / 86400, 1),
+    " days ago"
   )
 }
 
@@ -181,7 +323,7 @@ percent_text <- function(value) {
 metric_dataframe <- function(evaluations) {
   if (
     is.null(evaluations) ||
-    length(evaluations) == 0
+      length(evaluations) == 0
   ) {
     return(
       data.frame()
@@ -192,44 +334,37 @@ metric_dataframe <- function(evaluations) {
     evaluations,
     function(model) {
       data.frame(
-        model = (
-          model$model_name %||% "unknown"
+        model = safe_character(
+          model$model_name,
+          "unknown"
         ),
-
         balanced_accuracy = number_or_zero(
           model$balanced_accuracy
         ),
-
         macro_f1 = number_or_zero(
           model$macro_f1
         ),
-
         net_return = number_or_zero(
           model$net_return
         ),
-
         maximum_drawdown = number_or_zero(
           model$maximum_drawdown
         ),
-
         positive_fold_fraction = number_or_zero(
           model$positive_fold_fraction
         ),
-
         composite_score = number_or_zero(
           model$composite_score
         ),
-
         trade_count = number_or_zero(
           model$trade_count
         ),
-
         stringsAsFactors = FALSE
       )
     }
   )
 
-  bind_rows(
+  dplyr::bind_rows(
     rows
   )
 }
@@ -241,7 +376,7 @@ fold_dataframe <- function(
 ) {
   if (
     is.null(evaluations) ||
-    length(evaluations) == 0
+      length(evaluations) == 0
   ) {
     return(
       data.frame()
@@ -251,9 +386,14 @@ fold_dataframe <- function(
   selected <- NULL
 
   for (model in evaluations) {
+    model_name <- safe_character(
+      model$model_name,
+      ""
+    )
+
     if (
       identical(
-        model$model_name,
+        model_name,
         winner
       )
     ) {
@@ -264,7 +404,7 @@ fold_dataframe <- function(
 
   if (
     is.null(selected) ||
-    is.null(selected$folds)
+      is.null(selected$folds)
   ) {
     return(
       data.frame()
@@ -278,325 +418,826 @@ fold_dataframe <- function(
         fold = number_or_zero(
           fold$fold
         ),
-
         net_return = number_or_zero(
           fold$net_return
         ),
-
         balanced_accuracy = number_or_zero(
           fold$balanced_accuracy
         ),
-
         macro_f1 = number_or_zero(
           fold$macro_f1
         ),
-
         maximum_drawdown = number_or_zero(
           fold$maximum_drawdown
         ),
-
         stringsAsFactors = FALSE
       )
     }
   )
 
-  bind_rows(
+  dplyr::bind_rows(
     rows
   )
 }
 
 
+empty_plotly <- function(message) {
+  plotly::plot_ly() |>
+    plotly::layout(
+      annotations = list(
+        list(
+          text = message,
+          x = 0.5,
+          y = 0.5,
+          xref = "paper",
+          yref = "paper",
+          showarrow = FALSE,
+          font = list(
+            size = 16,
+            color = "#94a3b8"
+          )
+        )
+      ),
+      xaxis = list(
+        visible = FALSE
+      ),
+      yaxis = list(
+        visible = FALSE
+      ),
+      paper_bgcolor = "rgba(0,0,0,0)",
+      plot_bgcolor = "rgba(0,0,0,0)"
+    )
+}
+
+
+plotly_dark_layout <- function(
+  plot,
+  x_title = "",
+  y_title = ""
+) {
+  plot |>
+    plotly::layout(
+      paper_bgcolor = "rgba(0,0,0,0)",
+      plot_bgcolor = "rgba(0,0,0,0)",
+      font = list(
+        color = "#cbd5e1"
+      ),
+      margin = list(
+        l = 70,
+        r = 30,
+        b = 70,
+        t = 20
+      ),
+      xaxis = list(
+        title = x_title,
+        gridcolor = "#1e293b",
+        zerolinecolor = "#334155"
+      ),
+      yaxis = list(
+        title = y_title,
+        gridcolor = "#1e293b",
+        zerolinecolor = "#334155"
+      ),
+      legend = list(
+        orientation = "h",
+        x = 0,
+        y = 1.1
+      )
+    )
+}
+
+
+# ============================================================
+# UI COMPONENT HELPERS
+# ============================================================
+
+
+metric_card <- function(
+  output_id,
+  title,
+  icon_name
+) {
+  div(
+    class = "metric-card",
+    div(
+      class = "metric-card-top",
+      div(
+        class = "metric-icon",
+        icon(
+          icon_name
+        )
+      ),
+      div(
+        class = "metric-title",
+        title
+      )
+    ),
+    div(
+      class = "metric-value",
+      textOutput(
+        output_id,
+        inline = TRUE
+      )
+    )
+  )
+}
+
+
+section_header <- function(
+  title,
+  subtitle = NULL
+) {
+  div(
+    class = "section-header",
+    h2(
+      title
+    ),
+    if (!is.null(subtitle)) {
+      p(
+        subtitle
+      )
+    }
+  )
+}
+
+
+panel_box <- function(
+  title,
+  ...
+) {
+  shinydashboard::box(
+    title = title,
+    width = 12,
+    class = "finai-box",
+    solidHeader = FALSE,
+    ...
+  )
+}
+
+
+# ============================================================
+# USER INTERFACE
+# ============================================================
+
+
 ui <- dashboardPage(
   skin = "black",
-
   dashboardHeader(
-    title = "FinAI V4.2"
+    title = span(
+      class = "brand-title",
+      "FINAI",
+      span(
+        class = "brand-version",
+        "V4.2"
+      )
+    )
   ),
-
   dashboardSidebar(
+    width = 245,
+    div(
+      class = "sidebar-platform-label",
+      "INSTITUTIONAL RESEARCH"
+    ),
     sidebarMenu(
+      id = "tabs",
       menuItem(
         "Executive",
         tabName = "executive",
         icon = icon("dashboard")
       ),
-
       menuItem(
-        "Models",
+        "Model Lab",
         tabName = "models",
         icon = icon("bar-chart")
       ),
-
       menuItem(
         "Validation",
         tabName = "validation",
         icon = icon("check-circle")
       ),
-
       menuItem(
         "Research",
         tabName = "research",
         icon = icon("flask")
       ),
-
       menuItem(
         "Architecture",
         tabName = "architecture",
         icon = icon("sitemap")
       )
+    ),
+    div(
+      class = "sidebar-footer",
+      div(
+        class = "status-dot"
+      ),
+      span(
+        "PAPER / SHADOW ONLY"
+      )
     )
   ),
-
   dashboardBody(
     tags$head(
+      tags$meta(
+        name = "viewport",
+        content = "width=device-width, initial-scale=1"
+      ),
       tags$link(
         rel = "stylesheet",
         type = "text/css",
         href = "custom.css"
       )
     ),
-
+    div(
+      class = "top-status-strip",
+      div(
+        span(
+          class = "status-label",
+          "SYSTEM"
+        ),
+        span(
+          class = "status-value",
+          textOutput(
+            "top_system_status",
+            inline = TRUE
+          )
+        )
+      ),
+      div(
+        span(
+          class = "status-label",
+          "SYMBOL"
+        ),
+        span(
+          class = "status-value",
+          textOutput(
+            "top_symbol",
+            inline = TRUE
+          )
+        )
+      ),
+      div(
+        span(
+          class = "status-label",
+          "INTERVAL"
+        ),
+        span(
+          class = "status-value",
+          textOutput(
+            "top_interval",
+            inline = TRUE
+          )
+        )
+      ),
+      div(
+        span(
+          class = "status-label",
+          "ARTIFACT"
+        ),
+        span(
+          class = "status-value",
+          textOutput(
+            "artifact_freshness",
+            inline = TRUE
+          )
+        )
+      )
+    ),
     tabItems(
+      # ======================================================
+      # EXECUTIVE
+      # ======================================================
       tabItem(
         tabName = "executive",
-
-        fluidRow(
-          valueBoxOutput(
-            "system_box",
-            width = 3
-          ),
-
-          valueBoxOutput(
-            "champion_box",
-            width = 3
-          ),
-
-          valueBoxOutput(
-            "candidate_box",
-            width = 3
-          ),
-
-          valueBoxOutput(
-            "holdout_box",
-            width = 3
+        section_header(
+          "Executive overview",
+          paste(
+            "Governed machine-learning research,",
+            "validation and paper execution."
           )
         ),
-
         fluidRow(
-          shinydashboard::box(
-            title = "Model composite score",
-            width = 6,
-            status = "primary",
-            solidHeader = TRUE,
-
-            plotOutput(
-              "composite_plot",
-              height = 320
+          column(
+            width = 3,
+            metric_card(
+              "system_status",
+              "System",
+              "server"
             )
           ),
-
-          shinydashboard::box(
-            title = "Walk-forward net return",
-            width = 6,
-            status = "primary",
-            solidHeader = TRUE,
-
-            plotOutput(
-              "return_plot",
-              height = 320
+          column(
+            width = 3,
+            metric_card(
+              "champion_status",
+              "Champion",
+              "trophy"
+            )
+          ),
+          column(
+            width = 3,
+            metric_card(
+              "candidate_name",
+              "Latest candidate",
+              "bar-chart"
+            )
+          ),
+          column(
+            width = 3,
+            metric_card(
+              "holdout_return",
+              "Holdout return",
+              "line-chart"
             )
           )
         ),
-
         fluidRow(
-          shinydashboard::box(
-            title = "Latest learning cycle",
+          column(
+            width = 8,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Model ranking"
+                ),
+                span(
+                  "Composite research score"
+                )
+              ),
+              plotlyOutput(
+                "composite_plot",
+                height = "370px"
+              )
+            )
+          ),
+          column(
+            width = 4,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Governance"
+                ),
+                span(
+                  "Promotion pipeline"
+                )
+              ),
+              uiOutput(
+                "governance_pipeline"
+              )
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Strategy return"
+                ),
+                span(
+                  "Net of modeled transaction costs"
+                )
+              ),
+              plotlyOutput(
+                "return_plot",
+                height = "340px"
+              )
+            )
+          ),
+          column(
+            width = 6,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Risk / return map"
+                ),
+                span(
+                  "Model comparison"
+                )
+              ),
+              plotlyOutput(
+                "risk_return_plot",
+                height = "340px"
+              )
+            )
+          )
+        ),
+        fluidRow(
+          column(
             width = 12,
-            status = "info",
-            solidHeader = TRUE,
-
-            tableOutput(
-              "latest_table"
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Latest learning cycle"
+                ),
+                span(
+                  "Current V4.1 research artifact"
+                )
+              ),
+              DTOutput(
+                "latest_table"
+              )
             )
           )
         )
       ),
+
+
+      # ======================================================
+      # MODELS
+      # ======================================================
 
       tabItem(
         tabName = "models",
-
+        section_header(
+          "Model laboratory",
+          paste(
+            "Compare predictive quality,",
+            "economic performance and robustness."
+          )
+        ),
         fluidRow(
-          shinydashboard::box(
-            title = "Classification quality",
+          column(
             width = 6,
-            status = "primary",
-            solidHeader = TRUE,
-
-            plotOutput(
-              "classification_plot",
-              height = 350
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Classification quality"
+                ),
+                span(
+                  "Balanced accuracy vs macro F1"
+                )
+              ),
+              plotlyOutput(
+                "classification_plot",
+                height = "380px"
+              )
             )
           ),
-
-          shinydashboard::box(
-            title = "Risk vs return",
+          column(
             width = 6,
-            status = "warning",
-            solidHeader = TRUE,
-
-            plotOutput(
-              "risk_return_plot",
-              height = 350
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Fold consistency"
+                ),
+                span(
+                  "Positive walk-forward fold fraction"
+                )
+              ),
+              plotlyOutput(
+                "consistency_plot",
+                height = "380px"
+              )
             )
           )
         ),
-
         fluidRow(
-          shinydashboard::box(
-            title = "Model comparison",
+          column(
             width = 12,
-            status = "primary",
-            solidHeader = TRUE,
-
-            DTOutput(
-              "model_table"
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Model leaderboard"
+                ),
+                span(
+                  "Cross-validation research metrics"
+                )
+              ),
+              DTOutput(
+                "model_table"
+              )
             )
           )
         )
       ),
+
+
+      # ======================================================
+      # VALIDATION
+      # ======================================================
 
       tabItem(
         tabName = "validation",
-
-        fluidRow(
-          valueBoxOutput(
-            "historical_box",
-            width = 4
-          ),
-
-          valueBoxOutput(
-            "shadow_box",
-            width = 4
-          ),
-
-          valueBoxOutput(
-            "execution_box",
-            width = 4
+        section_header(
+          "Validation & governance",
+          paste(
+            "Historical qualification,",
+            "prospective shadow validation",
+            "and controlled promotion."
           )
         ),
-
         fluidRow(
-          shinydashboard::box(
-            title = "Winning-model fold returns",
-            width = 6,
-            status = "primary",
-            solidHeader = TRUE,
-
-            plotOutput(
-              "fold_return_plot",
-              height = 350
+          column(
+            width = 4,
+            metric_card(
+              "historical_status",
+              "Historical qualification",
+              "check-circle"
             )
           ),
-
-          shinydashboard::box(
-            title = "Fold balanced accuracy",
-            width = 6,
-            status = "info",
-            solidHeader = TRUE,
-
-            plotOutput(
-              "fold_accuracy_plot",
-              height = 350
+          column(
+            width = 4,
+            metric_card(
+              "shadow_status",
+              "Shadow validation",
+              "eye"
+            )
+          ),
+          column(
+            width = 4,
+            metric_card(
+              "execution_status",
+              "Execution",
+              "lock"
             )
           )
         ),
-
         fluidRow(
-          shinydashboard::box(
-            title = "Governance state",
+          column(
+            width = 6,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Walk-forward returns"
+                ),
+                span(
+                  "Winning candidate by fold"
+                )
+              ),
+              plotlyOutput(
+                "fold_return_plot",
+                height = "360px"
+              )
+            )
+          ),
+          column(
+            width = 6,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Walk-forward classification"
+                ),
+                span(
+                  "Balanced accuracy across folds"
+                )
+              ),
+              plotlyOutput(
+                "fold_accuracy_plot",
+                height = "360px"
+              )
+            )
+          )
+        ),
+        fluidRow(
+          column(
             width = 12,
-            status = "warning",
-            solidHeader = TRUE,
-
-            verbatimTextOutput(
-              "governance_text"
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Governance decision"
+                ),
+                span(
+                  "Current promotion state"
+                )
+              ),
+              uiOutput(
+                "governance_detail"
+              )
             )
           )
         )
       ),
+
+
+      # ======================================================
+      # RESEARCH
+      # ======================================================
 
       tabItem(
         tabName = "research",
-
+        section_header(
+          "Research diagnostics",
+          paste(
+            "Detailed evaluation metrics",
+            "for interview and model-review workflows."
+          )
+        ),
         fluidRow(
-          shinydashboard::box(
-            title = "Research metrics",
+          column(
             width = 12,
-            status = "primary",
-            solidHeader = TRUE,
-
-            DTOutput(
-              "research_table"
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Model research matrix"
+                ),
+                span(
+                  "Sortable and searchable evaluation data"
+                )
+              ),
+              DTOutput(
+                "research_table"
+              )
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3(
+                  "Research methodology"
+                )
+              ),
+              div(
+                class = "methodology-grid",
+                div(
+                  class = "method-card",
+                  h4("01 · Data"),
+                  p(
+                    paste(
+                      "AAPL target series with SPY",
+                      "and QQQ cross-market context."
+                    )
+                  )
+                ),
+                div(
+                  class = "method-card",
+                  h4("02 · Features"),
+                  p(
+                    paste(
+                      "Cost-aware momentum, volatility,",
+                      "regime and relative-market signals."
+                    )
+                  )
+                ),
+                div(
+                  class = "method-card",
+                  h4("03 · Validation"),
+                  p(
+                    paste(
+                      "Purged walk-forward evaluation",
+                      "before untouched holdout testing."
+                    )
+                  )
+                ),
+                div(
+                  class = "method-card",
+                  h4("04 · Governance"),
+                  p(
+                    paste(
+                      "Candidates must qualify historically",
+                      "before prospective shadow validation."
+                    )
+                  )
+                )
+              )
             )
           )
         )
       ),
 
+
+      # ======================================================
+      # ARCHITECTURE
+      # ======================================================
+
       tabItem(
         tabName = "architecture",
-
+        section_header(
+          "Platform architecture",
+          paste(
+            "End-to-end flow from market data",
+            "to governed paper execution."
+          )
+        ),
         fluidRow(
-          shinydashboard::box(
-            title = "FinAI architecture",
+          column(
             width = 12,
-            status = "primary",
-            solidHeader = TRUE,
-
-            tags$div(
-              class = "architecture",
-
-              tags$pre(
-"
-REAL MARKET DATA
-      |
-      v
-AAPL + SPY + QQQ
-      |
-      v
-DATABASE
-      |
-      v
-V4.1 FEATURE ENGINEERING
-      |
-      v
-REGIME-AWARE ML
-      |
-      v
-PURGED WALK-FORWARD
-      |
-      v
-UNTOUCHED HOLDOUT
-      |
-   +--+--+
-   |     |
- FAIL   PASS
-   |     |
-REJECT  v
-      SHADOW
-        |
-        v
-PROSPECTIVE VALIDATION
-        |
-     +--+--+
-     |     |
-   FAIL   PASS
-     |     |
- OBSERVE  v
-       CHAMPION
-           |
-           v
-       PAPER MODE
-"
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "architecture-flow",
+                div(
+                  class = "architecture-node",
+                  h4("Market data"),
+                  p("AAPL · SPY · QQQ")
+                ),
+                div(
+                  class = "architecture-arrow",
+                  "→"
+                ),
+                div(
+                  class = "architecture-node",
+                  h4("PostgreSQL"),
+                  p("Historical + operational state")
+                ),
+                div(
+                  class = "architecture-arrow",
+                  "→"
+                ),
+                div(
+                  class = "architecture-node",
+                  h4("Feature engine"),
+                  p("V4.1 multi-market features")
+                ),
+                div(
+                  class = "architecture-arrow",
+                  "→"
+                ),
+                div(
+                  class = "architecture-node",
+                  h4("Model lab"),
+                  p("Regime-aware candidates")
+                )
+              ),
+              div(
+                class = "architecture-flow second-row",
+                div(
+                  class = "architecture-node",
+                  h4("Walk-forward"),
+                  p("Purged research evaluation")
+                ),
+                div(
+                  class = "architecture-arrow",
+                  "→"
+                ),
+                div(
+                  class = "architecture-node",
+                  h4("Holdout"),
+                  p("Untouched validation")
+                ),
+                div(
+                  class = "architecture-arrow",
+                  "→"
+                ),
+                div(
+                  class = "architecture-node",
+                  h4("Shadow"),
+                  p("Prospective observation")
+                ),
+                div(
+                  class = "architecture-arrow",
+                  "→"
+                ),
+                div(
+                  class = "architecture-node",
+                  h4("Paper execution"),
+                  p("Governed only")
+                )
+              )
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "safety-banner",
+                icon(
+                  "shield"
+                ),
+                div(
+                  h3(
+                    "Model governance is enforced"
+                  ),
+                  p(
+                    paste(
+                      "No model is promoted simply because",
+                      "it is the best candidate.",
+                      "Historical and prospective",
+                      "qualification gates remain active."
+                    )
+                  )
+                )
               )
             )
           )
@@ -605,6 +1246,11 @@ PROSPECTIVE VALIDATION
     )
   )
 )
+
+
+# ============================================================
+# SERVER
+# ============================================================
 
 
 server <- function(
@@ -616,30 +1262,27 @@ server <- function(
     5000
   )
 
+
   latest <- reactive({
     refresh()
-
     read_latest_learning()
   })
 
 
   evaluations <- reactive({
     refresh()
-
     read_evaluations()
   })
 
 
   champion <- reactive({
     refresh()
-
     read_champion()
   })
 
 
   shadow <- reactive({
     refresh()
-
     read_shadow()
   })
 
@@ -660,435 +1303,792 @@ server <- function(
       )
     }
 
+    winner <- safe_character(
+      current$winning_model,
+      ""
+    )
+
     fold_dataframe(
       evaluations(),
-      current$winning_model %||% ""
+      winner
     )
   })
 
 
-  output$system_box <- renderValueBox({
+  # ==========================================================
+  # TOP STATUS
+  # ==========================================================
+
+
+  output$top_system_status <- renderText({
+    if (
+      is.null(
+        latest()
+      )
+    ) {
+      "WAITING"
+    } else {
+      "ONLINE"
+    }
+  })
+
+
+  output$top_symbol <- renderText({
     current <- latest()
 
-    healthy <- !is.null(
-      current
-    )
+    if (is.null(current)) {
+      return("N/A")
+    }
 
-    valueBox(
-      value = if (healthy) {
-        "ONLINE"
-      } else {
-        "WAITING"
-      },
-
-      subtitle = "Research artifact feed",
-
-      icon = icon(
-        "server"
-      ),
-
-      color = if (healthy) {
-        "green"
-      } else {
-        "yellow"
-      }
+    safe_character(
+      current$symbol,
+      "N/A"
     )
   })
 
 
-  output$champion_box <- renderValueBox({
-    champ <- champion()
-
-    exists <- !is.null(
-      champ
-    )
-
-    valueBox(
-      value = if (exists) {
-        "YES"
-      } else {
-        "NONE"
-      },
-
-      subtitle = "Qualified champion",
-
-      icon = icon(
-        "trophy"
-      ),
-
-      color = if (exists) {
-        "green"
-      } else {
-        "yellow"
-      }
-    )
-  })
-
-
-  output$candidate_box <- renderValueBox({
+  output$top_interval <- renderText({
     current <- latest()
 
-    value <- if (
-      is.null(current)
+    if (is.null(current)) {
+      return("N/A")
+    }
+
+    safe_character(
+      current$interval,
+      "N/A"
+    )
+  })
+
+
+  output$artifact_freshness <- renderText({
+    artifact_age(
+      latest_learning_path
+    )
+  })
+
+
+  # ==========================================================
+  # KPI CARDS
+  # ==========================================================
+
+
+  output$system_status <- renderText({
+    if (
+      is.null(
+        latest()
+      )
+    ) {
+      "WAITING"
+    } else {
+      "ONLINE"
+    }
+  })
+
+
+  output$champion_status <- renderText({
+    if (
+      is.null(
+        champion()
+      )
     ) {
       "NONE"
     } else {
-      current$winning_model %||% "unknown"
+      "QUALIFIED"
     }
-
-    valueBox(
-      value = value,
-      subtitle = "Latest candidate",
-      icon = icon("bar-chart"),
-      color = "aqua"
-    )
   })
 
 
-  output$holdout_box <- renderValueBox({
+  output$candidate_name <- renderText({
     current <- latest()
 
-    value <- if (
-      is.null(current)
-    ) {
-      "N/A"
-    } else {
-      percent_text(
-        current$holdout_net_return %||% 0
-      )
+    if (is.null(current)) {
+      return("NONE")
     }
 
-    valueBox(
-      value = value,
-      subtitle = "Holdout net return",
-      icon = icon("line-chart"),
-      color = "purple"
+    safe_character(
+      current$winning_model,
+      "UNKNOWN"
     )
   })
 
 
-  output$historical_box <- renderValueBox({
+  output$holdout_return <- renderText({
+    current <- latest()
+
+    if (is.null(current)) {
+      return("N/A")
+    }
+
+    percent_text(
+      current$holdout_net_return %||% 0
+    )
+  })
+
+
+  output$historical_status <- renderText({
     current <- latest()
 
     qualified <- (
       !is.null(current) &&
-      isTRUE(
-        current$historical_qualified
-      )
+        isTRUE(
+          current$historical_qualified
+        )
     )
 
-    valueBox(
-      value = if (qualified) {
-        "PASS"
-      } else {
-        "NOT PASSED"
-      },
-
-      subtitle = "Historical qualification",
-
-      icon = icon(
-        "check-circle"
-      ),
-
-      color = if (qualified) {
-        "green"
-      } else {
-        "yellow"
-      }
-    )
+    if (qualified) {
+      "PASSED"
+    } else {
+      "NOT PASSED"
+    }
   })
 
 
-  output$shadow_box <- renderValueBox({
+  output$shadow_status <- renderText({
     current_shadow <- shadow()
 
-    state <- if (
-      is.null(current_shadow)
-    ) {
-      "NONE"
-    } else {
-      toupper(
-        current_shadow$shadow_status %||% "OBSERVING"
+    if (is.null(current_shadow)) {
+      return(
+        "NO CANDIDATE"
       )
     }
 
-    valueBox(
-      value = state,
-      subtitle = "Prospective validation",
-      icon = icon("eye"),
-      color = "aqua"
+    toupper(
+      safe_character(
+        current_shadow$shadow_status,
+        "OBSERVING"
+      )
     )
   })
 
 
-  output$execution_box <- renderValueBox({
+  output$execution_status <- renderText({
+    if (
+      is.null(
+        champion()
+      )
+    ) {
+      "BLOCKED"
+    } else {
+      "PAPER READY"
+    }
+  })
+
+
+  # ==========================================================
+  # GOVERNANCE PIPELINE
+  # ==========================================================
+
+
+  output$governance_pipeline <- renderUI({
+    current <- latest()
+    current_shadow <- shadow()
     champ <- champion()
 
-    valueBox(
-      value = if (
-        is.null(champ)
-      ) {
-        "BLOCKED"
-      } else {
-        "PAPER READY"
-      },
+    historical_pass <- (
+      !is.null(current) &&
+        isTRUE(
+          current$historical_qualified
+        )
+    )
 
-      subtitle = "Execution governance",
+    shadow_exists <- !is.null(
+      current_shadow
+    )
 
-      icon = icon(
-        "lock"
+    champion_exists <- !is.null(
+      champ
+    )
+
+    tagList(
+      div(
+        class = paste(
+          "pipeline-stage",
+          "pipeline-active"
+        ),
+        span(
+          class = "pipeline-number",
+          "01"
+        ),
+        div(
+          h4(
+            "Candidate research"
+          ),
+          p(
+            "Walk-forward evaluation"
+          )
+        )
       ),
-
-      color = if (
-        is.null(champ)
-      ) {
-        "red"
-      } else {
-        "green"
-      }
-    )
-  })
-
-
-  output$composite_plot <- renderPlot({
-    frame <- metrics()
-
-    shiny::validate(
-      shiny::need(
-        nrow(frame) > 0,
-        "No model evaluation exists yet."
-      )
-    )
-
-    ggplot(
-      frame,
-      aes(
-        x = reorder(
-          model,
-          composite_score
+      div(
+        class = if (historical_pass) {
+          "pipeline-stage pipeline-pass"
+        } else {
+          "pipeline-stage pipeline-blocked"
+        },
+        span(
+          class = "pipeline-number",
+          "02"
         ),
-        y = composite_score
-      )
-    ) +
-      geom_col() +
-      coord_flip() +
-      labs(
-        x = NULL,
-        y = "Composite score"
-      ) +
-      theme_minimal(
-        base_size = 13
-      )
-  })
-
-
-  output$return_plot <- renderPlot({
-    frame <- metrics()
-
-    shiny::validate(
-      shiny::need(
-        nrow(frame) > 0,
-        "No return data exists yet."
-      )
-    )
-
-    ggplot(
-      frame,
-      aes(
-        x = reorder(
-          model,
-          net_return
+        div(
+          h4(
+            "Historical gate"
+          ),
+          p(
+            if (historical_pass) {
+              "Qualification passed"
+            } else {
+              "Qualification not passed"
+            }
+          )
+        )
+      ),
+      div(
+        class = if (shadow_exists) {
+          "pipeline-stage pipeline-active"
+        } else {
+          "pipeline-stage pipeline-muted"
+        },
+        span(
+          class = "pipeline-number",
+          "03"
         ),
-        y = net_return
+        div(
+          h4(
+            "Shadow validation"
+          ),
+          p(
+            if (shadow_exists) {
+              "Prospective monitoring"
+            } else {
+              "Awaiting qualified candidate"
+            }
+          )
+        )
+      ),
+      div(
+        class = if (champion_exists) {
+          "pipeline-stage pipeline-pass"
+        } else {
+          "pipeline-stage pipeline-muted"
+        },
+        span(
+          class = "pipeline-number",
+          "04"
+        ),
+        div(
+          h4(
+            "Champion"
+          ),
+          p(
+            if (champion_exists) {
+              "Governed model available"
+            } else {
+              "No promotion"
+            }
+          )
+        )
       )
-    ) +
-      geom_col() +
-      coord_flip() +
-      scale_y_continuous(
-        labels = percent
-      ) +
-      labs(
-        x = NULL,
-        y = "Net return"
-      ) +
-      theme_minimal(
-        base_size = 13
-      )
+    )
   })
 
 
-  output$classification_plot <- renderPlot({
+  # ==========================================================
+  # COMPOSITE SCORE
+  # ==========================================================
+
+
+  output$composite_plot <- renderPlotly({
     frame <- metrics()
 
-    shiny::validate(
-      shiny::need(
-        nrow(frame) > 0,
-        "No classification metrics yet."
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No model evaluation available."
+        )
       )
-    )
+    }
 
-    plotting <- frame |>
-      select(
+    frame <- frame |>
+      arrange(
+        composite_score
+      )
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~composite_score,
+      y = ~ reorder(
         model,
-        balanced_accuracy,
-        macro_f1
-      ) |>
-      pivot_longer(
-        cols = c(
-          balanced_accuracy,
-          macro_f1
+        composite_score
+      ),
+      type = "bar",
+      orientation = "h",
+      text = ~ paste0(
+        "<b>",
+        model,
+        "</b><br>",
+        "Composite: ",
+        round(
+          composite_score,
+          4
         ),
-        names_to = "metric",
-        values_to = "value"
-      )
+        "<br>",
+        "Net return: ",
+        percent(
+          net_return,
+          accuracy = 0.01
+        ),
+        "<br>",
+        "Balanced accuracy: ",
+        percent(
+          balanced_accuracy,
+          accuracy = 0.01
+        )
+      ),
+      hoverinfo = "text"
+    )
 
-    ggplot(
-      plotting,
-      aes(
-        x = model,
-        y = value,
-        fill = metric
-      )
-    ) +
-      geom_col(
-        position = "dodge"
-      ) +
-      scale_y_continuous(
-        labels = percent
-      ) +
-      coord_flip() +
-      labs(
-        x = NULL,
-        y = "Score",
-        fill = NULL
-      ) +
-      theme_minimal(
-        base_size = 13
-      )
+    plotly_dark_layout(
+      plot,
+      x_title = "Composite score",
+      y_title = ""
+    )
   })
 
 
-  output$risk_return_plot <- renderPlot({
+  # ==========================================================
+  # RETURNS
+  # ==========================================================
+
+
+  output$return_plot <- renderPlotly({
     frame <- metrics()
 
-    shiny::validate(
-      shiny::need(
-        nrow(frame) > 0,
-        "No risk data exists yet."
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No return metrics available."
+        )
       )
-    )
+    }
 
-    ggplot(
-      frame,
-      aes(
-        x = maximum_drawdown,
-        y = net_return,
-        label = model
+    frame <- frame |>
+      arrange(
+        net_return
       )
-    ) +
-      geom_point(
-        size = 4
-      ) +
-      geom_text(
-        nudge_y = 0.01,
-        check_overlap = TRUE
-      ) +
-      scale_x_continuous(
-        labels = percent
-      ) +
-      scale_y_continuous(
-        labels = percent
-      ) +
-      labs(
-        x = "Maximum drawdown",
-        y = "Net return"
-      ) +
-      theme_minimal(
-        base_size = 13
-      )
-  })
 
-
-  output$fold_return_plot <- renderPlot({
-    frame <- folds()
-
-    shiny::validate(
-      shiny::need(
-        nrow(frame) > 0,
-        "No winning-model fold data yet."
-      )
-    )
-
-    ggplot(
-      frame,
-      aes(
-        x = factor(
-          fold
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~net_return,
+      y = ~ reorder(
+        model,
+        net_return
+      ),
+      type = "bar",
+      orientation = "h",
+      text = ~ paste0(
+        "<b>",
+        model,
+        "</b><br>",
+        "Net return: ",
+        percent(
+          net_return,
+          accuracy = 0.01
         ),
-        y = net_return
-      )
-    ) +
-      geom_col() +
-      scale_y_continuous(
-        labels = percent
-      ) +
-      labs(
-        x = "Walk-forward fold",
-        y = "Net return"
-      ) +
-      theme_minimal(
-        base_size = 13
+        "<br>",
+        "Maximum drawdown: ",
+        percent(
+          maximum_drawdown,
+          accuracy = 0.01
+        ),
+        "<br>",
+        "Trades: ",
+        round(
+          trade_count
+        )
+      ),
+      hoverinfo = "text"
+    )
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Net return",
+      y_title = ""
+    )
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          tickformat = ".1%"
+        )
       )
   })
 
 
-  output$fold_accuracy_plot <- renderPlot({
-    frame <- folds()
+  # ==========================================================
+  # CLASSIFICATION QUALITY
+  # ==========================================================
 
-    shiny::validate(
-      shiny::need(
-        nrow(frame) > 0,
-        "No fold accuracy exists yet."
+
+  output$classification_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No classification metrics available."
+        )
+      )
+    }
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~model,
+      y = ~balanced_accuracy,
+      type = "bar",
+      name = "Balanced accuracy",
+      text = ~ percent(
+        balanced_accuracy,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "<b>%{x}</b><br>",
+        "Balanced accuracy: %{text}",
+        "<extra></extra>"
       )
     )
 
-    ggplot(
-      frame,
-      aes(
-        x = fold,
-        y = balanced_accuracy
+    plot <- plot |>
+      plotly::add_trace(
+        y = ~macro_f1,
+        name = "Macro F1",
+        text = ~ percent(
+          macro_f1,
+          accuracy = 0.01
+        ),
+        hovertemplate = paste(
+          "<b>%{x}</b><br>",
+          "Macro F1: %{text}",
+          "<extra></extra>"
+        )
       )
-    ) +
-      geom_line(
-        linewidth = 1
-      ) +
-      geom_point(
-        size = 3
-      ) +
-      scale_y_continuous(
-        labels = percent
-      ) +
-      labs(
-        x = "Walk-forward fold",
-        y = "Balanced accuracy"
-      ) +
-      theme_minimal(
-        base_size = 13
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "",
+      y_title = "Classification score"
+    )
+
+    plot |>
+      plotly::layout(
+        barmode = "group",
+        yaxis = list(
+          tickformat = ".0%",
+          gridcolor = "#1e293b"
+        )
       )
   })
+
+
+  # ==========================================================
+  # CONSISTENCY
+  # ==========================================================
+
+
+  output$consistency_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No fold consistency metrics available."
+        )
+      )
+    }
+
+    frame <- frame |>
+      arrange(
+        positive_fold_fraction
+      )
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~positive_fold_fraction,
+      y = ~ reorder(
+        model,
+        positive_fold_fraction
+      ),
+      type = "bar",
+      orientation = "h",
+      text = ~ percent(
+        positive_fold_fraction,
+        accuracy = 1
+      ),
+      hovertemplate = paste(
+        "<b>%{y}</b><br>",
+        "Positive folds: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Positive fold fraction",
+      y_title = ""
+    )
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          tickformat = ".0%",
+          range = c(
+            0,
+            1
+          ),
+          gridcolor = "#1e293b"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # RISK RETURN
+  # ==========================================================
+
+
+  output$risk_return_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No risk/return metrics available."
+        )
+      )
+    }
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~maximum_drawdown,
+      y = ~net_return,
+      type = "scatter",
+      mode = "markers+text",
+      text = ~model,
+      textposition = "top center",
+      marker = list(
+        size = 13,
+        opacity = 0.85
+      ),
+      hovertext = ~ paste0(
+        "<b>",
+        model,
+        "</b><br>",
+        "Net return: ",
+        percent(
+          net_return,
+          accuracy = 0.01
+        ),
+        "<br>",
+        "Maximum drawdown: ",
+        percent(
+          maximum_drawdown,
+          accuracy = 0.01
+        ),
+        "<br>",
+        "Composite score: ",
+        round(
+          composite_score,
+          4
+        )
+      ),
+      hoverinfo = "text"
+    )
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Maximum drawdown",
+      y_title = "Net return"
+    )
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          tickformat = ".1%",
+          gridcolor = "#1e293b"
+        ),
+        yaxis = list(
+          tickformat = ".1%",
+          gridcolor = "#1e293b"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # WALK-FORWARD FOLD RETURNS
+  # ==========================================================
+
+
+  output$fold_return_plot <- renderPlotly({
+    frame <- folds()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No winning-model fold data available."
+        )
+      )
+    }
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~ factor(
+        fold
+      ),
+      y = ~net_return,
+      type = "bar",
+      text = ~ percent(
+        net_return,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "Fold %{x}<br>",
+        "Net return: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Walk-forward fold",
+      y_title = "Net return"
+    )
+
+    plot |>
+      plotly::layout(
+        yaxis = list(
+          tickformat = ".1%",
+          gridcolor = "#1e293b"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # WALK-FORWARD ACCURACY
+  # ==========================================================
+
+
+  output$fold_accuracy_plot <- renderPlotly({
+    frame <- folds()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No fold accuracy data available."
+        )
+      )
+    }
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~fold,
+      y = ~balanced_accuracy,
+      type = "scatter",
+      mode = "lines+markers",
+      marker = list(
+        size = 9
+      ),
+      line = list(
+        width = 3
+      ),
+      text = ~ percent(
+        balanced_accuracy,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "Fold %{x}<br>",
+        "Balanced accuracy: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Walk-forward fold",
+      y_title = "Balanced accuracy"
+    )
+
+    plot |>
+      plotly::layout(
+        yaxis = list(
+          tickformat = ".0%",
+          gridcolor = "#1e293b"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # TABLES
+  # ==========================================================
 
 
   output$model_table <- renderDT({
     frame <- metrics()
 
-    datatable(
-      frame,
-      rownames = FALSE,
+    if (nrow(frame) == 0) {
+      frame <- data.frame(
+        status = "No evaluation artifact available."
+      )
+    }
 
+    display <- frame
+
+    if (
+      "balanced_accuracy" %in% names(display)
+    ) {
+      display <- display |>
+        mutate(
+          balanced_accuracy = percent(
+            balanced_accuracy,
+            accuracy = 0.01
+          ),
+          macro_f1 = percent(
+            macro_f1,
+            accuracy = 0.01
+          ),
+          net_return = percent(
+            net_return,
+            accuracy = 0.01
+          ),
+          maximum_drawdown = percent(
+            maximum_drawdown,
+            accuracy = 0.01
+          ),
+          positive_fold_fraction = percent(
+            positive_fold_fraction,
+            accuracy = 0.01
+          ),
+          composite_score = round(
+            composite_score,
+            4
+          ),
+          trade_count = round(
+            trade_count
+          )
+        )
+    }
+
+    DT::datatable(
+      display,
+      rownames = FALSE,
+      filter = "top",
       options = list(
         pageLength = 10,
-        scrollX = TRUE
-      )
+        scrollX = TRUE,
+        autoWidth = TRUE
+      ),
+      class = "stripe hover compact"
     )
   })
 
@@ -1096,121 +2096,267 @@ server <- function(
   output$research_table <- renderDT({
     frame <- metrics()
 
-    datatable(
-      frame,
-      rownames = FALSE,
-
-      options = list(
-        pageLength = 10,
-        scrollX = TRUE
-      )
-    )
-  })
-
-
-  output$latest_table <- renderTable({
-    current <- latest()
-
-    if (is.null(current)) {
-      return(
-        data.frame(
-          status = "No learning cycle yet"
-        )
+    if (nrow(frame) == 0) {
+      frame <- data.frame(
+        status = "No research metrics available."
       )
     }
 
-    data.frame(
-      Metric = c(
-        "Symbol",
-        "Interval",
-        "Winning model",
-        "Rows used",
-        "Research rows",
-        "Holdout rows",
-        "Walk-forward net return",
-        "Holdout net return",
-        "Holdout balanced accuracy",
-        "Historical qualification"
+    DT::datatable(
+      frame,
+      rownames = FALSE,
+      filter = "top",
+      options = list(
+        pageLength = 15,
+        scrollX = TRUE,
+        autoWidth = TRUE
       ),
-
-      Value = c(
-        current$symbol %||% "N/A",
-
-        current$interval %||% "N/A",
-
-        current$winning_model %||% "N/A",
-
-        current$rows_used %||% "N/A",
-
-        current$research_rows %||% "N/A",
-
-        current$holdout_rows %||% "N/A",
-
-        percent_text(
-          current$walk_forward_net_return %||% 0
+      class = "stripe hover compact"
+    ) |>
+      DT::formatRound(
+        columns = intersect(
+          c(
+            "balanced_accuracy",
+            "macro_f1",
+            "net_return",
+            "maximum_drawdown",
+            "positive_fold_fraction",
+            "composite_score"
+          ),
+          names(frame)
         ),
-
-        percent_text(
-          current$holdout_net_return %||% 0
-        ),
-
-        percent_text(
-          current$holdout_balanced_accuracy %||% 0
-        ),
-
-        current$historical_qualified %||% FALSE
+        digits = 4
       )
+  })
+
+
+  output$latest_table <- renderDT({
+    current <- latest()
+
+    if (is.null(current)) {
+      frame <- data.frame(
+        Metric = "Status",
+        Value = "No learning-cycle artifact available."
+      )
+    } else {
+      frame <- data.frame(
+        Metric = c(
+          "Symbol",
+          "Interval",
+          "Winning model",
+          "Rows used",
+          "Research rows",
+          "Holdout rows",
+          "Walk-forward net return",
+          "Holdout net return",
+          "Holdout balanced accuracy",
+          "Historical qualification",
+          "Artifact freshness"
+        ),
+        Value = c(
+          safe_character(
+            current$symbol
+          ),
+          safe_character(
+            current$interval
+          ),
+          safe_character(
+            current$winning_model
+          ),
+          integer_text(
+            current$rows_used %||% 0
+          ),
+          integer_text(
+            current$research_rows %||% 0
+          ),
+          integer_text(
+            current$holdout_rows %||% 0
+          ),
+          percent_text(
+            current$walk_forward_net_return %||% 0
+          ),
+          percent_text(
+            current$holdout_net_return %||% 0
+          ),
+          percent_text(
+            current$holdout_balanced_accuracy %||% 0
+          ),
+          if (
+            isTRUE(
+              current$historical_qualified
+            )
+          ) {
+            "PASSED"
+          } else {
+            "NOT PASSED"
+          },
+          artifact_age(
+            latest_learning_path
+          )
+        ),
+        stringsAsFactors = FALSE
+      )
+    }
+
+    DT::datatable(
+      frame,
+      rownames = FALSE,
+      options = list(
+        dom = "t",
+        ordering = FALSE,
+        pageLength = 20
+      ),
+      class = "stripe hover compact"
     )
   })
 
 
-  output$governance_text <- renderText({
+  # ==========================================================
+  # GOVERNANCE DETAIL
+  # ==========================================================
+
+
+  output$governance_detail <- renderUI({
     current <- latest()
     current_shadow <- shadow()
     champ <- champion()
 
-    historical <- if (
+    historical_pass <- (
       !is.null(current) &&
-      isTRUE(
-        current$historical_qualified
-      )
+        isTRUE(
+          current$historical_qualified
+        )
+    )
+
+    historical_reason <- if (
+      is.null(current)
     ) {
-      "PASSED"
+      "No learning-cycle artifact is available."
     } else {
-      "NOT PASSED"
+      safe_character(
+        current$historical_reason,
+        if (historical_pass) {
+          "Candidate satisfied historical qualification."
+        } else {
+          "Candidate has not satisfied qualification."
+        }
+      )
     }
 
-    shadow_state <- if (
+    shadow_text <- if (
       is.null(current_shadow)
     ) {
-      "NO SHADOW CANDIDATE"
+      "No candidate is currently in prospective shadow validation."
     } else {
-      toupper(
-        current_shadow$shadow_status %||% "OBSERVING"
+      paste(
+        "Shadow state:",
+        toupper(
+          safe_character(
+            current_shadow$shadow_status,
+            "OBSERVING"
+          )
+        )
       )
     }
 
-    champion_state <- if (
+    champion_text <- if (
       is.null(champ)
     ) {
-      "NONE"
+      paste(
+        "No qualified champion exists.",
+        "Paper execution remains governed and blocked."
+      )
     } else {
-      "AVAILABLE"
+      paste(
+        "A qualified champion exists.",
+        "Execution remains paper-only."
+      )
     }
 
-    paste0(
-      "Historical qualification: ",
-      historical,
-      "\n",
-      "Shadow state: ",
-      shadow_state,
-      "\n",
-      "Champion: ",
-      champion_state,
-      "\n",
-      "Execution mode: PAPER / GOVERNED",
-      "\n",
-      "Live-money enablement: DISABLED"
+    tagList(
+      div(
+        class = "governance-detail-grid",
+        div(
+          class = if (historical_pass) {
+            "governance-detail-card state-pass"
+          } else {
+            "governance-detail-card state-block"
+          },
+          h4(
+            "Historical qualification"
+          ),
+          h3(
+            if (historical_pass) {
+              "PASSED"
+            } else {
+              "NOT PASSED"
+            }
+          ),
+          p(
+            historical_reason
+          )
+        ),
+        div(
+          class = "governance-detail-card",
+          h4(
+            "Prospective validation"
+          ),
+          h3(
+            if (
+              is.null(
+                current_shadow
+              )
+            ) {
+              "WAITING"
+            } else {
+              "ACTIVE"
+            }
+          ),
+          p(
+            shadow_text
+          )
+        ),
+        div(
+          class = if (
+            is.null(
+              champ
+            )
+          ) {
+            "governance-detail-card state-block"
+          } else {
+            "governance-detail-card state-pass"
+          },
+          h4(
+            "Champion"
+          ),
+          h3(
+            if (
+              is.null(
+                champ
+              )
+            ) {
+              "NONE"
+            } else {
+              "QUALIFIED"
+            }
+          ),
+          p(
+            champion_text
+          )
+        )
+      ),
+      div(
+        class = "paper-only-banner",
+        icon(
+          "lock"
+        ),
+        span(
+          paste(
+            "Execution mode: PAPER / SHADOW.",
+            "Live-money enablement is disabled."
+          )
+        )
+      )
     )
   })
 }
