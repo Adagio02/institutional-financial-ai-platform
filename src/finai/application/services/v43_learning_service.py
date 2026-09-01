@@ -162,22 +162,19 @@ class V43LearningService(V421LearningService):
         short_threshold: float,
     ) -> np.ndarray:
         """
-        V4.3 changes one important V4.1 behavior.
+        Convert class probabilities into executable positions.
 
-        A directional class must now beat BOTH:
+        A directional class must:
 
-        - the opposite directional probability
-        - the HOLD probability
+        - satisfy the configured confidence threshold
+        - beat the opposite directional probability
+        - beat the HOLD probability
 
-        Therefore a model prediction such as:
-
-            LONG  = 0.40
-            HOLD  = 0.50
-            SHORT = 0.10
-
-        remains HOLD instead of opening LONG.
+        Thresholds greater than or equal to 1.0 are treated as an
+        explicit disabled-direction state. This supports V4.3.1
+        asymmetric directional governance while preserving V4.3
+        behavior for ordinary thresholds.
         """
-
         (
             short_probability,
             hold_probability,
@@ -187,37 +184,42 @@ class V43LearningService(V421LearningService):
             classes=classes,
         )
 
-        effective_long_threshold = max(
-            float(long_threshold),
-            cls.MINIMUM_SIGNAL_PROBABILITY,
-        )
-
-        effective_short_threshold = max(
-            float(short_threshold),
-            cls.MINIMUM_SIGNAL_PROBABILITY,
-        )
-
         positions = np.full(
             len(probabilities),
             HOLD,
             dtype=int,
         )
 
-        long_mask = (
-            (long_probability >= effective_long_threshold)
-            & (long_probability > short_probability)
-            & (long_probability > hold_probability)
-        )
+        long_disabled = float(long_threshold) >= 1.0
+        short_disabled = float(short_threshold) >= 1.0
 
-        short_mask = (
-            (short_probability >= effective_short_threshold)
-            & (short_probability > long_probability)
-            & (short_probability > hold_probability)
-        )
+        if not long_disabled:
+            effective_long_threshold = max(
+                float(long_threshold),
+                cls.MINIMUM_SIGNAL_PROBABILITY,
+            )
 
-        positions[long_mask] = BUY
+            long_mask = (
+                (long_probability >= effective_long_threshold)
+                & (long_probability > short_probability)
+                & (long_probability > hold_probability)
+            )
 
-        positions[short_mask] = SELL
+            positions[long_mask] = BUY
+
+        if not short_disabled:
+            effective_short_threshold = max(
+                float(short_threshold),
+                cls.MINIMUM_SIGNAL_PROBABILITY,
+            )
+
+            short_mask = (
+                (short_probability >= effective_short_threshold)
+                & (short_probability > long_probability)
+                & (short_probability > hold_probability)
+            )
+
+            positions[short_mask] = SELL
 
         return positions
 
