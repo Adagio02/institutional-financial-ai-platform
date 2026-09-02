@@ -1,0 +1,13 @@
+ pyproject.toml                                     |   1 [32m+[m
+ scripts/verify_alpaca_v21.py                       |  63 [32m+++++[m
+ scripts/verify_v21.ps1                             | 213 [32m++++++++++++++[m
+ .../services/alpaca_order_execution_service.py     |  58 [32m+++[m[31m-[m
+ .../services/alpaca_trade_update_daemon.py         | 237 [32m++++++++++++++++[m
+ .../services/alpaca_trade_update_service.py        | 115 [32m++++++++[m
+ src/finai/core/config.py                           |  13 [32m+[m
+ .../database/repositories/order_repository.py      |  23 [32m++[m
+ .../infrastructure/execution/alpaca_broker.py      | 124 [32m++++++[m[31m---[m
+ .../execution/alpaca_trade_update_stream.py        | 308 [32m+++++++++++++++++++++[m
+ .../execution/test_alpaca_trade_update_snapshot.py |  91 [32m++++++[m
+ .../execution/test_alpaca_trade_update_stream.py   |  76 [32m+++++[m
+ 12 files changed, 1281 insertions(+), 41 deletions(-)

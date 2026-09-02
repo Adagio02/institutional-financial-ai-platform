@@ -1,14 +1,59 @@
 $ErrorActionPreference = "Stop"
 
-$Project = "D:\Projects\institutional-financial-ai-platform"
-$ComposeFile = Join-Path $Project "docker-compose.v42.yml"
-$Workspace = Join-Path $Project "FinAI-V42.code-workspace"
-$SupervisorScript = Join-Path $Project "scripts\run_v37_autonomous_platform.py"
-$PythonExe = Join-Path $Project ".venv\Scripts\python.exe"
-$LogDirectory = Join-Path $Project "artifacts\v42"
-$LogFile = Join-Path $LogDirectory "startup.log"
 
-New-Item -ItemType Directory -Force -Path $LogDirectory | Out-Null
+# ============================================================
+# FINAI V4.2 AUTONOMOUS WORKSTATION STARTUP
+# ============================================================
+
+
+$Project = "D:\Projects\institutional-financial-ai-platform"
+
+$PythonExe = Join-Path `
+    $Project `
+    ".venv\Scripts\python.exe"
+
+$SupervisorScript = Join-Path `
+    $Project `
+    "scripts\run_v37_autonomous_platform.py"
+
+$DashboardCompose = Join-Path `
+    $Project `
+    "docker-compose.v42.yml"
+
+$Workspace = Join-Path `
+    $Project `
+    "FinAI-V42.code-workspace"
+
+$ArtifactDirectory = Join-Path `
+    $Project `
+    "artifacts\v42"
+
+$StartupLog = Join-Path `
+    $ArtifactDirectory `
+    "startup.log"
+
+$SupervisorStdout = Join-Path `
+    $ArtifactDirectory `
+    "autonomous_stdout.log"
+
+$SupervisorStderr = Join-Path `
+    $ArtifactDirectory `
+    "autonomous_stderr.log"
+
+
+New-Item `
+    -ItemType Directory `
+    -Force `
+    -Path $ArtifactDirectory |
+Out-Null
+
+
+Set-Location $Project
+
+
+# ============================================================
+# LOGGING
+# ============================================================
 
 
 function Write-StartupLog {
@@ -17,23 +62,31 @@ function Write-StartupLog {
         [string]$Message
     )
 
-    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $Timestamp = Get-Date `
+        -Format "yyyy-MM-dd HH:mm:ss"
+
     $Line = "[$Timestamp] $Message"
 
     Write-Host $Line
-    Add-Content -Path $LogFile -Value $Line
+
+    Add-Content `
+        -Path $StartupLog `
+        -Value $Line
 }
+
+
+# ============================================================
+# DOCKER ENGINE
+# ============================================================
 
 
 function Test-DockerReady {
     try {
         docker info *> $null
 
-        if ($LASTEXITCODE -eq 0) {
-            return $true
-        }
-
-        return $false
+        return (
+            $LASTEXITCODE -eq 0
+        )
     }
     catch {
         return $false
@@ -43,120 +96,458 @@ function Test-DockerReady {
 
 function Start-DockerDesktop {
     if (Test-DockerReady) {
-        Write-StartupLog "Docker is already running."
+        Write-StartupLog `
+            "Docker engine is already available."
+
         return
     }
 
-    $DockerCandidates = @(
+
+    $Candidates = @(
         "$env:ProgramFiles\Docker\Docker\Docker Desktop.exe",
         "$env:LOCALAPPDATA\Docker\Docker Desktop.exe"
     )
 
+
     $DockerDesktop = $null
 
-    foreach ($Candidate in $DockerCandidates) {
+
+    foreach ($Candidate in $Candidates) {
         if (Test-Path $Candidate) {
             $DockerDesktop = $Candidate
             break
         }
     }
 
+
     if (-not $DockerDesktop) {
-        throw "Docker Desktop executable was not found."
+        throw `
+            "Docker Desktop executable could not be found."
     }
 
-    Write-StartupLog "Starting Docker Desktop."
 
-    Start-Process -FilePath $DockerDesktop
+    Write-StartupLog `
+        "Starting Docker Desktop."
 
-    $TimeoutSeconds = 180
+
+    Start-Process `
+        -FilePath $DockerDesktop
+
+
+    $TimeoutSeconds = 240
+
     $StartedAt = Get-Date
 
+
     while (-not (Test-DockerReady)) {
-        $Elapsed = ((Get-Date) - $StartedAt).TotalSeconds
+        $Elapsed = (
+            (Get-Date) - $StartedAt
+        ).TotalSeconds
+
 
         if ($Elapsed -gt $TimeoutSeconds) {
-            throw "Docker did not become ready within $TimeoutSeconds seconds."
+            throw `
+                "Docker engine did not become ready within $TimeoutSeconds seconds."
         }
 
-        Start-Sleep -Seconds 3
+
+        Start-Sleep `
+            -Seconds 3
     }
 
-    Write-StartupLog "Docker is ready."
+
+    Write-StartupLog `
+        "Docker engine is ready."
 }
 
 
-function Start-V42Dashboard {
-    if (-not (Test-Path $ComposeFile)) {
-        throw "V4.2 compose file not found: $ComposeFile"
+# ============================================================
+# MAIN COMPOSE FILE
+# ============================================================
+
+
+function Get-MainComposeFile {
+    $Candidates = @(
+        (Join-Path $Project "docker-compose.yml"),
+        (Join-Path $Project "docker-compose.yaml"),
+        (Join-Path $Project "compose.yml"),
+        (Join-Path $Project "compose.yaml")
+    )
+
+
+    foreach ($Candidate in $Candidates) {
+        if (Test-Path $Candidate) {
+            return $Candidate
+        }
     }
 
-    Write-StartupLog "Starting V4.2 dashboard."
+
+    throw `
+        "No main Docker Compose file was found."
+}
+
+
+# ============================================================
+# MAIN INFRASTRUCTURE
+# ============================================================
+
+
+function Start-MainInfrastructure {
+    $ComposeFile = Get-MainComposeFile
+
+
+    Write-StartupLog `
+        "Starting main FinAI Docker infrastructure."
+
 
     Push-Location $Project
 
+
     try {
-        docker compose -f $ComposeFile up -d
+        docker compose `
+            -f $ComposeFile `
+            up -d
+
 
         if ($LASTEXITCODE -ne 0) {
-            throw "docker compose returned exit code $LASTEXITCODE."
+            throw `
+                "Main docker compose startup failed with exit code $LASTEXITCODE."
         }
     }
     finally {
         Pop-Location
     }
 
-    Write-StartupLog "V4.2 dashboard started."
+
+    Write-StartupLog `
+        "Main Docker infrastructure launch requested."
 }
 
 
-function Start-AutonomousPlatform {
-    if (-not (Test-Path $PythonExe)) {
-        Write-StartupLog "Virtual environment Python not found. Skipping autonomous platform."
-        return
-    }
+# ============================================================
+# POSTGRES READINESS
+# ============================================================
 
-    if (-not (Test-Path $SupervisorScript)) {
-        Write-StartupLog "Autonomous supervisor script not found. Skipping."
-        return
-    }
 
-    $ExistingProcesses = Get-CimInstance Win32_Process |
-        Where-Object {
-            $_.Name -match "^python" -and
-            $_.CommandLine -match "run_v37_autonomous_platform\.py"
+function Test-TcpPort {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ComputerName,
+
+        [Parameter(Mandatory = $true)]
+        [int]$Port
+    )
+
+
+    try {
+        $Client = New-Object `
+            System.Net.Sockets.TcpClient
+
+
+        $Connection = $Client.BeginConnect(
+            $ComputerName,
+            $Port,
+            $null,
+            $null
+        )
+
+
+        $Connected = $Connection.AsyncWaitHandle.WaitOne(
+            1000,
+            $false
+        )
+
+
+        if (-not $Connected) {
+            $Client.Close()
+
+            return $false
         }
 
-    if ($ExistingProcesses) {
-        Write-StartupLog "Autonomous platform is already running."
+
+        $Client.EndConnect(
+            $Connection
+        )
+
+
+        $Client.Close()
+
+
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+
+function Wait-ForPostgres {
+    $HostName = "127.0.0.1"
+
+    $Port = 5433
+
+    $TimeoutSeconds = 180
+
+    $StartedAt = Get-Date
+
+
+    Write-StartupLog `
+        "Waiting for PostgreSQL on $HostName`:$Port."
+
+
+    while ($true) {
+        if (
+            Test-TcpPort `
+                -ComputerName $HostName `
+                -Port $Port
+        ) {
+            Write-StartupLog `
+                "PostgreSQL port $Port is available."
+
+            return
+        }
+
+
+        $Elapsed = (
+            (Get-Date) - $StartedAt
+        ).TotalSeconds
+
+
+        if ($Elapsed -gt $TimeoutSeconds) {
+            Write-StartupLog `
+                "Current Docker state:"
+
+            docker ps -a
+
+
+            throw `
+                "PostgreSQL did not become available on port $Port within $TimeoutSeconds seconds."
+        }
+
+
+        Start-Sleep `
+            -Seconds 3
+    }
+}
+
+
+# ============================================================
+# V4.2 DASHBOARD
+# ============================================================
+
+
+function Start-V42Dashboard {
+    if (-not (Test-Path $DashboardCompose)) {
+        throw `
+            "Dashboard compose file does not exist: $DashboardCompose"
+    }
+
+
+    Write-StartupLog `
+        "Starting FinAI V4.2 dashboard."
+
+
+    Push-Location $Project
+
+
+    try {
+        docker compose `
+            -f $DashboardCompose `
+            up -d
+
+
+        if ($LASTEXITCODE -ne 0) {
+            throw `
+                "Dashboard compose startup failed with exit code $LASTEXITCODE."
+        }
+    }
+    finally {
+        Pop-Location
+    }
+
+
+    Write-StartupLog `
+        "V4.2 dashboard launch requested."
+}
+
+
+function Wait-ForDashboard {
+    $Url = "http://127.0.0.1:3838"
+
+    $TimeoutSeconds = 120
+
+    $StartedAt = Get-Date
+
+
+    Write-StartupLog `
+        "Waiting for V4.2 dashboard."
+
+
+    while ($true) {
+        try {
+            $Response = Invoke-WebRequest `
+                -Uri $Url `
+                -UseBasicParsing `
+                -TimeoutSec 5
+
+
+            if ($Response.StatusCode -eq 200) {
+                Write-StartupLog `
+                    "V4.2 dashboard is HTTP-ready."
+
+                return
+            }
+        }
+        catch {
+        }
+
+
+        $Elapsed = (
+            (Get-Date) - $StartedAt
+        ).TotalSeconds
+
+
+        if ($Elapsed -gt $TimeoutSeconds) {
+            Write-StartupLog `
+                "Dashboard did not become ready before timeout."
+
+            docker logs `
+                finai-v42-dashboard `
+                --tail 100
+
+            return
+        }
+
+
+        Start-Sleep `
+            -Seconds 3
+    }
+}
+
+
+# ============================================================
+# AUTONOMOUS SUPERVISOR
+# ============================================================
+
+
+function Get-AutonomousSupervisor {
+    return (
+        Get-CimInstance `
+            Win32_Process |
+        Where-Object {
+            $_.Name -match "^python" -and
+            $_.CommandLine -match `
+                "run_v37_autonomous_platform\.py"
+        }
+    )
+}
+
+
+function Start-AutonomousSupervisor {
+    if (-not (Test-Path $PythonExe)) {
+        throw `
+            "Python virtual environment was not found: $PythonExe"
+    }
+
+
+    if (-not (Test-Path $SupervisorScript)) {
+        throw `
+            "Autonomous supervisor script was not found: $SupervisorScript"
+    }
+
+
+    $Existing = Get-AutonomousSupervisor
+
+
+    if ($Existing) {
+        Write-StartupLog `
+            "Autonomous supervisor is already running."
+
         return
     }
 
-    Write-StartupLog "Starting autonomous platform."
+
+    Write-StartupLog `
+        "Starting autonomous FinAI supervisor."
+
+
+    if (Test-Path $SupervisorStdout) {
+        Remove-Item `
+            $SupervisorStdout `
+            -Force
+    }
+
+
+    if (Test-Path $SupervisorStderr) {
+        Remove-Item `
+            $SupervisorStderr `
+            -Force
+    }
+
 
     Start-Process `
         -FilePath $PythonExe `
         -ArgumentList @(
-            "-u",
-            $SupervisorScript
-        ) `
+        "-u",
+        $SupervisorScript
+    ) `
         -WorkingDirectory $Project `
-        -WindowStyle Minimized
+        -WindowStyle Minimized `
+        -RedirectStandardOutput $SupervisorStdout `
+        -RedirectStandardError $SupervisorStderr
 
-    Write-StartupLog "Autonomous platform launch requested."
+
+    Start-Sleep `
+        -Seconds 5
+
+
+    $Process = Get-AutonomousSupervisor
+
+
+    if (-not $Process) {
+        Write-StartupLog `
+            "Autonomous supervisor exited during startup."
+
+        if (Test-Path $SupervisorStderr) {
+            Get-Content `
+                $SupervisorStderr `
+                -Tail 100
+        }
+
+
+        throw `
+            "Autonomous supervisor is not running."
+    }
+
+
+    Write-StartupLog `
+        "Autonomous supervisor is running."
 }
 
 
+# ============================================================
+# VS CODE
+# ============================================================
+
+
 function Start-VSCode {
-    $CodeCommand = Get-Command "code" -ErrorAction SilentlyContinue
+    $CodeCommand = Get-Command `
+        "code" `
+        -ErrorAction SilentlyContinue
+
 
     if (-not $CodeCommand) {
-        Write-StartupLog "VS Code command 'code' was not found in PATH."
+        Write-StartupLog `
+            "VS Code CLI is not available in PATH."
+
         return
     }
 
+
     if (Test-Path $Workspace) {
-        Write-StartupLog "Opening FinAI V4.2 workspace."
+        Write-StartupLog `
+            "Opening FinAI V4.2 VS Code workspace."
+
 
         Start-Process `
             -FilePath "code" `
@@ -164,7 +555,9 @@ function Start-VSCode {
             -WorkingDirectory $Project
     }
     else {
-        Write-StartupLog "Workspace file not found. Opening project directory."
+        Write-StartupLog `
+            "Workspace file missing. Opening project folder."
+
 
         Start-Process `
             -FilePath "code" `
@@ -174,63 +567,96 @@ function Start-VSCode {
 }
 
 
-function Wait-ForDashboard {
-    $Url = "http://localhost:3838"
-    $TimeoutSeconds = 90
-    $StartedAt = Get-Date
+# ============================================================
+# STATUS SUMMARY
+# ============================================================
 
-    Write-StartupLog "Waiting for dashboard HTTP service."
 
-    while ($true) {
-        try {
-            $Response = Invoke-WebRequest `
-                -Uri $Url `
-                -UseBasicParsing `
-                -TimeoutSec 5
+function Show-SystemStatus {
+    Write-Host ""
+    Write-Host "============================================"
+    Write-Host " FINAI V4.2 SYSTEM STATUS"
+    Write-Host "============================================"
+    Write-Host ""
 
-            if ($Response.StatusCode -eq 200) {
-                Write-StartupLog "Dashboard HTTP service is ready."
-                return
-            }
-        }
-        catch {
-        }
 
-        $Elapsed = ((Get-Date) - $StartedAt).TotalSeconds
+    docker ps `
+        --format `
+        "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-        if ($Elapsed -gt $TimeoutSeconds) {
-            Write-StartupLog "Dashboard did not become HTTP-ready within $TimeoutSeconds seconds."
-            return
-        }
 
-        Start-Sleep -Seconds 3
-    }
+    Write-Host ""
+    Write-Host "PostgreSQL 5433:"
+
+
+    $DatabaseReady = Test-TcpPort `
+        -ComputerName "127.0.0.1" `
+        -Port 5433
+
+
+    Write-Host $DatabaseReady
+
+
+    Write-Host ""
+    Write-Host "Autonomous supervisor:"
+
+
+    Get-AutonomousSupervisor |
+    Select-Object `
+        ProcessId,
+    CommandLine
+
+
+    Write-Host ""
+    Write-Host "Dashboard:"
+    Write-Host "http://127.0.0.1:3838"
+    Write-Host ""
 }
 
 
-function Open-Dashboard {
-    $Url = "http://localhost:3838"
-
-    Write-StartupLog "Opening V4.2 dashboard."
-    Start-Process $Url
-}
+# ============================================================
+# MAIN
+# ============================================================
 
 
 try {
-    Write-StartupLog "FinAI V4.2 startup beginning."
+    Write-StartupLog `
+        "FinAI V4.2 autonomous startup beginning."
 
-    Set-Location $Project
 
     Start-DockerDesktop
-    Start-V42Dashboard
-    Start-AutonomousPlatform
-    Start-VSCode
-    Wait-ForDashboard
-    Open-Dashboard
 
-    Write-StartupLog "FinAI V4.2 startup completed."
+
+    Start-MainInfrastructure
+
+
+    Wait-ForPostgres
+
+
+    Start-V42Dashboard
+
+
+    Wait-ForDashboard
+
+
+    Start-AutonomousSupervisor
+
+
+    Start-VSCode
+
+
+    Show-SystemStatus
+
+
+    Write-StartupLog `
+        "FinAI V4.2 autonomous startup completed."
 }
 catch {
-    Write-StartupLog ("STARTUP FAILURE: " + $_.Exception.Message)
+    Write-StartupLog (
+        "STARTUP FAILURE: " +
+        $_.Exception.Message
+    )
+
+
     throw
 }

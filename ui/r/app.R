@@ -11,7 +11,9 @@ library(tidyr)
 
 
 # ============================================================
-# FINAI V4.2 INTERVIEW DASHBOARD
+# FINAI V4.2
+# Institutional Financial AI Platform
+# Interview Dashboard
 # ============================================================
 
 
@@ -33,6 +35,11 @@ library(tidyr)
 
   x
 }
+
+
+# ============================================================
+# PATHS
+# ============================================================
 
 
 artifact_root <- Sys.getenv(
@@ -79,7 +86,49 @@ shadow_path <- file.path(
 
 
 # ============================================================
-# HELPERS
+# VISUAL PALETTE
+# ============================================================
+
+
+COLOR_BG <- "#101318"
+
+COLOR_GRID <- "#2a3038"
+
+COLOR_TEXT <- "#c7cdd4"
+
+COLOR_MUTED <- "#7f8996"
+
+COLOR_CYAN <- "#2dd4bf"
+
+COLOR_GREEN <- "#4ade80"
+
+COLOR_RED <- "#f87171"
+
+COLOR_ORANGE <- "#fb923c"
+
+COLOR_PURPLE <- "#c084fc"
+
+COLOR_YELLOW <- "#facc15"
+
+COLOR_BLUE <- "#60a5fa"
+
+COLOR_PINK <- "#f472b6"
+
+
+MODEL_COLORS <- c(
+  COLOR_CYAN,
+  COLOR_GREEN,
+  COLOR_ORANGE,
+  COLOR_PURPLE,
+  COLOR_BLUE,
+  COLOR_PINK,
+  COLOR_YELLOW,
+  COLOR_RED
+)
+
+
+# ============================================================
+# JSON HELPERS
 # ============================================================
 
 
@@ -160,17 +209,6 @@ read_evaluations <- function() {
     return(NULL)
   }
 
-  # Supports either:
-  # [
-  #   {...model...},
-  #   {...model...}
-  # ]
-  #
-  # or:
-  # {
-  #   "models": [...]
-  # }
-
   if (!is.null(raw$models)) {
     return(
       raw$models
@@ -201,6 +239,11 @@ read_shadow <- function() {
     shadow_path
   )
 }
+
+
+# ============================================================
+# VALUE HELPERS
+# ============================================================
 
 
 number_or_zero <- function(value) {
@@ -242,18 +285,6 @@ percent_text <- function(value) {
   scales::percent(
     number_or_zero(value),
     accuracy = 0.01
-  )
-}
-
-
-decimal_text <- function(
-  value,
-  digits = 3
-) {
-  formatC(
-    number_or_zero(value),
-    digits = digits,
-    format = "f"
   )
 }
 
@@ -307,17 +338,28 @@ artifact_age <- function(path) {
   if (seconds < 86400) {
     return(
       paste0(
-        round(seconds / 3600, 1),
+        round(
+          seconds / 3600,
+          1
+        ),
         " hr ago"
       )
     )
   }
 
   paste0(
-    round(seconds / 86400, 1),
+    round(
+      seconds / 86400,
+      1
+    ),
     " days ago"
   )
 }
+
+
+# ============================================================
+# DATA FRAME BUILDERS
+# ============================================================
 
 
 metric_dataframe <- function(evaluations) {
@@ -441,9 +483,16 @@ fold_dataframe <- function(
 }
 
 
+# ============================================================
+# PLOTLY HELPERS
+# ============================================================
+
+
 empty_plotly <- function(message) {
   plotly::plot_ly() |>
     plotly::layout(
+      paper_bgcolor = COLOR_BG,
+      plot_bgcolor = COLOR_BG,
       annotations = list(
         list(
           text = message,
@@ -453,8 +502,8 @@ empty_plotly <- function(message) {
           yref = "paper",
           showarrow = FALSE,
           font = list(
-            size = 16,
-            color = "#94a3b8"
+            size = 15,
+            color = COLOR_MUTED
           )
         )
       ),
@@ -463,9 +512,10 @@ empty_plotly <- function(message) {
       ),
       yaxis = list(
         visible = FALSE
-      ),
-      paper_bgcolor = "rgba(0,0,0,0)",
-      plot_bgcolor = "rgba(0,0,0,0)"
+      )
+    ) |>
+    plotly::config(
+      displaylogo = FALSE
     )
 }
 
@@ -477,38 +527,59 @@ plotly_dark_layout <- function(
 ) {
   plot |>
     plotly::layout(
-      paper_bgcolor = "rgba(0,0,0,0)",
-      plot_bgcolor = "rgba(0,0,0,0)",
+      paper_bgcolor = COLOR_BG,
+      plot_bgcolor = COLOR_BG,
       font = list(
-        color = "#cbd5e1"
+        color = COLOR_TEXT,
+        family = "Arial"
       ),
       margin = list(
         l = 70,
         r = 30,
         b = 70,
-        t = 20
+        t = 25
+      ),
+      hoverlabel = list(
+        bgcolor = "#1d2229",
+        bordercolor = "#3a4654",
+        font = list(
+          color = "#ffffff"
+        )
       ),
       xaxis = list(
         title = x_title,
-        gridcolor = "#1e293b",
-        zerolinecolor = "#334155"
+        color = "#aab2bc",
+        gridcolor = COLOR_GRID,
+        zerolinecolor = "#555f6b",
+        linecolor = "#343b44",
+        tickcolor = "#343b44"
       ),
       yaxis = list(
         title = y_title,
-        gridcolor = "#1e293b",
-        zerolinecolor = "#334155"
+        color = "#aab2bc",
+        gridcolor = COLOR_GRID,
+        zerolinecolor = "#555f6b",
+        linecolor = "#343b44",
+        tickcolor = "#343b44"
       ),
       legend = list(
         orientation = "h",
         x = 0,
-        y = 1.1
+        y = 1.12,
+        font = list(
+          color = COLOR_TEXT
+        )
       )
+    ) |>
+    plotly::config(
+      displaylogo = FALSE,
+      responsive = TRUE
     )
 }
 
 
 # ============================================================
-# UI COMPONENT HELPERS
+# UI HELPERS
 # ============================================================
 
 
@@ -561,16 +632,27 @@ section_header <- function(
 }
 
 
-panel_box <- function(
+chart_panel <- function(
   title,
-  ...
+  subtitle,
+  output_id,
+  height = "360px"
 ) {
-  shinydashboard::box(
-    title = title,
-    width = 12,
-    class = "finai-box",
-    solidHeader = FALSE,
-    ...
+  div(
+    class = "dashboard-panel chart-panel",
+    div(
+      class = "panel-header",
+      h3(
+        title
+      ),
+      span(
+        subtitle
+      )
+    ),
+    plotlyOutput(
+      output_id,
+      height = height
+    )
   )
 }
 
@@ -712,8 +794,8 @@ ui <- dashboardPage(
         section_header(
           "Executive overview",
           paste(
-            "Governed machine-learning research,",
-            "validation and paper execution."
+            "Research performance, model governance",
+            "and deployment readiness."
           )
         ),
         fluidRow(
@@ -753,34 +835,24 @@ ui <- dashboardPage(
         fluidRow(
           column(
             width = 8,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Model ranking"
-                ),
-                span(
-                  "Composite research score"
-                )
-              ),
-              plotlyOutput(
-                "composite_plot",
-                height = "370px"
-              )
+            chart_panel(
+              "Model ranking",
+              "Composite research score",
+              "composite_plot",
+              "380px"
             )
           ),
           column(
             width = 4,
             div(
-              class = "dashboard-panel",
+              class = "dashboard-panel governance-panel",
               div(
                 class = "panel-header",
                 h3(
-                  "Governance"
+                  "Governance pipeline"
                 ),
                 span(
-                  "Promotion pipeline"
+                  "Promotion state"
                 )
               ),
               uiOutput(
@@ -792,40 +864,20 @@ ui <- dashboardPage(
         fluidRow(
           column(
             width = 6,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Strategy return"
-                ),
-                span(
-                  "Net of modeled transaction costs"
-                )
-              ),
-              plotlyOutput(
-                "return_plot",
-                height = "340px"
-              )
+            chart_panel(
+              "Economic performance",
+              "Net return after modeled costs",
+              "return_plot",
+              "350px"
             )
           ),
           column(
             width = 6,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Risk / return map"
-                ),
-                span(
-                  "Model comparison"
-                )
-              ),
-              plotlyOutput(
-                "risk_return_plot",
-                height = "340px"
-              )
+            chart_panel(
+              "Risk / return map",
+              "Return relative to maximum drawdown",
+              "risk_return_plot",
+              "350px"
             )
           )
         ),
@@ -853,7 +905,7 @@ ui <- dashboardPage(
 
 
       # ======================================================
-      # MODELS
+      # MODEL LAB
       # ======================================================
 
       tabItem(
@@ -862,46 +914,46 @@ ui <- dashboardPage(
           "Model laboratory",
           paste(
             "Compare predictive quality,",
-            "economic performance and robustness."
+            "economic performance and stability."
           )
         ),
         fluidRow(
           column(
             width = 6,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Classification quality"
-                ),
-                span(
-                  "Balanced accuracy vs macro F1"
-                )
-              ),
-              plotlyOutput(
-                "classification_plot",
-                height = "380px"
-              )
+            chart_panel(
+              "Classification quality",
+              "Balanced accuracy versus macro F1",
+              "classification_plot",
+              "390px"
             )
           ),
           column(
             width = 6,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Fold consistency"
-                ),
-                span(
-                  "Positive walk-forward fold fraction"
-                )
-              ),
-              plotlyOutput(
-                "consistency_plot",
-                height = "380px"
-              )
+            chart_panel(
+              "Fold consistency",
+              "Fraction of profitable walk-forward folds",
+              "consistency_plot",
+              "390px"
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            chart_panel(
+              "Economic performance",
+              "Net strategy return by model",
+              "model_return_plot",
+              "360px"
+            )
+          ),
+          column(
+            width = 6,
+            chart_panel(
+              "Drawdown comparison",
+              "Maximum drawdown by model",
+              "drawdown_plot",
+              "360px"
             )
           )
         ),
@@ -916,7 +968,10 @@ ui <- dashboardPage(
                   "Model leaderboard"
                 ),
                 span(
-                  "Cross-validation research metrics"
+                  paste(
+                    "Sortable research metrics across",
+                    "all evaluated candidates"
+                  )
                 )
               ),
               DTOutput(
@@ -937,9 +992,8 @@ ui <- dashboardPage(
         section_header(
           "Validation & governance",
           paste(
-            "Historical qualification,",
-            "prospective shadow validation",
-            "and controlled promotion."
+            "Walk-forward testing, historical qualification",
+            "and prospective shadow validation."
           )
         ),
         fluidRow(
@@ -971,40 +1025,40 @@ ui <- dashboardPage(
         fluidRow(
           column(
             width = 6,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Walk-forward returns"
-                ),
-                span(
-                  "Winning candidate by fold"
-                )
-              ),
-              plotlyOutput(
-                "fold_return_plot",
-                height = "360px"
-              )
+            chart_panel(
+              "Walk-forward returns",
+              "Green = profitable fold · Red = losing fold",
+              "fold_return_plot",
+              "370px"
             )
           ),
           column(
             width = 6,
-            div(
-              class = "dashboard-panel",
-              div(
-                class = "panel-header",
-                h3(
-                  "Walk-forward classification"
-                ),
-                span(
-                  "Balanced accuracy across folds"
-                )
-              ),
-              plotlyOutput(
-                "fold_accuracy_plot",
-                height = "360px"
-              )
+            chart_panel(
+              "Walk-forward accuracy",
+              "Balanced accuracy across folds",
+              "fold_accuracy_plot",
+              "370px"
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            chart_panel(
+              "Fold drawdown",
+              "Maximum drawdown across validation windows",
+              "fold_drawdown_plot",
+              "350px"
+            )
+          ),
+          column(
+            width = 6,
+            chart_panel(
+              "Accuracy vs return",
+              "Validation relationship by fold",
+              "fold_scatter_plot",
+              "350px"
             )
           )
         ),
@@ -1019,7 +1073,7 @@ ui <- dashboardPage(
                   "Governance decision"
                 ),
                 span(
-                  "Current promotion state"
+                  "Current model-promotion state"
                 )
               ),
               uiOutput(
@@ -1040,8 +1094,8 @@ ui <- dashboardPage(
         section_header(
           "Research diagnostics",
           paste(
-            "Detailed evaluation metrics",
-            "for interview and model-review workflows."
+            "Detailed quantitative evaluation",
+            "for model review and interviews."
           )
         ),
         fluidRow(
@@ -1052,10 +1106,10 @@ ui <- dashboardPage(
               div(
                 class = "panel-header",
                 h3(
-                  "Model research matrix"
+                  "Research matrix"
                 ),
                 span(
-                  "Sortable and searchable evaluation data"
+                  "Searchable evaluation dataset"
                 )
               ),
               DTOutput(
@@ -1073,47 +1127,58 @@ ui <- dashboardPage(
                 class = "panel-header",
                 h3(
                   "Research methodology"
+                ),
+                span(
+                  "End-to-end model-development process"
                 )
               ),
               div(
                 class = "methodology-grid",
                 div(
                   class = "method-card",
-                  h4("01 · Data"),
+                  h4(
+                    "01 · DATA"
+                  ),
                   p(
                     paste(
-                      "AAPL target series with SPY",
-                      "and QQQ cross-market context."
+                      "AAPL target market with SPY and QQQ",
+                      "cross-market context."
                     )
                   )
                 ),
                 div(
                   class = "method-card",
-                  h4("02 · Features"),
+                  h4(
+                    "02 · FEATURES"
+                  ),
                   p(
                     paste(
-                      "Cost-aware momentum, volatility,",
-                      "regime and relative-market signals."
+                      "Momentum, volatility, regime,",
+                      "relative-market and cost-aware signals."
                     )
                   )
                 ),
                 div(
                   class = "method-card",
-                  h4("03 · Validation"),
+                  h4(
+                    "03 · VALIDATION"
+                  ),
                   p(
                     paste(
-                      "Purged walk-forward evaluation",
-                      "before untouched holdout testing."
+                      "Purged walk-forward testing followed",
+                      "by untouched holdout evaluation."
                     )
                   )
                 ),
                 div(
                   class = "method-card",
-                  h4("04 · Governance"),
+                  h4(
+                    "04 · GOVERNANCE"
+                  ),
                   p(
                     paste(
-                      "Candidates must qualify historically",
-                      "before prospective shadow validation."
+                      "Historical qualification precedes",
+                      "prospective shadow validation."
                     )
                   )
                 )
@@ -1133,8 +1198,8 @@ ui <- dashboardPage(
         section_header(
           "Platform architecture",
           paste(
-            "End-to-end flow from market data",
-            "to governed paper execution."
+            "Market-data ingestion through",
+            "governed paper execution."
           )
         ),
         fluidRow(
@@ -1145,71 +1210,103 @@ ui <- dashboardPage(
               div(
                 class = "architecture-flow",
                 div(
-                  class = "architecture-node",
-                  h4("Market data"),
-                  p("AAPL · SPY · QQQ")
+                  class = "architecture-node node-cyan",
+                  h4(
+                    "Market data"
+                  ),
+                  p(
+                    "AAPL · SPY · QQQ"
+                  )
                 ),
                 div(
                   class = "architecture-arrow",
                   "→"
                 ),
                 div(
-                  class = "architecture-node",
-                  h4("PostgreSQL"),
-                  p("Historical + operational state")
+                  class = "architecture-node node-blue",
+                  h4(
+                    "PostgreSQL"
+                  ),
+                  p(
+                    "Historical + operational state"
+                  )
                 ),
                 div(
                   class = "architecture-arrow",
                   "→"
                 ),
                 div(
-                  class = "architecture-node",
-                  h4("Feature engine"),
-                  p("V4.1 multi-market features")
+                  class = "architecture-node node-orange",
+                  h4(
+                    "Feature engine"
+                  ),
+                  p(
+                    "V4.1 multi-market features"
+                  )
                 ),
                 div(
                   class = "architecture-arrow",
                   "→"
                 ),
                 div(
-                  class = "architecture-node",
-                  h4("Model lab"),
-                  p("Regime-aware candidates")
+                  class = "architecture-node node-purple",
+                  h4(
+                    "Model laboratory"
+                  ),
+                  p(
+                    "Regime-aware candidates"
+                  )
                 )
               ),
               div(
                 class = "architecture-flow second-row",
                 div(
-                  class = "architecture-node",
-                  h4("Walk-forward"),
-                  p("Purged research evaluation")
+                  class = "architecture-node node-yellow",
+                  h4(
+                    "Walk-forward"
+                  ),
+                  p(
+                    "Purged historical validation"
+                  )
                 ),
                 div(
                   class = "architecture-arrow",
                   "→"
                 ),
                 div(
-                  class = "architecture-node",
-                  h4("Holdout"),
-                  p("Untouched validation")
+                  class = "architecture-node node-pink",
+                  h4(
+                    "Holdout"
+                  ),
+                  p(
+                    "Untouched final evaluation"
+                  )
                 ),
                 div(
                   class = "architecture-arrow",
                   "→"
                 ),
                 div(
-                  class = "architecture-node",
-                  h4("Shadow"),
-                  p("Prospective observation")
+                  class = "architecture-node node-green",
+                  h4(
+                    "Shadow"
+                  ),
+                  p(
+                    "Prospective validation"
+                  )
                 ),
                 div(
                   class = "architecture-arrow",
                   "→"
                 ),
                 div(
-                  class = "architecture-node",
-                  h4("Paper execution"),
-                  p("Governed only")
+                  class = "architecture-node node-red",
+                  h4(
+                    "Paper execution"
+                  ),
+                  p(
+                    "Champion-gated execution"
+                  )
                 )
               )
             )
@@ -1231,10 +1328,10 @@ ui <- dashboardPage(
                   ),
                   p(
                     paste(
-                      "No model is promoted simply because",
-                      "it is the best candidate.",
-                      "Historical and prospective",
-                      "qualification gates remain active."
+                      "A candidate is not promoted merely",
+                      "because it ranks first.",
+                      "Historical qualification and",
+                      "prospective validation remain active."
                     )
                   )
                 )
@@ -1258,6 +1355,8 @@ server <- function(
   output,
   session
 ) {
+  # Refresh artifact state every five seconds.
+
   refresh <- reactiveTimer(
     5000
   )
@@ -1265,24 +1364,28 @@ server <- function(
 
   latest <- reactive({
     refresh()
+
     read_latest_learning()
   })
 
 
   evaluations <- reactive({
     refresh()
+
     read_evaluations()
   })
 
 
   champion <- reactive({
     refresh()
+
     read_champion()
   })
 
 
   shadow <- reactive({
     refresh()
+
     read_shadow()
   })
 
@@ -1316,16 +1419,12 @@ server <- function(
 
 
   # ==========================================================
-  # TOP STATUS
+  # STATUS STRIP
   # ==========================================================
 
 
   output$top_system_status <- renderText({
-    if (
-      is.null(
-        latest()
-      )
-    ) {
+    if (is.null(latest())) {
       "WAITING"
     } else {
       "ONLINE"
@@ -1374,11 +1473,7 @@ server <- function(
 
 
   output$system_status <- renderText({
-    if (
-      is.null(
-        latest()
-      )
-    ) {
+    if (is.null(latest())) {
       "WAITING"
     } else {
       "ONLINE"
@@ -1387,11 +1482,7 @@ server <- function(
 
 
   output$champion_status <- renderText({
-    if (
-      is.null(
-        champion()
-      )
-    ) {
+    if (is.null(champion())) {
       "NONE"
     } else {
       "QUALIFIED"
@@ -1463,11 +1554,7 @@ server <- function(
 
 
   output$execution_status <- renderText({
-    if (
-      is.null(
-        champion()
-      )
-    ) {
+    if (is.null(champion())) {
       "BLOCKED"
     } else {
       "PAPER READY"
@@ -1482,8 +1569,11 @@ server <- function(
 
   output$governance_pipeline <- renderUI({
     current <- latest()
+
     current_shadow <- shadow()
+
     champ <- champion()
+
 
     historical_pass <- (
       !is.null(current) &&
@@ -1492,20 +1582,20 @@ server <- function(
         )
     )
 
+
     shadow_exists <- !is.null(
       current_shadow
     )
+
 
     champion_exists <- !is.null(
       champ
     )
 
+
     tagList(
       div(
-        class = paste(
-          "pipeline-stage",
-          "pipeline-active"
-        ),
+        class = "pipeline-stage pipeline-active",
         span(
           class = "pipeline-number",
           "01"
@@ -1593,7 +1683,7 @@ server <- function(
 
 
   # ==========================================================
-  # COMPOSITE SCORE
+  # MODEL RANKING
   # ==========================================================
 
 
@@ -1608,10 +1698,18 @@ server <- function(
       )
     }
 
+
     frame <- frame |>
       arrange(
         composite_score
       )
+
+
+    colors <- rep(
+      MODEL_COLORS,
+      length.out = nrow(frame)
+    )
+
 
     plot <- plotly::plot_ly(
       data = frame,
@@ -1622,11 +1720,19 @@ server <- function(
       ),
       type = "bar",
       orientation = "h",
+      marker = list(
+        color = colors,
+        opacity = 0.88,
+        line = list(
+          color = "#d1d5db",
+          width = 0.4
+        )
+      ),
       text = ~ paste0(
         "<b>",
         model,
         "</b><br>",
-        "Composite: ",
+        "Composite score: ",
         round(
           composite_score,
           4
@@ -1647,6 +1753,7 @@ server <- function(
       hoverinfo = "text"
     )
 
+
     plotly_dark_layout(
       plot,
       x_title = "Composite score",
@@ -1656,7 +1763,7 @@ server <- function(
 
 
   # ==========================================================
-  # RETURNS
+  # EXECUTIVE RETURN
   # ==========================================================
 
 
@@ -1671,10 +1778,19 @@ server <- function(
       )
     }
 
+
     frame <- frame |>
       arrange(
         net_return
       )
+
+
+    colors <- ifelse(
+      frame$net_return >= 0,
+      COLOR_GREEN,
+      COLOR_RED
+    )
+
 
     plot <- plotly::plot_ly(
       data = frame,
@@ -1685,6 +1801,10 @@ server <- function(
       ),
       type = "bar",
       orientation = "h",
+      marker = list(
+        color = colors,
+        opacity = 0.9
+      ),
       text = ~ paste0(
         "<b>",
         model,
@@ -1709,149 +1829,30 @@ server <- function(
       hoverinfo = "text"
     )
 
+
     plot <- plotly_dark_layout(
       plot,
       x_title = "Net return",
       y_title = ""
     )
 
-    plot |>
-      plotly::layout(
-        xaxis = list(
-          tickformat = ".1%"
-        )
-      )
-  })
-
-
-  # ==========================================================
-  # CLASSIFICATION QUALITY
-  # ==========================================================
-
-
-  output$classification_plot <- renderPlotly({
-    frame <- metrics()
-
-    if (nrow(frame) == 0) {
-      return(
-        empty_plotly(
-          "No classification metrics available."
-        )
-      )
-    }
-
-    plot <- plotly::plot_ly(
-      data = frame,
-      x = ~model,
-      y = ~balanced_accuracy,
-      type = "bar",
-      name = "Balanced accuracy",
-      text = ~ percent(
-        balanced_accuracy,
-        accuracy = 0.01
-      ),
-      hovertemplate = paste(
-        "<b>%{x}</b><br>",
-        "Balanced accuracy: %{text}",
-        "<extra></extra>"
-      )
-    )
-
-    plot <- plot |>
-      plotly::add_trace(
-        y = ~macro_f1,
-        name = "Macro F1",
-        text = ~ percent(
-          macro_f1,
-          accuracy = 0.01
-        ),
-        hovertemplate = paste(
-          "<b>%{x}</b><br>",
-          "Macro F1: %{text}",
-          "<extra></extra>"
-        )
-      )
-
-    plot <- plotly_dark_layout(
-      plot,
-      x_title = "",
-      y_title = "Classification score"
-    )
-
-    plot |>
-      plotly::layout(
-        barmode = "group",
-        yaxis = list(
-          tickformat = ".0%",
-          gridcolor = "#1e293b"
-        )
-      )
-  })
-
-
-  # ==========================================================
-  # CONSISTENCY
-  # ==========================================================
-
-
-  output$consistency_plot <- renderPlotly({
-    frame <- metrics()
-
-    if (nrow(frame) == 0) {
-      return(
-        empty_plotly(
-          "No fold consistency metrics available."
-        )
-      )
-    }
-
-    frame <- frame |>
-      arrange(
-        positive_fold_fraction
-      )
-
-    plot <- plotly::plot_ly(
-      data = frame,
-      x = ~positive_fold_fraction,
-      y = ~ reorder(
-        model,
-        positive_fold_fraction
-      ),
-      type = "bar",
-      orientation = "h",
-      text = ~ percent(
-        positive_fold_fraction,
-        accuracy = 1
-      ),
-      hovertemplate = paste(
-        "<b>%{y}</b><br>",
-        "Positive folds: %{text}",
-        "<extra></extra>"
-      )
-    )
-
-    plot <- plotly_dark_layout(
-      plot,
-      x_title = "Positive fold fraction",
-      y_title = ""
-    )
 
     plot |>
       plotly::layout(
         xaxis = list(
-          tickformat = ".0%",
-          range = c(
-            0,
-            1
-          ),
-          gridcolor = "#1e293b"
+          title = "Net return",
+          tickformat = ".1%",
+          gridcolor = COLOR_GRID,
+          zeroline = TRUE,
+          zerolinecolor = "#8b949e",
+          zerolinewidth = 1.5
         )
       )
   })
 
 
   # ==========================================================
-  # RISK RETURN
+  # RISK / RETURN
   # ==========================================================
 
 
@@ -1861,10 +1862,17 @@ server <- function(
     if (nrow(frame) == 0) {
       return(
         empty_plotly(
-          "No risk/return metrics available."
+          "No risk / return metrics available."
         )
       )
     }
+
+
+    colors <- rep(
+      MODEL_COLORS,
+      length.out = nrow(frame)
+    )
+
 
     plot <- plotly::plot_ly(
       data = frame,
@@ -1874,9 +1882,18 @@ server <- function(
       mode = "markers+text",
       text = ~model,
       textposition = "top center",
+      textfont = list(
+        color = "#d6d9de",
+        size = 10
+      ),
       marker = list(
-        size = 13,
-        opacity = 0.85
+        size = 15,
+        color = colors,
+        opacity = 0.92,
+        line = list(
+          color = "#f3f4f6",
+          width = 0.7
+        )
       ),
       hovertext = ~ paste0(
         "<b>",
@@ -1903,28 +1920,328 @@ server <- function(
       hoverinfo = "text"
     )
 
+
     plot <- plotly_dark_layout(
       plot,
       x_title = "Maximum drawdown",
       y_title = "Net return"
     )
 
+
     plot |>
       plotly::layout(
         xaxis = list(
+          title = "Maximum drawdown",
           tickformat = ".1%",
-          gridcolor = "#1e293b"
+          gridcolor = COLOR_GRID
         ),
         yaxis = list(
+          title = "Net return",
           tickformat = ".1%",
-          gridcolor = "#1e293b"
+          gridcolor = COLOR_GRID,
+          zeroline = TRUE,
+          zerolinecolor = "#8b949e"
         )
       )
   })
 
 
   # ==========================================================
-  # WALK-FORWARD FOLD RETURNS
+  # CLASSIFICATION
+  # ==========================================================
+
+
+  output$classification_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No classification metrics available."
+        )
+      )
+    }
+
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~model,
+      y = ~balanced_accuracy,
+      type = "bar",
+      name = "Balanced accuracy",
+      marker = list(
+        color = COLOR_PURPLE,
+        opacity = 0.9
+      ),
+      text = ~ percent(
+        balanced_accuracy,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "<b>%{x}</b><br>",
+        "Balanced accuracy: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+
+    plot <- plot |>
+      plotly::add_trace(
+        y = ~macro_f1,
+        name = "Macro F1",
+        marker = list(
+          color = COLOR_ORANGE,
+          opacity = 0.9
+        ),
+        text = ~ percent(
+          macro_f1,
+          accuracy = 0.01
+        ),
+        hovertemplate = paste(
+          "<b>%{x}</b><br>",
+          "Macro F1: %{text}",
+          "<extra></extra>"
+        )
+      )
+
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "",
+      y_title = "Classification score"
+    )
+
+
+    plot |>
+      plotly::layout(
+        barmode = "group",
+        yaxis = list(
+          title = "Classification score",
+          tickformat = ".0%",
+          gridcolor = COLOR_GRID,
+          rangemode = "tozero"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # FOLD CONSISTENCY
+  # ==========================================================
+
+
+  output$consistency_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No fold consistency metrics available."
+        )
+      )
+    }
+
+
+    frame <- frame |>
+      arrange(
+        positive_fold_fraction
+      )
+
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~positive_fold_fraction,
+      y = ~ reorder(
+        model,
+        positive_fold_fraction
+      ),
+      type = "bar",
+      orientation = "h",
+      marker = list(
+        color = COLOR_YELLOW,
+        opacity = 0.88,
+        line = list(
+          color = "#fde68a",
+          width = 0.6
+        )
+      ),
+      text = ~ percent(
+        positive_fold_fraction,
+        accuracy = 1
+      ),
+      hovertemplate = paste(
+        "<b>%{y}</b><br>",
+        "Positive folds: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Positive fold fraction",
+      y_title = ""
+    )
+
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          title = "Positive fold fraction",
+          tickformat = ".0%",
+          range = c(
+            0,
+            1
+          ),
+          gridcolor = COLOR_GRID
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # MODEL RETURN
+  # ==========================================================
+
+
+  output$model_return_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No economic metrics available."
+        )
+      )
+    }
+
+
+    frame <- frame |>
+      arrange(
+        net_return
+      )
+
+
+    colors <- ifelse(
+      frame$net_return >= 0,
+      COLOR_GREEN,
+      COLOR_RED
+    )
+
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~net_return,
+      y = ~ reorder(
+        model,
+        net_return
+      ),
+      type = "bar",
+      orientation = "h",
+      marker = list(
+        color = colors,
+        opacity = 0.9
+      ),
+      text = ~ percent(
+        net_return,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "<b>%{y}</b><br>",
+        "Net return: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Net return",
+      y_title = ""
+    )
+
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          title = "Net return",
+          tickformat = ".1%",
+          gridcolor = COLOR_GRID,
+          zeroline = TRUE,
+          zerolinecolor = "#8b949e"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # DRAWDOWN
+  # ==========================================================
+
+
+  output$drawdown_plot <- renderPlotly({
+    frame <- metrics()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No drawdown metrics available."
+        )
+      )
+    }
+
+
+    frame <- frame |>
+      arrange(
+        maximum_drawdown
+      )
+
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~maximum_drawdown,
+      y = ~ reorder(
+        model,
+        maximum_drawdown
+      ),
+      type = "bar",
+      orientation = "h",
+      marker = list(
+        color = COLOR_ORANGE,
+        opacity = 0.9
+      ),
+      text = ~ percent(
+        maximum_drawdown,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "<b>%{y}</b><br>",
+        "Maximum drawdown: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Maximum drawdown",
+      y_title = ""
+    )
+
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          title = "Maximum drawdown",
+          tickformat = ".1%",
+          gridcolor = COLOR_GRID
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # WALK-FORWARD RETURNS
   # ==========================================================
 
 
@@ -1939,6 +2256,14 @@ server <- function(
       )
     }
 
+
+    frame$bar_color <- ifelse(
+      frame$net_return >= 0,
+      COLOR_GREEN,
+      COLOR_RED
+    )
+
+
     plot <- plotly::plot_ly(
       data = frame,
       x = ~ factor(
@@ -1946,6 +2271,10 @@ server <- function(
       ),
       y = ~net_return,
       type = "bar",
+      marker = list(
+        color = frame$bar_color,
+        opacity = 0.9
+      ),
       text = ~ percent(
         net_return,
         accuracy = 0.01
@@ -1957,17 +2286,23 @@ server <- function(
       )
     )
 
+
     plot <- plotly_dark_layout(
       plot,
       x_title = "Walk-forward fold",
       y_title = "Net return"
     )
 
+
     plot |>
       plotly::layout(
         yaxis = list(
+          title = "Net return",
           tickformat = ".1%",
-          gridcolor = "#1e293b"
+          gridcolor = COLOR_GRID,
+          zeroline = TRUE,
+          zerolinecolor = "#8b949e",
+          zerolinewidth = 1.5
         )
       )
   })
@@ -1989,6 +2324,7 @@ server <- function(
       )
     }
 
+
     plot <- plotly::plot_ly(
       data = frame,
       x = ~fold,
@@ -1996,10 +2332,16 @@ server <- function(
       type = "scatter",
       mode = "lines+markers",
       marker = list(
-        size = 9
+        size = 9,
+        color = COLOR_CYAN,
+        line = list(
+          color = "#99f6e4",
+          width = 1
+        )
       ),
       line = list(
-        width = 3
+        width = 3,
+        color = COLOR_CYAN
       ),
       text = ~ percent(
         balanced_accuracy,
@@ -2012,29 +2354,186 @@ server <- function(
       )
     )
 
+
     plot <- plotly_dark_layout(
       plot,
       x_title = "Walk-forward fold",
       y_title = "Balanced accuracy"
     )
 
+
     plot |>
       plotly::layout(
         yaxis = list(
+          title = "Balanced accuracy",
           tickformat = ".0%",
-          gridcolor = "#1e293b"
+          gridcolor = COLOR_GRID
         )
       )
   })
 
 
   # ==========================================================
-  # TABLES
+  # FOLD DRAWDOWN
+  # ==========================================================
+
+
+  output$fold_drawdown_plot <- renderPlotly({
+    frame <- folds()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No fold drawdown data available."
+        )
+      )
+    }
+
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~ factor(
+        fold
+      ),
+      y = ~maximum_drawdown,
+      type = "bar",
+      marker = list(
+        color = COLOR_ORANGE,
+        opacity = 0.88
+      ),
+      text = ~ percent(
+        maximum_drawdown,
+        accuracy = 0.01
+      ),
+      hovertemplate = paste(
+        "Fold %{x}<br>",
+        "Maximum drawdown: %{text}",
+        "<extra></extra>"
+      )
+    )
+
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Walk-forward fold",
+      y_title = "Maximum drawdown"
+    )
+
+
+    plot |>
+      plotly::layout(
+        yaxis = list(
+          title = "Maximum drawdown",
+          tickformat = ".1%",
+          gridcolor = COLOR_GRID
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # FOLD ACCURACY VS RETURN
+  # ==========================================================
+
+
+  output$fold_scatter_plot <- renderPlotly({
+    frame <- folds()
+
+    if (nrow(frame) == 0) {
+      return(
+        empty_plotly(
+          "No fold relationship data available."
+        )
+      )
+    }
+
+
+    colors <- ifelse(
+      frame$net_return >= 0,
+      COLOR_GREEN,
+      COLOR_RED
+    )
+
+
+    plot <- plotly::plot_ly(
+      data = frame,
+      x = ~balanced_accuracy,
+      y = ~net_return,
+      type = "scatter",
+      mode = "markers+text",
+      text = ~ paste0(
+        "Fold ",
+        fold
+      ),
+      textposition = "top center",
+      marker = list(
+        size = 14,
+        color = colors,
+        opacity = 0.9,
+        line = list(
+          color = "#ffffff",
+          width = 0.6
+        )
+      ),
+      hovertext = ~ paste0(
+        "<b>Fold ",
+        fold,
+        "</b><br>",
+        "Balanced accuracy: ",
+        percent(
+          balanced_accuracy,
+          accuracy = 0.01
+        ),
+        "<br>",
+        "Net return: ",
+        percent(
+          net_return,
+          accuracy = 0.01
+        ),
+        "<br>",
+        "Drawdown: ",
+        percent(
+          maximum_drawdown,
+          accuracy = 0.01
+        )
+      ),
+      hoverinfo = "text"
+    )
+
+
+    plot <- plotly_dark_layout(
+      plot,
+      x_title = "Balanced accuracy",
+      y_title = "Net return"
+    )
+
+
+    plot |>
+      plotly::layout(
+        xaxis = list(
+          title = "Balanced accuracy",
+          tickformat = ".0%",
+          gridcolor = COLOR_GRID
+        ),
+        yaxis = list(
+          title = "Net return",
+          tickformat = ".1%",
+          gridcolor = COLOR_GRID,
+          zeroline = TRUE,
+          zerolinecolor = "#8b949e"
+        )
+      )
+  })
+
+
+  # ==========================================================
+  # MODEL TABLE
   # ==========================================================
 
 
   output$model_table <- renderDT({
     frame <- metrics()
+
 
     if (nrow(frame) == 0) {
       frame <- data.frame(
@@ -2042,10 +2541,13 @@ server <- function(
       )
     }
 
+
     display <- frame
 
+
     if (
-      "balanced_accuracy" %in% names(display)
+      "balanced_accuracy" %in%
+        names(display)
     ) {
       display <- display |>
         mutate(
@@ -2079,6 +2581,7 @@ server <- function(
         )
     }
 
+
     DT::datatable(
       display,
       rownames = FALSE,
@@ -2093,8 +2596,14 @@ server <- function(
   })
 
 
+  # ==========================================================
+  # RESEARCH TABLE
+  # ==========================================================
+
+
   output$research_table <- renderDT({
     frame <- metrics()
+
 
     if (nrow(frame) == 0) {
       frame <- data.frame(
@@ -2102,7 +2611,8 @@ server <- function(
       )
     }
 
-    DT::datatable(
+
+    table <- DT::datatable(
       frame,
       rownames = FALSE,
       filter = "top",
@@ -2112,26 +2622,43 @@ server <- function(
         autoWidth = TRUE
       ),
       class = "stripe hover compact"
-    ) |>
-      DT::formatRound(
-        columns = intersect(
-          c(
-            "balanced_accuracy",
-            "macro_f1",
-            "net_return",
-            "maximum_drawdown",
-            "positive_fold_fraction",
-            "composite_score"
-          ),
-          names(frame)
-        ),
+    )
+
+
+    numeric_columns <- intersect(
+      c(
+        "balanced_accuracy",
+        "macro_f1",
+        "net_return",
+        "maximum_drawdown",
+        "positive_fold_fraction",
+        "composite_score"
+      ),
+      names(frame)
+    )
+
+
+    if (length(numeric_columns) > 0) {
+      table <- DT::formatRound(
+        table,
+        columns = numeric_columns,
         digits = 4
       )
+    }
+
+
+    table
   })
+
+
+  # ==========================================================
+  # LATEST CYCLE TABLE
+  # ==========================================================
 
 
   output$latest_table <- renderDT({
     current <- latest()
+
 
     if (is.null(current)) {
       frame <- data.frame(
@@ -2198,6 +2725,7 @@ server <- function(
       )
     }
 
+
     DT::datatable(
       frame,
       rownames = FALSE,
@@ -2218,8 +2746,11 @@ server <- function(
 
   output$governance_detail <- renderUI({
     current <- latest()
+
     current_shadow <- shadow()
+
     champ <- champion()
+
 
     historical_pass <- (
       !is.null(current) &&
@@ -2227,6 +2758,7 @@ server <- function(
           current$historical_qualified
         )
     )
+
 
     historical_reason <- if (
       is.null(current)
@@ -2236,17 +2768,27 @@ server <- function(
       safe_character(
         current$historical_reason,
         if (historical_pass) {
-          "Candidate satisfied historical qualification."
+          paste(
+            "Candidate satisfied",
+            "historical qualification."
+          )
         } else {
-          "Candidate has not satisfied qualification."
+          paste(
+            "Candidate has not satisfied",
+            "historical qualification."
+          )
         }
       )
     }
 
+
     shadow_text <- if (
       is.null(current_shadow)
     ) {
-      "No candidate is currently in prospective shadow validation."
+      paste(
+        "No candidate is currently in",
+        "prospective shadow validation."
+      )
     } else {
       paste(
         "Shadow state:",
@@ -2259,12 +2801,14 @@ server <- function(
       )
     }
 
+
     champion_text <- if (
       is.null(champ)
     ) {
       paste(
         "No qualified champion exists.",
-        "Paper execution remains governed and blocked."
+        "Paper execution remains governed",
+        "and blocked."
       )
     } else {
       paste(
@@ -2273,14 +2817,21 @@ server <- function(
       )
     }
 
+
     tagList(
       div(
         class = "governance-detail-grid",
         div(
           class = if (historical_pass) {
-            "governance-detail-card state-pass"
+            paste(
+              "governance-detail-card",
+              "state-pass"
+            )
           } else {
-            "governance-detail-card state-block"
+            paste(
+              "governance-detail-card",
+              "state-block"
+            )
           },
           h4(
             "Historical qualification"
@@ -2322,9 +2873,15 @@ server <- function(
               champ
             )
           ) {
-            "governance-detail-card state-block"
+            paste(
+              "governance-detail-card",
+              "state-block"
+            )
           } else {
-            "governance-detail-card state-pass"
+            paste(
+              "governance-detail-card",
+              "state-pass"
+            )
           },
           h4(
             "Champion"
@@ -2360,6 +2917,11 @@ server <- function(
     )
   })
 }
+
+
+# ============================================================
+# START APPLICATION
+# ============================================================
 
 
 shinyApp(

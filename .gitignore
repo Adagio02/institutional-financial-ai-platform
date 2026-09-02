@@ -33,3 +33,6 @@ pytest-temp-v16/
 pytest-temp-v17/
 artifacts/
 Reports/v30_*
+
+.VSCodeCounter/
+.v*_backup_*/
