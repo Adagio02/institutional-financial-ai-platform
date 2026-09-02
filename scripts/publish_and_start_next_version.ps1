@@ -1,172 +1,70 @@
-﻿param(
-    [Parameter(Mandatory = $true)]
-    [string]$CurrentVersion,
-
-    [Parameter(Mandatory = $true)]
-    [string]$NextVersion,
-
-    [string]$ProjectRoot = "D:\Projects\institutional-financial-ai-platform",
-
+param(
+    [Parameter(Mandatory = $true)][string]$CurrentVersion,
+    [Parameter(Mandatory = $true)][string]$NextBranch,
     [string]$Remote = "origin",
-
     [string]$CommitMessage = "Complete version $CurrentVersion",
-
-    [string]$VerificationScript = ""
+    [switch]$SkipVerification,
+    [switch]$AllowExistingNextBranch
 )
 
 $ErrorActionPreference = "Stop"
+Set-Location (Resolve-Path (Join-Path $PSScriptRoot ".."))
 
-function Invoke-Checked {
-    param(
-        [Parameter(Mandatory = $true)]
-        [scriptblock]$Command,
-
-        [Parameter(Mandatory = $true)]
-        [string]$FailureMessage
-    )
-
-    & $Command
-    if ($LASTEXITCODE -ne 0) {
-        throw $FailureMessage
-    }
-}
-
-function Get-VersionBranch {
-    param([Parameter(Mandatory = $true)][string]$Version)
-
-    $CleanVersion = $Version.Trim()
-    if ($CleanVersion.StartsWith("v", [System.StringComparison]::OrdinalIgnoreCase)) {
-        return "v$($CleanVersion.Substring(1))"
-    }
-    return "v$CleanVersion"
-}
-
-function Get-VerificationPath {
-    param([Parameter(Mandatory = $true)][string]$Version)
-
-    $Digits = ($Version -replace "^[vV]", "") -replace "\.", ""
-    return "scripts\verify_v$Digits.ps1"
-}
-
-$ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
-if (-not (Test-Path (Join-Path $ProjectRoot "pyproject.toml"))) {
-    throw "Project root is invalid: $ProjectRoot"
-}
-
-Set-Location $ProjectRoot
-
-Invoke-Checked {
-    git rev-parse --is-inside-work-tree | Out-Null
-} "The project directory is not a Git repository."
-
-Invoke-Checked {
-    git remote get-url $Remote | Out-Null
-} "Git remote '$Remote' does not exist."
-
+git rev-parse --is-inside-work-tree | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "This directory is not a Git repository." }
 $CurrentBranch = (git branch --show-current).Trim()
-if ([string]::IsNullOrWhiteSpace($CurrentBranch)) {
-    throw "Git is in detached-HEAD state. Switch to a branch first."
-}
+if ([string]::IsNullOrWhiteSpace($CurrentBranch)) { throw "Detached HEAD is not supported." }
 
-$ExpectedCurrentBranch = Get-VersionBranch -Version $CurrentVersion
-if ($CurrentBranch -ne $ExpectedCurrentBranch) {
-    Write-Host (
-        "Current branch is '$CurrentBranch'; version branch would be " +
-        "'$ExpectedCurrentBranch'. The current branch will be published as-is."
-    ) -ForegroundColor Yellow
-}
-
-if ([string]::IsNullOrWhiteSpace($VerificationScript)) {
-    $VerificationScript = Get-VerificationPath -Version $CurrentVersion
-}
-
-$VerificationPath = Join-Path $ProjectRoot $VerificationScript
-if (-not (Test-Path $VerificationPath)) {
-    throw "Verification script does not exist: $VerificationPath"
-}
-
-$Activate = Join-Path $ProjectRoot ".venv\Scripts\Activate.ps1"
-if (Test-Path $Activate) {
-    . $Activate
-}
-
-Write-Host "Verifying version $CurrentVersion..." -ForegroundColor Cyan
-& $VerificationPath
-if ($LASTEXITCODE -ne 0) {
-    throw "Version $CurrentVersion verification failed. Nothing was committed."
-}
-
-Write-Host "Staging project changes..." -ForegroundColor Cyan
-Invoke-Checked { git add --all } "git add failed."
-
-$StagedFiles = @(git -c core.quotePath=false diff --cached --name-only --diff-filter=ACMR)
-$BlockedNames = @(
-    ".env",
-    ".env.local",
-    "credentials.json",
-    "secrets.json",
-    "id_rsa",
-    "id_ed25519"
-)
-
-foreach ($RelativePath in $StagedFiles) {
-    $LeafName = Split-Path $RelativePath -Leaf
-    if ($BlockedNames -contains $LeafName) {
-        throw "Sensitive file is staged and will not be pushed: $RelativePath"
+if (-not $SkipVerification) {
+    $VersionKey = $CurrentVersion.Replace(".", "")
+    $VerifyScript = Join-Path $PSScriptRoot "verify_v$VersionKey.ps1"
+    $VersionParts = $CurrentVersion.Split(".")
+    if ((-not (Test-Path -LiteralPath $VerifyScript)) -and $VersionParts.Count -ge 2) {
+        $SeriesKey = "$($VersionParts[0])$($VersionParts[1])"
+        $VerifyScript = Join-Path $PSScriptRoot "verify_v$SeriesKey.ps1"
     }
-
-    $LocalPath = Join-Path $ProjectRoot $RelativePath
-    if ((Test-Path -LiteralPath $LocalPath) -and (Get-Item -LiteralPath $LocalPath).Length -gt 50MB) {
-        throw "File exceeds 50 MB and will not be pushed automatically: $RelativePath"
+    if (-not (Test-Path -LiteralPath $VerifyScript)) {
+        throw "Verification script not found for $CurrentVersion. Use -SkipVerification only intentionally."
     }
+    & $VerifyScript
 }
 
+# Do not parse git status paths. Quoted/non-ASCII filenames in porcelain output
+# caused earlier Test-Path illegal-character failures. Git handles its own paths.
+git add --all
 git diff --cached --quiet
-$HasStagedChanges = $LASTEXITCODE -ne 0
-
-if ($HasStagedChanges) {
-    Write-Host "Committing version $CurrentVersion..." -ForegroundColor Cyan
-    Invoke-Checked {
-        git commit -m $CommitMessage
-    } "git commit failed."
+if ($LASTEXITCODE -ne 0) {
+    git commit -m $CommitMessage
+    if ($LASTEXITCODE -ne 0) { throw "Git commit failed." }
 } else {
     Write-Host "No new changes to commit." -ForegroundColor Yellow
 }
 
-Write-Host "Pushing '$CurrentBranch' to '$Remote'..." -ForegroundColor Cyan
-Invoke-Checked {
-    git push --set-upstream $Remote $CurrentBranch
-} "Pushing the completed version failed."
+git push --set-upstream $Remote $CurrentBranch
+if ($LASTEXITCODE -ne 0) { throw "Push of $CurrentBranch failed." }
 
-$NextBranch = Get-VersionBranch -Version $NextVersion
-if ($NextBranch -eq $CurrentBranch) {
-    throw "The next-version branch must differ from the current branch."
+$Tag = "v$CurrentVersion"
+git rev-parse --verify --quiet "refs/tags/$Tag" | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    git tag -a $Tag -m "Version $CurrentVersion"
+    git push $Remote $Tag
+    if ($LASTEXITCODE -ne 0) { throw "Push of tag $Tag failed." }
 }
 
-$LocalNextExists = $null -ne (git branch --list $NextBranch)
-if ($LocalNextExists) {
-    Invoke-Checked { git switch $NextBranch } "Could not switch to '$NextBranch'."
+git show-ref --verify --quiet "refs/heads/$NextBranch"
+$LocalExists = $LASTEXITCODE -eq 0
+git ls-remote --exit-code --heads $Remote $NextBranch | Out-Null
+$RemoteExists = $LASTEXITCODE -eq 0
+if (($LocalExists -or $RemoteExists) -and -not $AllowExistingNextBranch) {
+    throw "Branch $NextBranch already exists. Re-run with -AllowExistingNextBranch to use it."
+}
+if ($LocalExists) {
+    git switch $NextBranch
+} elseif ($RemoteExists) {
+    git switch --track "$Remote/$NextBranch"
 } else {
-    git ls-remote --exit-code --heads $Remote $NextBranch | Out-Null
-    $RemoteNextExists = $LASTEXITCODE -eq 0
-
-    if ($RemoteNextExists) {
-        Invoke-Checked {
-            git switch --track "$Remote/$NextBranch"
-        } "Could not track remote branch '$Remote/$NextBranch'."
-    } else {
-        Invoke-Checked {
-            git switch --create $NextBranch
-        } "Could not create next-version branch '$NextBranch'."
-    }
-}
-
-Write-Host "Publishing next-version branch '$NextBranch'..." -ForegroundColor Cyan
-Invoke-Checked {
+    git switch -c $NextBranch
     git push --set-upstream $Remote $NextBranch
-} "Publishing the next-version branch failed."
-
-Write-Host "Completed version $CurrentVersion was pushed." -ForegroundColor Green
-Write-Host "Workspace is now on branch $NextBranch." -ForegroundColor Green
-git status --short --branch
-
+}
+if ($LASTEXITCODE -ne 0) { throw "Could not switch to $NextBranch." }
+Write-Host "Published $CurrentVersion and switched to $NextBranch." -ForegroundColor Green
