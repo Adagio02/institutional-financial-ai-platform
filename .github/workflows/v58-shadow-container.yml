@@ -1,0 +1,14 @@
+name: v58-shadow-container
+on:
+  workflow_dispatch:
+jobs:
+  verify-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/unit/test_v58_shadow.py -q
+      - run: docker build -f Dockerfile.v58 -t finai-v58-shadow .
