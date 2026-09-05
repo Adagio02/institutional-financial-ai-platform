@@ -1,0 +1,8 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY pyproject.toml ./
+COPY src ./src
+COPY scripts ./scripts
+RUN pip install --no-cache-dir pandas numpy pyarrow
+ENV PYTHONPATH=/app/src FINAI_V59_CONTRACT_ROOT=/state FINAI_V59_ARTIFACT_DIR=/state/v59
+CMD ["python","scripts/run_v59_cloud.py"]
