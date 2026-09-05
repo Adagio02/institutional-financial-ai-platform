@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class Chunk:
     text: str
     metadata: dict[str, str]
+
 
 def section_aware_chunks(
     text: str,

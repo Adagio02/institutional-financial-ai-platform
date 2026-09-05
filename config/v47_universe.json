@@ -1,0 +1,1014 @@
+{
+  "version": "4.7",
+  "benchmarks": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "DIA"
+  ],
+  "sector_etfs": {
+    "Communication Services": "XLC",
+    "Consumer Discretionary": "XLY",
+    "Consumer Staples": "XLP",
+    "Energy": "XLE",
+    "Financials": "XLF",
+    "Health Care": "XLV",
+    "Industrials": "XLI",
+    "Materials": "XLB",
+    "Real Estate": "XLRE",
+    "Technology": "XLK",
+    "Utilities": "XLU"
+  },
+  "instruments": [
+    {
+      "symbol": "AAPL",
+      "name": "AAPL",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "MSFT",
+      "name": "MSFT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "NVDA",
+      "name": "NVDA",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "AVGO",
+      "name": "AVGO",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "ORCL",
+      "name": "ORCL",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "CRM",
+      "name": "CRM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "AMD",
+      "name": "AMD",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "ADBE",
+      "name": "ADBE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "QCOM",
+      "name": "QCOM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "INTC",
+      "name": "INTC",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "TXN",
+      "name": "TXN",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "AMAT",
+      "name": "AMAT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "MU",
+      "name": "MU",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "NOW",
+      "name": "NOW",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "PANW",
+      "name": "PANW",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Technology",
+      "benchmark": "XLK",
+      "enabled": true
+    },
+    {
+      "symbol": "META",
+      "name": "META",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "GOOGL",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "GOOG",
+      "name": "GOOG",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "NFLX",
+      "name": "NFLX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "DIS",
+      "name": "DIS",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "TMUS",
+      "name": "TMUS",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "T",
+      "name": "T",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "VZ",
+      "name": "VZ",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "CMCSA",
+      "name": "CMCSA",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Communication Services",
+      "benchmark": "XLC",
+      "enabled": true
+    },
+    {
+      "symbol": "AMZN",
+      "name": "AMZN",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "TSLA",
+      "name": "TSLA",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "HD",
+      "name": "HD",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "MCD",
+      "name": "MCD",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "BKNG",
+      "name": "BKNG",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "LOW",
+      "name": "LOW",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "TJX",
+      "name": "TJX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "SBUX",
+      "name": "SBUX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "NKE",
+      "name": "NKE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Discretionary",
+      "benchmark": "XLY",
+      "enabled": true
+    },
+    {
+      "symbol": "WMT",
+      "name": "WMT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "COST",
+      "name": "COST",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "PG",
+      "name": "PG",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "KO",
+      "name": "KO",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "PEP",
+      "name": "PEP",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "PM",
+      "name": "PM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "MO",
+      "name": "MO",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "MDLZ",
+      "name": "MDLZ",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "CL",
+      "name": "CL",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Consumer Staples",
+      "benchmark": "XLP",
+      "enabled": true
+    },
+    {
+      "symbol": "JPM",
+      "name": "JPM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "BAC",
+      "name": "BAC",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "WFC",
+      "name": "WFC",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "GS",
+      "name": "GS",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "MS",
+      "name": "MS",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "C",
+      "name": "C",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "BLK",
+      "name": "BLK",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "SCHW",
+      "name": "SCHW",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "AXP",
+      "name": "AXP",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "V",
+      "name": "V",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "MA",
+      "name": "MA",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Financials",
+      "benchmark": "XLF",
+      "enabled": true
+    },
+    {
+      "symbol": "LLY",
+      "name": "LLY",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "UNH",
+      "name": "UNH",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "JNJ",
+      "name": "JNJ",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "ABBV",
+      "name": "ABBV",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "MRK",
+      "name": "MRK",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "TMO",
+      "name": "TMO",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "ABT",
+      "name": "ABT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "ISRG",
+      "name": "ISRG",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "AMGN",
+      "name": "AMGN",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "GILD",
+      "name": "GILD",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Health Care",
+      "benchmark": "XLV",
+      "enabled": true
+    },
+    {
+      "symbol": "GE",
+      "name": "GE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "CAT",
+      "name": "CAT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "RTX",
+      "name": "RTX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "BA",
+      "name": "BA",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "HON",
+      "name": "HON",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "UPS",
+      "name": "UPS",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "DE",
+      "name": "DE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "LMT",
+      "name": "LMT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "ETN",
+      "name": "ETN",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "UNP",
+      "name": "UNP",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Industrials",
+      "benchmark": "XLI",
+      "enabled": true
+    },
+    {
+      "symbol": "XOM",
+      "name": "XOM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "CVX",
+      "name": "CVX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "COP",
+      "name": "COP",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "SLB",
+      "name": "SLB",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "EOG",
+      "name": "EOG",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "MPC",
+      "name": "MPC",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "PSX",
+      "name": "PSX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Energy",
+      "benchmark": "XLE",
+      "enabled": true
+    },
+    {
+      "symbol": "NEE",
+      "name": "NEE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Utilities",
+      "benchmark": "XLU",
+      "enabled": true
+    },
+    {
+      "symbol": "SO",
+      "name": "SO",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Utilities",
+      "benchmark": "XLU",
+      "enabled": true
+    },
+    {
+      "symbol": "DUK",
+      "name": "DUK",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Utilities",
+      "benchmark": "XLU",
+      "enabled": true
+    },
+    {
+      "symbol": "AEP",
+      "name": "AEP",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Utilities",
+      "benchmark": "XLU",
+      "enabled": true
+    },
+    {
+      "symbol": "SRE",
+      "name": "SRE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Utilities",
+      "benchmark": "XLU",
+      "enabled": true
+    },
+    {
+      "symbol": "LIN",
+      "name": "LIN",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Materials",
+      "benchmark": "XLB",
+      "enabled": true
+    },
+    {
+      "symbol": "APD",
+      "name": "APD",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Materials",
+      "benchmark": "XLB",
+      "enabled": true
+    },
+    {
+      "symbol": "SHW",
+      "name": "SHW",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Materials",
+      "benchmark": "XLB",
+      "enabled": true
+    },
+    {
+      "symbol": "FCX",
+      "name": "FCX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Materials",
+      "benchmark": "XLB",
+      "enabled": true
+    },
+    {
+      "symbol": "NEM",
+      "name": "NEM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Materials",
+      "benchmark": "XLB",
+      "enabled": true
+    },
+    {
+      "symbol": "PLD",
+      "name": "PLD",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Real Estate",
+      "benchmark": "XLRE",
+      "enabled": true
+    },
+    {
+      "symbol": "AMT",
+      "name": "AMT",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Real Estate",
+      "benchmark": "XLRE",
+      "enabled": true
+    },
+    {
+      "symbol": "EQIX",
+      "name": "EQIX",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Real Estate",
+      "benchmark": "XLRE",
+      "enabled": true
+    },
+    {
+      "symbol": "WELL",
+      "name": "WELL",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Real Estate",
+      "benchmark": "XLRE",
+      "enabled": true
+    },
+    {
+      "symbol": "SPG",
+      "name": "SPG",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "Real Estate",
+      "benchmark": "XLRE",
+      "enabled": true
+    },
+    {
+      "symbol": "SPY",
+      "name": "SPY",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "QQQ",
+      "name": "QQQ",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "IWM",
+      "name": "IWM",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "DIA",
+      "name": "DIA",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLC",
+      "name": "XLC",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLY",
+      "name": "XLY",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLP",
+      "name": "XLP",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLE",
+      "name": "XLE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLF",
+      "name": "XLF",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLV",
+      "name": "XLV",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLI",
+      "name": "XLI",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLB",
+      "name": "XLB",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLRE",
+      "name": "XLRE",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLK",
+      "name": "XLK",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    },
+    {
+      "symbol": "XLU",
+      "name": "XLU",
+      "asset_class": "equity",
+      "exchange": "US",
+      "sector": "ETF",
+      "benchmark": "SPY",
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+from finai.application.services.v38_learning_factory import (
+    parse_thresholds,
+)
+from finai.application.services.v39_learning_service import (
+    V39LearningService,
+)
+from finai.core.config import (
+    Settings,
+)
+
+
+def create_v39_learning_service(
+    *,
+    settings: Settings,
+) -> V39LearningService:
+    return V39LearningService(
+        database_url=(
+            settings.database_url
+        ),
+        artifact_directory=(
+            settings
+            .v39_learning_artifact_directory
+        ),
+        minimum_rows=(
+            settings
+            .v39_minimum_rows
+        ),
+        forward_horizon_bars=(
+            settings
+            .v39_forward_horizon_bars
+        ),
+        target_minimum_edge_bps=(
+            settings
+            .v39_target_minimum_edge_bps
+        ),
+        holdout_fraction=(
+            settings
+            .v39_holdout_fraction
+        ),
+        walk_forward_folds=(
+            settings
+            .v39_walk_forward_folds
+        ),
+        purge_rows=(
+            settings
+            .v39_purge_rows
+        ),
+        round_trip_cost_bps=(
+            settings
+            .v39_round_trip_cost_bps
+        ),
+        long_probability_thresholds=(
+            parse_thresholds(
+                settings
+                .v39_long_probability_thresholds
+            )
+        ),
+        short_probability_thresholds=(
+            parse_thresholds(
+                settings
+                .v39_short_probability_thresholds
+            )
+        ),
+        inner_calibration_fraction=(
+            settings
+            .v39_inner_calibration_fraction
+        ),
+        minimum_balanced_accuracy=(
+            settings
+            .v39_minimum_balanced_accuracy
+        ),
+        minimum_macro_f1=(
+            settings
+            .v39_minimum_macro_f1
+        ),
+        minimum_net_return=(
+            settings
+            .v39_minimum_net_return
+        ),
+        minimum_positive_fold_fraction=(
+            settings
+            .v39_minimum_positive_fold_fraction
+        ),
+        minimum_trades=(
+            settings
+            .v39_minimum_trades
+        ),
+        maximum_holdout_drawdown=(
+            settings
+            .v39_maximum_holdout_drawdown
+        ),
+        minimum_promotion_improvement=(
+            settings
+            .v39_minimum_promotion_improvement
+        ),
+        minimum_regime_rows=(
+            settings
+            .v39_minimum_regime_rows
+        ),
+        require_non_mock_data=True,
+    )

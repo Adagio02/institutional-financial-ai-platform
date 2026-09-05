@@ -1,0 +1,11 @@
+services:
+  champion-review:
+    build:
+      context: .
+      dockerfile: Dockerfile.v59
+    environment:
+      FINAI_V59_CONTRACT_ROOT: /state
+      FINAI_V59_ARTIFACT_DIR: /state/v59
+    volumes:
+      - ./artifacts:/state
+    restart: "no"

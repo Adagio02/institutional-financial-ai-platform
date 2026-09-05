@@ -40,17 +40,13 @@ def test_high_below_low_is_rejected() -> None:
 
 
 def test_negative_volume_is_rejected() -> None:
-    frame = valid_frame().with_columns(
-        pl.lit(-1.0).alias("volume")
-    )
+    frame = valid_frame().with_columns(pl.lit(-1.0).alias("volume"))
 
     assert "negative_volume" in validate_market_prices(frame)
 
 
 def test_nonpositive_adjusted_close_is_rejected() -> None:
-    frame = valid_frame().with_columns(
-        pl.lit(0.0).alias("adjusted_close")
-    )
+    frame = valid_frame().with_columns(pl.lit(0.0).alias("adjusted_close"))
 
     assert "nonpositive_adjusted_close" in validate_market_prices(frame)
 

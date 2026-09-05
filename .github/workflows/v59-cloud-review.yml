@@ -1,0 +1,21 @@
+name: v59-cloud-review
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 22 * * 1-5"
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/unit/test_v59_eligibility.py -q
+      - run: docker build -f Dockerfile.v59 -t finai-v59 .
+      - run: python scripts/generate_v59_demo_contracts.py
+      - run: FINAI_V59_CONTRACT_ROOT=data/research/v59/contracts FINAI_V59_ARTIFACT_DIR=artifacts/v59 python scripts/run_v59_cloud.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v59-review-artifacts
+          path: artifacts/v59

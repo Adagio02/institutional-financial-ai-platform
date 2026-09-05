@@ -2,6 +2,7 @@ from __future__ import annotations
 import pandas as pd
 from lightgbm import LGBMRanker
 
+
 def fit_ranker(frame: pd.DataFrame, features: list[str], target: str, date_col: str) -> LGBMRanker:
     ordered = frame.sort_values(date_col)
     groups = ordered.groupby(date_col, sort=True).size().to_numpy()

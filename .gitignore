@@ -23,3 +23,16 @@ mlruns/
 *.sqlite*
 .DS_Store
 Thumbs.db
+data/gold/datasets/*.parquet
+!data/gold/datasets/.gitkeep
+data/models/*.joblib
+!data/models/.gitkeep
+pytest-temp/
+pytest-temp-v15/
+pytest-temp-v16/
+pytest-temp-v17/
+artifacts/
+Reports/v30_*
+
+.VSCodeCounter/
+.v*_backup_*/

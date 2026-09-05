@@ -4,6 +4,7 @@ from zipfile import ZipFile
 import httpx
 import pandas as pd
 
+
 class FrenchFactorConnector:
     daily_5_factor_url = (
         "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/"
@@ -20,6 +21,7 @@ class FrenchFactorConnector:
         start = next(i for i, line in enumerate(lines) if line.strip().startswith(",Mkt-RF"))
         end = next(i for i in range(start + 1, len(lines)) if not lines[i].strip())
         from io import StringIO
+
         frame = pd.read_csv(StringIO("\n".join(lines[start:end])))
         frame = frame.rename(columns={frame.columns[0]: "date"})
         frame["date"] = pd.to_datetime(frame["date"].astype(str), format="%Y%m%d")

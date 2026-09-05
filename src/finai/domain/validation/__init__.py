@@ -1,0 +1,2 @@
+"""Immutable validation gates."""
+

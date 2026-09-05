@@ -2,10 +2,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 import pandas as pd
 
+
 @dataclass(frozen=True)
 class Fold:
     train: pd.DataFrame
     validation: pd.DataFrame
+
 
 def expanding_folds(
     frame: pd.DataFrame,

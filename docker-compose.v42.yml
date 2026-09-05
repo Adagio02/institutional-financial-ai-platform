@@ -1,0 +1,31 @@
+services:
+  finai-dashboard:
+    build:
+      context: ./ui/r
+      dockerfile: Dockerfile
+
+    container_name: finai-v42-dashboard
+
+    restart: unless-stopped
+
+    ports:
+      - "3838:3838"
+
+    environment:
+      FINAI_ARTIFACT_ROOT: /app/artifacts
+
+    volumes:
+      - ./artifacts:/app/artifacts:ro
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:3838"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

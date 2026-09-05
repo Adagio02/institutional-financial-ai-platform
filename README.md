@@ -135,3 +135,188 @@ This mirrors public institutional research practices without claiming access to 
 ## License
 
 Apache-2.0. Review each external data source's license and usage terms before redistribution.
+## Version 0.5
+
+Version 0.5 adds a reproducible feature-engineering
+and dataset platform.
+
+### Feature capabilities
+
+- Simple returns
+- Logarithmic returns
+- Rolling means
+- Rolling standard deviation
+- Annualized rolling volatility
+- Momentum
+- RSI
+- MACD
+- ATR
+- Volume change
+- Drawdown
+
+### Dataset capabilities
+
+- Versioned feature sets
+- Persisted feature values
+- Deterministic schema hashes
+- Deterministic content hashes
+- Parquet dataset output
+- Dataset lineage and status
+- Temporal-leakage tests
+
+POST /api/v1/features/generate
+GET  /api/v1/features/sets
+
+POST /api/v1/datasets/build
+GET  /api/v1/datasets
+GET  /api/v1/datasets/{dataset_id}
+
+## Version 0.6
+
+Version 0.6 adds reproducible model training and
+experiment tracking.
+
+### Training capabilities
+
+- Classification and regression tasks
+- Logistic-regression baseline
+- Linear-regression baseline
+- Random-forest classification
+- Random-forest regression
+- Expanding walk-forward validation
+- Fold-level and aggregate evaluation metrics
+- Train-only preprocessing
+- Deterministic random seeds
+
+### Tracking and artifacts
+
+- MLflow experiment tracking
+- Persisted training-run records
+- Persisted fold metrics
+- Serialized Joblib model artifacts
+- SHA-256 model artifact hashes
+- Candidate, staging, production, rejected, and
+  archived model stages
+
+  ## Version 0.7
+
+Version 0.7 adds governed prediction serving and model
+explanations.
+
+### Prediction serving
+
+- Staging and production model serving
+- Model artifact checksum verification
+- Exact feature-schema validation
+- Historical timestamp filtering
+- Prediction persistence
+- Model and dataset lineage
+- Classification probabilities and confidence
+
+### Governance
+
+- Model cards
+- Evaluation requirements
+- Artifact validation
+- Explicit staging-to-production promotion
+- Configurable metric thresholds
+- Controlled stage transitions
+
+### Explanations
+
+- Linear-model feature contributions
+- Tree-model feature importance
+- Persisted explanation records
+- Clear separation between model explanation and causality
+
+## Version 0.8
+
+Version 0.8 adds institutional backtesting,
+portfolio simulation, and strategy risk analytics.
+
+### Strategy simulation
+
+- Classification prediction signals
+- Regression prediction signals
+- Configurable long/short thresholds
+- Configurable position sizing
+- Optional short exposure
+- Commission modeling
+- Slippage modeling
+- Persisted simulated trades
+
+### Portfolio accounting
+
+- Cash tracking
+- Position tracking
+- Market-value tracking
+- Equity curves
+- Drawdown tracking
+- Persisted portfolio snapshots
+
+### Risk analytics
+
+- Total return
+- Maximum drawdown
+- Annualized volatility
+- Sharpe ratio
+- Sortino ratio
+- Downside deviation
+- 95% Value at Risk
+- 95% Conditional Value at Risk
+
+Version 0.8 remains simulation-only and does not
+submit orders to a broker or exchange.
+
+POST /api/v1/backtests
+GET  /api/v1/backtests
+GET  /api/v1/backtests/{backtest_run_id}
+GET  /api/v1/backtests/{backtest_run_id}/trades
+GET  /api/v1/backtests/{backtest_run_id}/equity
+
+GET  /api/v1/risk/backtests/{backtest_run_id}
+
+## Version 0.9
+
+Version 0.9 introduces paper-trading execution and
+pre-trade risk controls.
+
+### Paper execution
+
+- Paper trading accounts
+- Market orders
+- Limit orders
+- Simulated fills
+- Slippage modeling
+- Commission modeling
+- Fill audit records
+
+### Order management
+
+- Pending orders
+- Filled orders
+- Rejected orders
+- Order history
+- Fill history
+- Time-in-force metadata
+
+### Portfolio accounting
+
+- Cash balances
+- Position quantities
+- Average entry prices
+- Gross exposure
+- Net exposure
+- Equity
+- Unrealized P&L
+
+### Risk controls
+
+- Maximum order notional
+- Maximum position notional
+- Maximum gross exposure
+- Maximum position fraction
+- Minimum cash reserve
+
+Version 0.9 remains paper-only. It does not send orders
+to a real brokerage or exchange.

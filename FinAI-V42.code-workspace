@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "name": "FinAI",
+            "path": "."
+        },
+        {
+            "name": "R Dashboard",
+            "path": "ui/r"
+        },
+        {
+            "name": "Documentation",
+            "path": "docs"
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+        "terminal.integrated.defaultProfile.windows": "PowerShell",
+        "editor.formatOnSave": true,
+        "files.exclude": {
+            "**/__pycache__": true,
+            "**/.pytest_cache": true
+        }
+    }
+}

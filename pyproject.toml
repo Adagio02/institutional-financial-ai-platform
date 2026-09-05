@@ -41,7 +41,15 @@ dependencies = [
   "plotly>=5.24",
   "prometheus-client>=0.21",
   "python-multipart>=0.0.12",
-  "tenacity>=9.0"
+  "tenacity>=9.0",
+  "numpy",
+  "pandas",
+  "pyarrow",
+  "joblib",
+  "mlflow",
+  "scikit-learn",
+  "shap",
+  "websockets>=15,<16",
 ]
 
 [project.optional-dependencies]
