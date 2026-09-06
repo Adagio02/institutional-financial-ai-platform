@@ -1,0 +1,17 @@
+{
+  "candidate": "v55-real-candidate-005",
+  "source": "data\\research\\v56-candidate-002\\v55_prelock_ensemble.parquet",
+  "source_sha256": "e4ffd072c15343942f10c82d8ec440e16e4d9affbc826f65c4f05f7c43c1e8f0",
+  "destination": "data\\research\\v56-candidate-002\\v55_prelock_calibrated_polarity.parquet",
+  "destination_sha256": "a65ced8134c4e6993c103f110fe75fc31d113f5fc178c67e8f5be1c876088ba5",
+  "calibration_periods": 126,
+  "calibration_start": "2023-01-03T00:00:00+00:00",
+  "calibration_end": "2023-07-05T00:00:00+00:00",
+  "mean_calibration_rank_ic": -0.04288455223229713,
+  "frozen_polarity": -1.0,
+  "smoothing": {
+    "method": "per_symbol_ewm",
+    "span": 10
+  },
+  "locked_v56_data_accessed": false
+}
