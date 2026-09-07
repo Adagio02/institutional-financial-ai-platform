@@ -19,3 +19,14 @@ def test_weights_are_market_neutral_and_capped():
     assert np.abs(weights).max() <= 0.20 + 1e-12
     assert np.abs(weights).sum() <= cfg.gross_limit + 1e-12
 
+
+def test_weights_are_sector_and_beta_neutral_when_supplied():
+    cfg = Config(position_limit=0.30, risk_penalty=1.0)
+    scores = np.array([-3., -2., 2., 3., -2.5, -1.5, 1.5, 2.5])
+    beta = np.array([.8, 1.0, 1.2, 1.4, .7, .9, 1.1, 1.3])
+    sectors = np.array(["A", "A", "A", "A", "B", "B", "B", "B"])
+    weights = neutral_weights(scores, np.zeros(8), cfg, beta=beta, sectors=sectors)
+    assert abs(weights.sum()) < 1e-7
+    assert abs(weights @ beta) < 1e-7
+    assert abs(weights[sectors == "A"].sum()) < 1e-7
+    assert abs(weights[sectors == "B"].sum()) < 1e-7

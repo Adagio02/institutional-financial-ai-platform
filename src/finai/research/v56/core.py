@@ -28,6 +28,7 @@ class Config:
     ic_lookback: int = 126
     ic_floor: float = 0.005
     seed: int = 17
+    rebalance_every: int = 1
 
 
 def read_frame(path: str | Path) -> pd.DataFrame:

@@ -19,8 +19,22 @@ def neutral_weights(
     centered = scores - np.nanmean(scores)
     if not np.isfinite(centered).all() or np.abs(centered).sum() == 0:
         return np.zeros(n)
-    initial = np.clip(centered / np.abs(centered).sum() * cfg.gross_limit,
-                      -cfg.position_limit, cfg.position_limit)
+    ranked_initial = centered / np.abs(centered).sum() * cfg.gross_limit
+    exposure_rows = [np.ones(n)]
+    if beta is not None and np.isfinite(beta).all():
+        exposure_rows.append(np.asarray(beta, float))
+    if sectors is not None:
+        unique_sectors = list(pd.Series(sectors).dropna().unique())
+        for sector in unique_sectors[:-1]:  # last sector is redundant with dollar neutrality
+            exposure_rows.append((np.asarray(sectors) == sector).astype(float))
+    exposure = np.vstack(exposure_rows)
+    initial = ranked_initial - exposure.T @ np.linalg.pinv(exposure @ exposure.T) @ exposure @ ranked_initial
+    scale = min(
+        1.0,
+        cfg.position_limit / max(np.abs(initial).max(), 1e-12),
+        cfg.gross_limit / max(np.abs(initial).sum(), 1e-12),
+    )
+    initial *= scale
     risk = np.ones(n) if volatility is None else np.maximum(np.asarray(volatility, float), 1e-4) ** 2
     constraints = [
         {"type": "eq", "fun": lambda w: float(w.sum())},
@@ -30,7 +44,8 @@ def neutral_weights(
         b = np.asarray(beta, float)
         constraints.append({"type": "eq", "fun": lambda w, b=b: float(w @ b)})
     if sectors is not None:
-        for sector in pd.Series(sectors).dropna().unique():
+        unique_sectors = list(pd.Series(sectors).dropna().unique())
+        for sector in unique_sectors[:-1]:
             mask = np.asarray(sectors) == sector
             if 1 < mask.sum() < n:
                 constraints.append({"type": "eq", "fun": lambda w, m=mask: float(w[m].sum())})
@@ -61,7 +76,10 @@ def neutral_weights(
 
 def simulate(predictions: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:
     rows, positions, previous_map = [], [], {}
-    for date, section in predictions.groupby("timestamp", sort=True):
+    grouped = list(predictions.groupby("timestamp", sort=True))
+    for group_index, (date, section) in enumerate(grouped):
+        if group_index % cfg.rebalance_every != 0:
+            continue
         section = section.sort_values("symbol").copy()
         previous = np.array([previous_map.get(s, 0.0) for s in section.symbol])
         beta = section.beta.to_numpy(float) if "beta" in section else None

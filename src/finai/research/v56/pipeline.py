@@ -37,7 +37,7 @@ def _ensemble_oos(pred: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     return pd.concat(pieces, ignore_index=True)
 
 
-def run_pipeline(input_path: str, output_dir: str, cfg: Config | None = None) -> dict:
+def run_pipeline(input_path: str, output_dir: str, cfg: Config | None = None, version: str = "5.6-research-003") -> dict:
     cfg = cfg or Config()
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
@@ -63,7 +63,7 @@ def run_pipeline(input_path: str, output_dir: str, cfg: Config | None = None) ->
     positions_path = write_frame(positions, output / "positions.parquet")
     result_metrics = metrics(ledger)
     checks = {
-        "minimum_periods": result_metrics["period_count"] >= 126,
+        "minimum_periods": result_metrics["period_count"] >= max(52, 126 // cfg.rebalance_every),
         "positive_net_return": result_metrics["cumulative_net_return"] > 0,
         "minimum_sharpe": result_metrics["annualized_sharpe"] >= 0.25,
         "maximum_drawdown": result_metrics["maximum_drawdown"] >= -0.30,
@@ -71,7 +71,7 @@ def run_pipeline(input_path: str, output_dir: str, cfg: Config | None = None) ->
     }
     eligible = all(checks.values())
     report = {
-        "version": "5.6-research-003", "research_only": True,
+        "version": version, "research_only": True,
         "eligible_to_create_new_locked_candidate": eligible,
         "not_eligible_for_champion": True,
         "config": config_dict(cfg), "audit": audit_report,

@@ -1,0 +1,51 @@
+symbol,sector,effective_from,effective_to
+AAPL,Information Technology,2000-01-01,2099-12-31
+MSFT,Information Technology,2000-01-01,2099-12-31
+NVDA,Information Technology,2000-01-01,2099-12-31
+AVGO,Information Technology,2000-01-01,2099-12-31
+ORCL,Information Technology,2000-01-01,2099-12-31
+JPM,Financials,2000-01-01,2099-12-31
+BAC,Financials,2000-01-01,2099-12-31
+WFC,Financials,2000-01-01,2099-12-31
+GS,Financials,2000-01-01,2099-12-31
+MS,Financials,2000-01-01,2099-12-31
+JNJ,Health Care,2000-01-01,2099-12-31
+LLY,Health Care,2000-01-01,2099-12-31
+UNH,Health Care,2000-01-01,2099-12-31
+ABBV,Health Care,2000-01-01,2099-12-31
+MRK,Health Care,2000-01-01,2099-12-31
+AMZN,Consumer Discretionary,2000-01-01,2099-12-31
+TSLA,Consumer Discretionary,2000-01-01,2099-12-31
+HD,Consumer Discretionary,2000-01-01,2099-12-31
+MCD,Consumer Discretionary,2000-01-01,2099-12-31
+LOW,Consumer Discretionary,2000-01-01,2099-12-31
+WMT,Consumer Staples,2000-01-01,2099-12-31
+COST,Consumer Staples,2000-01-01,2099-12-31
+PG,Consumer Staples,2000-01-01,2099-12-31
+KO,Consumer Staples,2000-01-01,2099-12-31
+PEP,Consumer Staples,2000-01-01,2099-12-31
+XOM,Energy,2000-01-01,2099-12-31
+CVX,Energy,2000-01-01,2099-12-31
+COP,Energy,2000-01-01,2099-12-31
+SLB,Energy,2000-01-01,2099-12-31
+EOG,Energy,2000-01-01,2099-12-31
+GE,Industrials,2000-01-01,2099-12-31
+CAT,Industrials,2000-01-01,2099-12-31
+HON,Industrials,2000-01-01,2099-12-31
+UPS,Industrials,2000-01-01,2099-12-31
+RTX,Industrials,2000-01-01,2099-12-31
+LIN,Materials,2000-01-01,2099-12-31
+SHW,Materials,2000-01-01,2099-12-31
+FCX,Materials,2000-01-01,2099-12-31
+NEM,Materials,2000-01-01,2099-12-31
+APD,Materials,2000-01-01,2099-12-31
+NEE,Utilities,2000-01-01,2099-12-31
+SO,Utilities,2000-01-01,2099-12-31
+DUK,Utilities,2000-01-01,2099-12-31
+AEP,Utilities,2000-01-01,2099-12-31
+SRE,Utilities,2000-01-01,2099-12-31
+META,Communication Services,2000-01-01,2099-12-31
+GOOGL,Communication Services,2000-01-01,2099-12-31
+NFLX,Communication Services,2000-01-01,2099-12-31
+TMUS,Communication Services,2000-01-01,2099-12-31
+VZ,Communication Services,2000-01-01,2099-12-31
