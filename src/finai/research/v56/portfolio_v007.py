@@ -56,20 +56,56 @@ def alpha_preserving_weights(
             target[short_idx] = -.5 * sector_gross / count
         target = _project_beta_to_band(target, beta, sectors, cfg.beta_exposure_limit)
         status = "active"
-    # Convex interpolation preserves dollar and sector neutrality and places a
-    # hard ceiling on one-way implementation change per rebalance.
-    difference = target - previous
-    turnover = float(np.abs(difference).sum())
-    fraction = min(1.0, cfg.rebalance_turnover_limit / max(turnover, 1e-12))
-    weights = previous + fraction * difference
+    weights, limited = _turnover_limited_weights(target, np.asarray(previous, float), beta, sectors, cfg)
+    if limited and status == "active":
+        status = "beta_drift_limited"
+    return weights, status
+
+
+def _finalize(weights: np.ndarray, beta: np.ndarray, sectors: np.ndarray, cfg: Config) -> np.ndarray:
+    """Beta band first, then position/gross scaling. Scaling preserves dollar and sector
+    neutrality and can only shrink beta exposure, so the band still holds afterwards."""
     weights = _project_beta_to_band(weights, beta, sectors, cfg.beta_exposure_limit)
     scale = min(
         1.0,
         cfg.position_limit / max(np.abs(weights).max(), 1e-12),
         cfg.gross_limit / max(np.abs(weights).sum(), 1e-12),
     )
-    weights *= scale
-    return weights, status
+    return weights * scale
+
+
+def _turnover_limited_weights(
+    target: np.ndarray, previous: np.ndarray, beta: np.ndarray, sectors: np.ndarray, cfg: Config,
+) -> tuple[np.ndarray, bool]:
+    """Move from previous toward target as far as the turnover cap allows, measuring
+    turnover AFTER the beta adjustment and scaling (V007 measured it before, so the
+    beta step could push a rebalance over the cap). Returns (weights, beta_limited)."""
+    cap = cfg.rebalance_turnover_limit
+    beta = np.where(np.isfinite(beta), beta, np.nanmedian(beta) if np.isfinite(beta).any() else 1.0)
+
+    def candidate(fraction: float) -> np.ndarray:
+        return _finalize(previous + fraction * (target - previous), beta, sectors, cfg)
+
+    def turnover(weights: np.ndarray) -> float:
+        return float(np.abs(weights - previous).sum())
+
+    full = candidate(1.0)
+    if turnover(full) <= cap + 1e-12:
+        return full, False
+    stay = candidate(0.0)
+    if turnover(stay) > cap + 1e-12:
+        # Beta drift alone needs more trading than the cap allows: honour the cap and
+        # move part of the way toward the beta-compliant book.
+        step = cap / turnover(stay)
+        return previous + step * (stay - previous), True
+    low, high = 0.0, 1.0
+    for _ in range(50):
+        middle = (low + high) / 2.0
+        if turnover(candidate(middle)) <= cap + 1e-12:
+            low = middle
+        else:
+            high = middle
+    return candidate(low), False
 
 
 def simulate_v007(predictions: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:

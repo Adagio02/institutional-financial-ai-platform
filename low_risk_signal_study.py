@@ -147,7 +147,7 @@ def main() -> None:
         scored[f"{component}_ex_beta"] = -neutralize(scored, component, ["beta"])
         variants[f"{component.removeprefix('rank_')} alone, beta removed (sign flipped)"] = f"{component}_ex_beta"
     ic_table = {label: ic_summary(rank_ic_by_date(scored, col, "resid_target")) for label, col in variants.items()}
-    print("\nIC vs sector/beta-neutral 5-day returns (positive = calmer stocks did better):")
+    print(f"\nIC vs sector/beta-neutral {args.horizon}-day returns (positive = calmer stocks did better):")
     print(pd.DataFrame(ic_table).T.to_string(float_format=lambda v: f"{v:,.4f}"))
 
     # ---- Step 3: V007 backtest ----------------------------------------------------

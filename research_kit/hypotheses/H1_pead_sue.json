@@ -1,0 +1,46 @@
+{
+  "id": "H1_pead_sue",
+  "hypothesis": "Stocks whose latest quarterly earnings beat the same quarter a year earlier by an unusually large amount (high SUE) outperform sector- and beta-matched peers over the next month; large misses underperform.",
+  "rationale": "Post-earnings-announcement drift: investors underreact to earnings news (Bernard and Thomas, 1989; widely replicated). The effect is reported to be weaker in large caps and in recent decades, so a small positive result is the realistic best case.",
+  "signal": {
+    "columns": {
+      "rank_sue_fresh": 1.0
+    },
+    "neutralize": [
+      "beta"
+    ],
+    "fill_missing": 0.0
+  },
+  "horizon": 21,
+  "cost_bps": 5,
+  "sensitivity_costs": [
+    10,
+    20
+  ],
+  "construction": {
+    "long_fraction": 0.2,
+    "gross_limit": 1.0,
+    "position_limit": 0.02,
+    "beta_exposure_limit": 0.1,
+    "rebalance_turnover_limit": 0.25
+  },
+  "gates": {
+    "min_periods": 60,
+    "min_active_fraction": 0.8,
+    "min_neutral_ic_t": 2.5,
+    "min_sharpe": 0.25,
+    "max_drawdown": -0.3,
+    "must_survive_cost_bps": 10
+  },
+  "panel": "data/research/v56-expanded/model_panel_v2.parquet",
+  "window": {
+    "start": "2018-07-01",
+    "end": "2026-10-02"
+  },
+  "min_symbols": 100,
+  "decision_rule": "If every gate passes: freeze as qualified and shadow-test for 24 monthly rebalances. If any gate fails: close H1. Do not retry other horizons, freshness windows or thresholds on 2018-2026.",
+  "forward": {
+    "ready": true,
+    "min_periods": 24
+  }
+}

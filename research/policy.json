@@ -1,0 +1,34 @@
+{
+  "description": "Feature sets closed for further HISTORICAL testing on 2018-2026. They were examined repeatedly (IC report, V008, low-risk weekly and monthly). Ideas built only from these can still be tested forward with 'freeze --exploratory'. Add a feature here once it has been tested historically.",
+  "closed_since": "2026-10-05",
+  "closed_window": {
+    "start": "2018-01-01",
+    "end": "2026-10-02"
+  },
+  "closed_features": [
+    "beta",
+    "rank_return_lag_1",
+    "rank_momentum_5",
+    "rank_momentum_21",
+    "rank_momentum_63",
+    "rank_momentum_126",
+    "rank_volatility",
+    "rank_volatility_63",
+    "rank_vol_scaled_momentum",
+    "rank_log_dollar_volume",
+    "rank_volume_change_20",
+    "rank_amihud_20",
+    "rank_range_20",
+    "rank_residual_momentum_21",
+    "rank_roe",
+    "rank_roa",
+    "rank_accruals",
+    "rank_gross_margin",
+    "rank_revenue_growth",
+    "rank_asset_growth",
+    "rank_earnings_yield",
+    "rank_book_to_price",
+    "rank_sales_to_price",
+    "rank_log_market_cap"
+  ]
+}

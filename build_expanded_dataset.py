@@ -151,7 +151,8 @@ def sic_to_sector(sic: int | None) -> str:
 
 def normalize_symbol(symbol: str) -> str:
     """One spelling per share class: 'BRK-B' and 'BRK.B' both become 'BRK.B' (Alpaca's format)."""
-    return str(symbol).strip().upper().replace("-", ".").replace("/", ".")
+    cleaned = str(symbol).split("(")[0].strip().upper()  # e.g. "RVTY (PREVIOUSLY PKI)" -> "RVTY"
+    return cleaned.replace("-", ".").replace("/", ".")
 
 
 def membership_intervals(history: pd.DataFrame, start: pd.Timestamp) -> pd.DataFrame:
@@ -395,8 +396,9 @@ def company_fundamentals(company: dict) -> pd.DataFrame:
         series = facts.rename(columns={"filed": "available"})[["end", "val", "available"]]
         lag = f"{name}_prior_year" if name == "total_assets" else None
         parts.append(as_of_timeline(series, name, lag))
-    share_parts = [_facts(company, taxonomy, [tag], "shares") for taxonomy, tag in SHARE_TAGS]
-    shares = pd.concat(share_parts, ignore_index=True)
+    share_parts = [p for p in (_facts(company, taxonomy, [tag], "shares") for taxonomy, tag in SHARE_TAGS)
+                   if not p.empty]
+    shares = pd.concat(share_parts, ignore_index=True) if share_parts else pd.DataFrame()
     if not shares.empty:
         shares = shares.sort_values("filed").drop_duplicates("end", keep="first")
         parts.append(as_of_timeline(shares.rename(columns={"filed": "available"})[["end", "val", "available"]],
@@ -435,7 +437,8 @@ def step_fundamentals(args: argparse.Namespace) -> None:
     ciks = sorted(pairs.cik.str.zfill(10).unique())
     for n, cik in enumerate(ciks, 1):
         path = cache / f"{cik}.parquet"
-        if path.exists():
+        if path.exists() and (args.refresh_days is None
+                              or time.time() - path.stat().st_mtime < args.refresh_days * 86400):
             continue
         response = http_get(SEC_FACTS_URL.format(cik=cik), headers=headers, pause=0.12)
         frame = company_fundamentals(response.json()) if response.ok else pd.DataFrame()
@@ -557,6 +560,8 @@ def main() -> int:
     p.add_argument("--end", default=(date.today() - timedelta(days=1)).isoformat())
     p.add_argument("--feed", default="sip", help="sip = full market (default), iex = single exchange")
     p.add_argument("--min-symbols", type=int, default=100)
+    p.add_argument("--refresh-days", type=float, default=None,
+                   help="re-download SEC fundamentals cached more than this many days ago (forward testing)")
     args = p.parse_args()
     steps = ["universe", "bars", "fundamentals", "panel"] if args.step == "all" else [args.step]
     for step in steps:
