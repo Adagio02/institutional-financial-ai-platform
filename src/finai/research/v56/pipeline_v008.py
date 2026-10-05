@@ -57,7 +57,7 @@ def run_v008(input_path: str, output_dir: str, cfg: Config) -> dict:
     pred_path=write_frame(pred,output/"oos_predictions.parquet")
     ledger,positions=simulate_v007(pred,cfg)
     ledger_path=write_frame(ledger,output/"ledger.parquet");positions_path=write_frame(positions,output/"positions.parquet")
-    result_metrics=metrics(ledger)
+    result_metrics=metrics(ledger, cfg.rebalance_every)
     rebalance=pred[pred.timestamp.isin(ledger.timestamp)]
     residual_ic=rebalance.groupby("timestamp",observed=True).apply(
         lambda section:_rank_ic(section,"forward_residual_return"),include_groups=False

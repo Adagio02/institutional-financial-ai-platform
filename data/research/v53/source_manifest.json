@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "provenance": "real_external_api",
+  "collected_at": "2026-09-05T17:57:48.825277+00:00",
+  "symbols": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "NVDA",
+    "META",
+    "GOOGL"
+  ],
+  "range": {
+    "start": "2023-01-01",
+    "end": "2026-09-05"
+  },
+  "sources": {
+    "prices": "Alpaca IEX adjusted daily bars",
+    "fundamentals": "SEC EDGAR Company Facts",
+    "events": "Alpha Vantage Earnings",
+    "news": "Alpha Vantage News Sentiment"
+  },
+  "files": {
+    "prices": {
+      "path": "data\\research\\v53\\prices.parquet",
+      "rows": 5532,
+      "sha256": "33b5972b073c79cb74c6633021aab85541c8f4099dac1bcc7fb6a815364c94de"
+    },
+    "events": {
+      "path": "data\\research\\v53\\events.parquet",
+      "rows": 605,
+      "sha256": "7e68824eacf203243915b80f71b8fada83612be4ff1936bed870899ca70590c4"
+    },
+    "news": {
+      "path": "data\\research\\v53\\news.parquet",
+      "rows": 6000,
+      "sha256": "a60268ac9051fe7becf2b981f12f3c599e41161724319e22ee85b36bb498dc68"
+    },
+    "fundamentals": {
+      "path": "data\\research\\v53\\fundamentals.parquet",
+      "rows": 101,
+      "sha256": "d54760ba03a3d7f2e31b50ad5adc86f038dfb911b1799c153e35c6b594ca651c"
+    }
+  }
+}

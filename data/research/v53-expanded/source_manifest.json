@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "provenance": "real_external_api",
+  "created_at": "2026-09-06T15:12:42.530791+00:00",
+  "existing_symbols": [
+    "AAPL",
+    "AMZN",
+    "MSFT"
+  ],
+  "added_symbols": [
+    "INTC",
+    "CAT",
+    "HD",
+    "CSCO",
+    "IBM"
+  ],
+  "files": {
+    "fundamentals": {
+      "path": "data\\research\\v53-expanded\\fundamentals.parquet",
+      "rows": 272,
+      "symbols": [
+        "AAPL",
+        "AMZN",
+        "CAT",
+        "CSCO",
+        "HD",
+        "IBM",
+        "INTC",
+        "MSFT"
+      ],
+      "sha256": "b1311638adc2d05de240eef12c9f70c1335514b2870d4ec2e32838fab04f270b"
+    },
+    "events": {
+      "path": "data\\research\\v53-expanded\\events.parquet",
+      "rows": 1215,
+      "symbols": [
+        "AAPL",
+        "AMZN",
+        "CAT",
+        "CSCO",
+        "GOOGL",
+        "HD",
+        "IBM",
+        "INTC",
+        "META",
+        "MSFT",
+        "NVDA"
+      ],
+      "sha256": "4332e2448362171d9d9b11bd383cb2c69b9603a0186175e77a2630cb7dc7425d"
+    },
+    "news": {
+      "path": "data\\research\\v53-expanded\\news.parquet",
+      "rows": 10884,
+      "symbols": [
+        "AAPL",
+        "AMZN",
+        "CAT",
+        "CSCO",
+        "GOOGL",
+        "HD",
+        "IBM",
+        "INTC",
+        "META",
+        "MSFT",
+        "NVDA"
+      ],
+      "sha256": "749d5fcd71fac65152148640a3dcea4794fc358ba20720bc625eaa5018e042a7"
+    },
+    "prices": {
+      "path": "data\\research\\v53-expanded\\prices.parquet",
+      "rows": 10142,
+      "symbols": [
+        "AAPL",
+        "AMZN",
+        "CAT",
+        "CSCO",
+        "GOOGL",
+        "HD",
+        "IBM",
+        "INTC",
+        "META",
+        "MSFT",
+        "NVDA"
+      ],
+      "sha256": "dbc9b0f389910769141e8340518cf3a0b8eb58fff98999aa00f1fac3c56d96e1"
+    }
+  }
+}

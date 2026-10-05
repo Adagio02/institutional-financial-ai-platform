@@ -61,7 +61,7 @@ def run_pipeline(input_path: str, output_dir: str, cfg: Config | None = None, ve
     ledger, positions = simulate(pred, cfg)
     ledger_path = write_frame(ledger, output / "ledger.parquet")
     positions_path = write_frame(positions, output / "positions.parquet")
-    result_metrics = metrics(ledger)
+    result_metrics = metrics(ledger, cfg.rebalance_every)
     checks = {
         "minimum_periods": result_metrics["period_count"] >= max(52, 126 // cfg.rebalance_every),
         "positive_net_return": result_metrics["cumulative_net_return"] > 0,

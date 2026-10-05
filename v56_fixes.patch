@@ -1,0 +1,142 @@
+diff --git a/scripts/run_v56_research.py b/scripts/run_v56_research.py
+index 5463c3f..141e51c 100644
+--- a/scripts/run_v56_research.py
++++ b/scripts/run_v56_research.py
+@@ -12,8 +12,12 @@ def main():
+     parser.add_argument("--min-symbols", type=int, default=8)
+     parser.add_argument("--cost-bps", type=float, default=5.0)
+     parser.add_argument("--horizon", type=int, default=5)
++    parser.add_argument("--rebalance-every", type=int, default=None,
++                        help="periods between rebalances; defaults to --horizon (non-overlapping)")
+     args = parser.parse_args()
+-    cfg = Config(min_symbols=args.min_symbols, cost_bps=args.cost_bps, horizon=args.horizon)
++    rebalance_every = args.rebalance_every if args.rebalance_every is not None else args.horizon
++    cfg = Config(min_symbols=args.min_symbols, cost_bps=args.cost_bps, horizon=args.horizon,
++                 rebalance_every=rebalance_every)
+     print(json.dumps(run_pipeline(args.input, args.output, cfg), indent=2, default=str))
+ 
+ 
+diff --git a/src/finai/research/v56/core.py b/src/finai/research/v56/core.py
+index 336219a..ba8c1e5 100644
+--- a/src/finai/research/v56/core.py
++++ b/src/finai/research/v56/core.py
+@@ -28,7 +28,18 @@ class Config:
+     ic_lookback: int = 126
+     ic_floor: float = 0.005
+     seed: int = 17
+-    rebalance_every: int = 1
++    rebalance_every: int = 5
++    beta_exposure_limit: float = 0.10
++    rebalance_turnover_limit: float = 0.25
++
++    def __post_init__(self) -> None:
++        if self.horizon < 1 or self.rebalance_every < 1:
++            raise ValueError("horizon and rebalance_every must be at least 1")
++        if self.rebalance_every < self.horizon:
++            raise ValueError(
++                f"rebalance_every ({self.rebalance_every}) must be >= horizon ({self.horizon}); "
++                "otherwise each ledger row books an overlapping multi-day forward return"
++            )
+ 
+ 
+ def read_frame(path: str | Path) -> pd.DataFrame:
+diff --git a/src/finai/research/v56/pipeline.py b/src/finai/research/v56/pipeline.py
+index d343312..3ca787a 100644
+--- a/src/finai/research/v56/pipeline.py
++++ b/src/finai/research/v56/pipeline.py
+@@ -61,7 +61,7 @@ def run_pipeline(input_path: str, output_dir: str, cfg: Config | None = None, ve
+     ledger, positions = simulate(pred, cfg)
+     ledger_path = write_frame(ledger, output / "ledger.parquet")
+     positions_path = write_frame(positions, output / "positions.parquet")
+-    result_metrics = metrics(ledger)
++    result_metrics = metrics(ledger, cfg.rebalance_every)
+     checks = {
+         "minimum_periods": result_metrics["period_count"] >= max(52, 126 // cfg.rebalance_every),
+         "positive_net_return": result_metrics["cumulative_net_return"] > 0,
+diff --git a/src/finai/research/v56/pipeline_v007.py b/src/finai/research/v56/pipeline_v007.py
+index e6712b1..4650be2 100644
+--- a/src/finai/research/v56/pipeline_v007.py
++++ b/src/finai/research/v56/pipeline_v007.py
+@@ -20,7 +20,7 @@ def run_v007(prediction_path: str, output_dir: str, cfg: Config) -> dict:
+     ledger, positions = simulate_v007(predictions, cfg)
+     ledger_path = write_frame(ledger, output / "ledger.parquet")
+     positions_path = write_frame(positions, output / "positions.parquet")
+-    result_metrics = metrics(ledger)
++    result_metrics = metrics(ledger, cfg.rebalance_every)
+     rebalance = predictions[predictions.timestamp.isin(ledger.timestamp)]
+     daily_ic = rebalance.groupby("timestamp", observed=True).apply(
+         lambda section: safe_rank_ic(section, "ensemble"), include_groups=False
+diff --git a/src/finai/research/v56/pipeline_v008.py b/src/finai/research/v56/pipeline_v008.py
+index 7c4b660..5443363 100644
+--- a/src/finai/research/v56/pipeline_v008.py
++++ b/src/finai/research/v56/pipeline_v008.py
+@@ -57,7 +57,7 @@ def run_v008(input_path: str, output_dir: str, cfg: Config) -> dict:
+     pred_path=write_frame(pred,output/"oos_predictions.parquet")
+     ledger,positions=simulate_v007(pred,cfg)
+     ledger_path=write_frame(ledger,output/"ledger.parquet");positions_path=write_frame(positions,output/"positions.parquet")
+-    result_metrics=metrics(ledger)
++    result_metrics=metrics(ledger,cfg.rebalance_every)
+     rebalance=pred[pred.timestamp.isin(ledger.timestamp)]
+     residual_ic=rebalance.groupby("timestamp",observed=True).apply(
+         lambda section:_rank_ic(section,"forward_residual_return"),include_groups=False
+diff --git a/src/finai/research/v56/portfolio.py b/src/finai/research/v56/portfolio.py
+index a22fe7a..15cea09 100644
+--- a/src/finai/research/v56/portfolio.py
++++ b/src/finai/research/v56/portfolio.py
+@@ -94,15 +94,22 @@ def simulate(predictions: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, pd.D
+         for symbol, weight, signal in zip(section.symbol, weights, section.ensemble):
+             positions.append({"timestamp": date, "symbol": symbol, "weight": weight, "signal": signal})
+             previous_map[symbol] = weight
+-    return pd.DataFrame(rows), pd.DataFrame(positions)
++    ledger = pd.DataFrame(rows)
++    ledger.attrs["rebalance_every"] = cfg.rebalance_every
++    return ledger, pd.DataFrame(positions)
+ 
+ 
+-def metrics(ledger: pd.DataFrame) -> dict:
++def metrics(ledger: pd.DataFrame, rebalance_every: int | None = None) -> dict:
++    """Ledger metrics. Each row spans `rebalance_every` daily periods, so the
++    Sharpe ratio is annualized with 252 / rebalance_every periods per year."""
++    if rebalance_every is None:
++        rebalance_every = int(ledger.attrs.get("rebalance_every", 1))
++    periods_per_year = 252.0 / max(1, int(rebalance_every))
+     r = ledger.net_return.fillna(0.0)
+     equity = (1.0 + r).cumprod()
+     drawdown = equity / equity.cummax() - 1.0
+     std = float(r.std(ddof=1))
+-    sharpe = float(np.sqrt(252) * r.mean() / std) if std > 0 else 0.0
++    sharpe = float(np.sqrt(periods_per_year) * r.mean() / std) if std > 0 else 0.0
+     return {
+         "period_count": len(r), "cumulative_net_return": float(equity.iloc[-1] - 1.0),
+         "annualized_sharpe": sharpe, "maximum_drawdown": float(drawdown.min()),
+diff --git a/tests/unit/test_v56_fixes.py b/tests/unit/test_v56_fixes.py
+new file mode 100644
+index 0000000..d6cc310
+--- /dev/null
++++ b/tests/unit/test_v56_fixes.py
+@@ -0,0 +1,25 @@
++import numpy as np
++import pandas as pd
++import pytest
++
++from finai.research.v56.core import Config
++from finai.research.v56.portfolio import metrics
++
++
++def test_config_accepts_v007_v008_risk_fields():
++    cfg = Config(beta_exposure_limit=0.10, rebalance_turnover_limit=0.25)
++    assert cfg.beta_exposure_limit == 0.10 and cfg.rebalance_turnover_limit == 0.25
++
++
++def test_config_rejects_overlapping_forward_returns():
++    with pytest.raises(ValueError, match="rebalance_every"):
++        Config(horizon=5, rebalance_every=1)
++    Config(horizon=5, rebalance_every=5)  # non-overlapping is allowed
++
++
++def test_sharpe_is_annualized_by_rebalance_period():
++    rng = np.random.default_rng(0)
++    ledger = pd.DataFrame({"net_return": rng.normal(0.001, 0.01, 200), "turnover": 0.1, "cost": 0.0})
++    daily = metrics(ledger, rebalance_every=1)["annualized_sharpe"]
++    weekly = metrics(ledger, rebalance_every=5)["annualized_sharpe"]
++    assert np.isclose(daily / weekly, np.sqrt(5))

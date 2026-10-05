@@ -3,19 +3,37 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "17 22 * * 1-5"
+permissions:
+  contents: read
 jobs:
-  review:
+  signed-contract-review:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.FINAI_OBJECT_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.FINAI_OBJECT_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ vars.FINAI_OBJECT_REGION }}
+      FINAI_S3_ENDPOINT_URL: ${{ vars.FINAI_S3_ENDPOINT_URL }}
+      FINAI_CONTRACT_SIGNING_KEY: ${{ secrets.FINAI_CONTRACT_SIGNING_KEY }}
+      FINAI_OBJECT_BUCKET: ${{ vars.FINAI_OBJECT_BUCKET }}
+      FINAI_OBJECT_KEY: ${{ vars.FINAI_OBJECT_KEY }}
+      FINAI_V59_ARTIFACT_DIR: artifacts/v59-cloud-real
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: "3.12"}
-      - run: pip install -e ".[dev]"
-      - run: pytest tests/unit/test_v59_eligibility.py -q
-      - run: docker build -f Dockerfile.v59 -t finai-v59 .
-      - run: python scripts/generate_v59_demo_contracts.py
-      - run: FINAI_V59_CONTRACT_ROOT=data/research/v59/contracts FINAI_V59_ARTIFACT_DIR=artifacts/v59 python scripts/run_v59_cloud.py
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]" boto3
+      - run: pytest tests/unit/test_cloud_contract_bundle.py tests/unit/test_v59_eligibility.py -q
+      - name: Download and verify signed contracts
+        run: python scripts/cloud_contract_bundle.py download-verify --bucket "$FINAI_OBJECT_BUCKET" --key "$FINAI_OBJECT_KEY" --bundle artifacts/cloud/contracts.zip --destination artifacts/cloud/verified-contracts
+      - name: Run V5.9 against verified contracts
+        env:
+          FINAI_V59_CONTRACT_ROOT: artifacts/cloud/verified-contracts
+        run: python scripts/run_v59_cloud.py
       - uses: actions/upload-artifact@v4
         with:
-          name: v59-review-artifacts
-          path: artifacts/v59
+          name: v59-real-cloud-review
+          path: artifacts/v59-cloud-real
+          if-no-files-found: error
+          retention-days: 30

@@ -20,7 +20,7 @@ def run_v007(prediction_path: str, output_dir: str, cfg: Config) -> dict:
     ledger, positions = simulate_v007(predictions, cfg)
     ledger_path = write_frame(ledger, output / "ledger.parquet")
     positions_path = write_frame(positions, output / "positions.parquet")
-    result_metrics = metrics(ledger)
+    result_metrics = metrics(ledger, cfg.rebalance_every)
     rebalance = predictions[predictions.timestamp.isin(ledger.timestamp)]
     daily_ic = rebalance.groupby("timestamp", observed=True).apply(
         lambda section: safe_rank_ic(section, "ensemble"), include_groups=False

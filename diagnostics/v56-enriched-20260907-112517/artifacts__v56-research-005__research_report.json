@@ -1,0 +1,99 @@
+{
+  "version": "5.6-research-005",
+  "research_only": true,
+  "eligible_to_create_new_locked_candidate": false,
+  "not_eligible_for_champion": true,
+  "config": {
+    "horizon": 5,
+    "train_periods": 756,
+    "test_periods": 63,
+    "embargo_periods": 5,
+    "min_train_periods": 504,
+    "min_symbols": 30,
+    "long_fraction": 0.2,
+    "gross_limit": 1.0,
+    "position_limit": 0.04,
+    "turnover_penalty": 0.004,
+    "risk_penalty": 10.0,
+    "cost_bps": 5.0,
+    "ic_lookback": 126,
+    "ic_floor": 0.005,
+    "seed": 17,
+    "rebalance_every": 5
+  },
+  "audit": {
+    "rows": 76650,
+    "periods": 1533,
+    "symbols": 50,
+    "minimum_symbols": 50,
+    "median_symbols": 50.0,
+    "duplicate_keys": 0,
+    "features": [
+      "return_lag_1",
+      "momentum_5",
+      "momentum_21",
+      "momentum_63",
+      "momentum_126",
+      "volatility",
+      "volatility_63",
+      "vol_scaled_momentum",
+      "log_dollar_volume",
+      "volume_change_20",
+      "amihud_20",
+      "range_20",
+      "beta",
+      "residual_momentum_21",
+      "rank_return_lag_1",
+      "rank_momentum_5",
+      "rank_momentum_21",
+      "rank_momentum_63",
+      "rank_momentum_126",
+      "rank_volatility",
+      "rank_volatility_63",
+      "rank_vol_scaled_momentum",
+      "rank_log_dollar_volume",
+      "rank_volume_change_20",
+      "rank_amihud_20",
+      "rank_range_20",
+      "rank_beta",
+      "rank_residual_momentum_21"
+    ],
+    "future_named_features": [],
+    "checks": {
+      "unique_keys": true,
+      "sufficient_cross_section": true,
+      "no_future_named_features": true,
+      "enough_periods": true
+    }
+  },
+  "metrics": {
+    "period_count": 152,
+    "cumulative_net_return": -0.08505311609311061,
+    "annualized_sharpe": -3.0555807945890385,
+    "maximum_drawdown": -0.09120046886442057,
+    "positive_period_fraction": 0.09210526315789473,
+    "mean_turnover": 0.4475837923950672,
+    "total_transaction_cost": 0.034016368222025105
+  },
+  "checks": {
+    "minimum_periods": true,
+    "positive_net_return": false,
+    "minimum_sharpe": false,
+    "maximum_drawdown": true,
+    "turnover_limit": true
+  },
+  "artifacts": {
+    "predictions": "artifacts\\v56-research-005\\oos_predictions.parquet",
+    "ledger": "artifacts\\v56-research-005\\ledger.parquet",
+    "positions": "artifacts\\v56-research-005\\positions.parquet"
+  },
+  "hashes": {
+    "oos_predictions.parquet": "fc0a1c60bb5ce4e6a3dc9f9c03701c606db37adf96dab0be756ffbbbab5a451e",
+    "ledger.parquet": "45211b2a7a3de2bd6f3277fd95c4118e08dc2566b3877d4b3b478b9669396b7b",
+    "positions.parquet": "27b8fa8196f0f34274bbd9a16d16541a959d45a71cf5849dcea77a8b23978909"
+  },
+  "blocking_reasons": [
+    "positive_net_return",
+    "minimum_sharpe"
+  ]
+}

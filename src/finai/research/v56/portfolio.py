@@ -190,12 +190,14 @@ def simulate(predictions: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, pd.D
     return pd.DataFrame(rows), pd.DataFrame(positions)
 
 
-def metrics(ledger: pd.DataFrame) -> dict:
+def metrics(ledger: pd.DataFrame, rebalance_every: int | None = None) -> dict:
     r = ledger.net_return.fillna(0.0)
     equity = (1.0 + r).cumprod()
     drawdown = equity / equity.cummax() - 1.0
     std = float(r.std(ddof=1))
-    annual_periods = 252.0 / max(1, int(getattr(ledger, "attrs", {}).get("rebalance_every", 1)))
+    if rebalance_every is None:
+        rebalance_every = int(getattr(ledger, "attrs", {}).get("rebalance_every", 1))
+    annual_periods = 252.0 / max(1, int(rebalance_every))
     sharpe = float(np.sqrt(annual_periods) * r.mean() / std) if std > 0 else 0.0
     return {
         "period_count": len(r), "cumulative_net_return": float(equity.iloc[-1] - 1.0),

@@ -1,0 +1,2 @@
+"symbol","company_name","proposed_sector","verified_sector","sec_cik","sec_sic","sec_sic_description","effective_from","effective_to","source_name","source_url_or_snapshot_id","source_snapshot_sha256","gics_definition_url","reviewed_by","reviewed_on","approved","review_status"
+"EA","","Communication Services","","","","","2026-09-08","2099-12-31","","","","https://www.spglobal.com/spdji/en/landing/topic/gics/","Felipe Taruselli","","false","ticker_not_found"

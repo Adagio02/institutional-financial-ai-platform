@@ -1,0 +1,21 @@
+{
+  "candidate": "v55-real-candidate-004",
+  "source": "data\\research\\v56-candidate-002\\v55_prelock_ensemble.parquet",
+  "destination": "data\\research\\v56-candidate-002\\v55_prelock_oriented_smoothed.parquet",
+  "source_sha256": "e4ffd072c15343942f10c82d8ec440e16e4d9affbc826f65c4f05f7c43c1e8f0",
+  "destination_sha256": "b89e1806df9b6689898e35c36df61a7904ec1ee1e2bf98e1916a7e5dd68fcbd5",
+  "polarity_policy": {
+    "daily_metric": "spearman_rank_ic",
+    "lag_periods": 2,
+    "window_periods": 63,
+    "minimum_periods": 20,
+    "negative_action": "invert",
+    "nonnegative_action": "retain"
+  },
+  "smoothing_policy": {
+    "method": "per_symbol_ewm",
+    "span": 5,
+    "adjust": false
+  },
+  "locked_data_accessed": false
+}

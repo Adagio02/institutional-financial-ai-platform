@@ -1,0 +1,470 @@
+{
+  "base": {
+    "candidate": "v56-research-005",
+    "artifact_directory_exists": true,
+    "prediction_rows": 37800,
+    "prediction_periods": 756,
+    "prediction_symbols": 50,
+    "signal_diagnostics": {
+      "elastic": {
+        "mean_rank_ic": 0.0342152098934812,
+        "median_rank_ic": 0.03159663865546219,
+        "positive_ic_fraction": 0.5383597883597884,
+        "observations": 756,
+        "prediction_standard_deviation": 0.2886212115593798,
+        "zero_fraction": 0.02
+      },
+      "tree": {
+        "mean_rank_ic": 0.016814083171349716,
+        "median_rank_ic": 0.015270108043217285,
+        "positive_ic_fraction": 0.5317460317460317,
+        "observations": 756,
+        "prediction_standard_deviation": 0.28862005661024404,
+        "zero_fraction": 0.019682539682539683
+      },
+      "ensemble": {
+        "mean_rank_ic": 0.030648513858174138,
+        "median_rank_ic": 0.02280912364945978,
+        "positive_ic_fraction": 0.529505582137161,
+        "observations": 627,
+        "prediction_standard_deviation": 0.24246487455556115,
+        "zero_fraction": 0.17637566137566138
+      }
+    },
+    "portfolio": {
+      "ledger_rows": 152,
+      "compounded_gross_return": -0.0533593318774408,
+      "compounded_net_return": -0.08505311609311061,
+      "total_cost": 0.034016368222025105,
+      "mean_turnover": 0.4475837923950672,
+      "maximum_turnover": 1.2587915862040107,
+      "zero_gross_return_fraction": 0.743421052631579
+    },
+    "exposures": {
+      "mean_gross_exposure": 0.25657894706454226,
+      "minimum_gross_exposure": 0.0,
+      "maximum_gross_exposure": 1.0000000000878733,
+      "maximum_absolute_net_exposure": 1.9409057694375065e-12,
+      "zero_exposure_fraction": 0.743421052631579
+    }
+  },
+  "enriched": {
+    "candidate": "v56-research-005-enriched",
+    "artifact_directory_exists": true,
+    "prediction_rows": 37800,
+    "prediction_periods": 756,
+    "prediction_symbols": 50,
+    "signal_diagnostics": {
+      "elastic": {
+        "mean_rank_ic": 0.028780528084249572,
+        "median_rank_ic": 0.031164465786314523,
+        "positive_ic_fraction": 0.548941798941799,
+        "observations": 756,
+        "prediction_standard_deviation": 0.2886212115593798,
+        "zero_fraction": 0.02
+      },
+      "tree": {
+        "mean_rank_ic": 0.011326039545984969,
+        "median_rank_ic": 0.0063385354141656655,
+        "positive_ic_fraction": 0.5066137566137566,
+        "observations": 756,
+        "prediction_standard_deviation": 0.2886199099497056,
+        "zero_fraction": 0.019894179894179895
+      },
+      "ensemble": {
+        "mean_rank_ic": 0.03014944415029006,
+        "median_rank_ic": 0.02737094837935174,
+        "positive_ic_fraction": 0.5471014492753623,
+        "observations": 552,
+        "prediction_standard_deviation": 0.22911582339798792,
+        "zero_fraction": 0.2751851851851852
+      }
+    },
+    "portfolio": {
+      "ledger_rows": 152,
+      "compounded_gross_return": -0.04400995446821243,
+      "compounded_net_return": -0.07627416792824293,
+      "total_cost": 0.0343008962773194,
+      "mean_turnover": 0.45132758259630795,
+      "maximum_turnover": 1.1424134650875295,
+      "zero_gross_return_fraction": 0.7236842105263158
+    },
+    "exposures": {
+      "mean_gross_exposure": 0.2763157890720976,
+      "minimum_gross_exposure": 0.0,
+      "maximum_gross_exposure": 1.0000000000852742,
+      "maximum_absolute_net_exposure": 1.7261657262631002e-11,
+      "zero_exposure_fraction": 0.7236842105263158
+    }
+  },
+  "panel_coverage": {
+    "base_panel": {
+      "exists": true,
+      "path": "D:\\Projects\\institutional-financial-ai-platform\\data\\research\\v56-research-005\\model_panel.parquet",
+      "rows": 76650,
+      "periods": 1533,
+      "symbols": 50,
+      "sectors": 10,
+      "minimum_symbols_per_date": 50,
+      "median_symbols_per_date": 50.0,
+      "maximum_symbols_per_date": 50,
+      "duplicate_keys": 0,
+      "features": {
+        "return_lag_1": {
+          "non_null_fraction": 0.9987084148727985,
+          "unique_values": 75166,
+          "standard_deviation": 0.01921186555540267
+        },
+        "momentum_5": {
+          "non_null_fraction": 0.996099151989563,
+          "unique_values": 75689,
+          "standard_deviation": 0.04276997719919247
+        },
+        "momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 75213,
+          "standard_deviation": 0.08741141530412547
+        },
+        "momentum_63": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 73248,
+          "standard_deviation": 0.1509950455076974
+        },
+        "momentum_126": {
+          "non_null_fraction": 0.9171689497716895,
+          "unique_values": 70153,
+          "standard_deviation": 0.22882374294128924
+        },
+        "volatility": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 76097,
+          "standard_deviation": 0.00860275485531733
+        },
+        "volatility_63": {
+          "non_null_fraction": 0.9797912589693412,
+          "unique_values": 75099,
+          "standard_deviation": 0.0075393822289791775
+        },
+        "vol_scaled_momentum": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 75512,
+          "standard_deviation": 4.84121412181727
+        },
+        "log_dollar_volume": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 76151,
+          "standard_deviation": 1.022104448545995
+        },
+        "volume_change_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 76151,
+          "standard_deviation": 0.4875114447542148
+        },
+        "amihud_20": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 76097,
+          "standard_deviation": 1.5744692026924398e-09
+        },
+        "range_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 76151,
+          "standard_deviation": 0.008319447413758835
+        },
+        "beta": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 73451,
+          "standard_deviation": 0.5690886200830191
+        },
+        "residual_momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 75551,
+          "standard_deviation": 0.0670393220138264
+        },
+        "rank_return_lag_1": {
+          "non_null_fraction": 0.9987084148727985,
+          "unique_values": 73,
+          "standard_deviation": 0.2886226463121917
+        },
+        "rank_momentum_5": {
+          "non_null_fraction": 0.996099151989563,
+          "unique_values": 52,
+          "standard_deviation": 0.28862283251331095
+        },
+        "rank_momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228992746963
+        },
+        "rank_momentum_63": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 50,
+          "standard_deviation": 0.28862305667755866
+        },
+        "rank_momentum_126": {
+          "non_null_fraction": 0.9171689497716895,
+          "unique_values": 51,
+          "standard_deviation": 0.2886233054851928
+        },
+        "rank_volatility": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228594856511
+        },
+        "rank_volatility_63": {
+          "non_null_fraction": 0.9797912589693412,
+          "unique_values": 50,
+          "standard_deviation": 0.2886229322628441
+        },
+        "rank_vol_scaled_momentum": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228992746963
+        },
+        "rank_log_dollar_volume": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285589696496
+        },
+        "rank_volume_change_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285589696496
+        },
+        "rank_amihud_20": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285948565103
+        },
+        "rank_range_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285589696496
+        },
+        "rank_beta": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 50,
+          "standard_deviation": 0.2886230566775587
+        },
+        "rank_residual_momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228992746963
+        }
+      }
+    },
+    "enriched_panel": {
+      "exists": true,
+      "path": "D:\\Projects\\institutional-financial-ai-platform\\data\\research\\v56-research-005-enriched\\model_panel.parquet",
+      "rows": 76650,
+      "periods": 1533,
+      "symbols": 50,
+      "sectors": 10,
+      "minimum_symbols_per_date": 50,
+      "median_symbols_per_date": 50.0,
+      "maximum_symbols_per_date": 50,
+      "duplicate_keys": 0,
+      "features": {
+        "return_lag_1": {
+          "non_null_fraction": 0.9987084148727985,
+          "unique_values": 75166,
+          "standard_deviation": 0.01921186555540267
+        },
+        "momentum_5": {
+          "non_null_fraction": 0.996099151989563,
+          "unique_values": 75689,
+          "standard_deviation": 0.04276997719919247
+        },
+        "momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 75213,
+          "standard_deviation": 0.08741141530412547
+        },
+        "momentum_63": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 73248,
+          "standard_deviation": 0.1509950455076974
+        },
+        "momentum_126": {
+          "non_null_fraction": 0.9171689497716895,
+          "unique_values": 70153,
+          "standard_deviation": 0.22882374294128924
+        },
+        "volatility": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 76097,
+          "standard_deviation": 0.00860275485531733
+        },
+        "volatility_63": {
+          "non_null_fraction": 0.9797912589693412,
+          "unique_values": 75099,
+          "standard_deviation": 0.0075393822289791775
+        },
+        "vol_scaled_momentum": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 75512,
+          "standard_deviation": 4.84121412181727
+        },
+        "log_dollar_volume": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 76151,
+          "standard_deviation": 1.022104448545995
+        },
+        "volume_change_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 76151,
+          "standard_deviation": 0.4875114447542148
+        },
+        "amihud_20": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 76097,
+          "standard_deviation": 1.5744692026924398e-09
+        },
+        "range_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 76151,
+          "standard_deviation": 0.008319447413758835
+        },
+        "beta": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 73451,
+          "standard_deviation": 0.5690886200830191
+        },
+        "residual_momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 75551,
+          "standard_deviation": 0.0670393220138264
+        },
+        "fundamental_revenue": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 71,
+          "standard_deviation": 153321595014.7212
+        },
+        "fundamental_net_income": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 58,
+          "standard_deviation": 34630417070.976616
+        },
+        "fundamental_operating_cash_flow": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 71,
+          "standard_deviation": 45121736010.34577
+        },
+        "fundamental_total_assets": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 71,
+          "standard_deviation": 230955699362.22903
+        },
+        "fundamental_total_equity": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 71,
+          "standard_deviation": 133872229386.90228
+        },
+        "fundamental_market_cap": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 75,
+          "standard_deviation": 1344770987010.4011
+        },
+        "rank_return_lag_1": {
+          "non_null_fraction": 0.9987084148727985,
+          "unique_values": 73,
+          "standard_deviation": 0.2886226463121917
+        },
+        "rank_momentum_5": {
+          "non_null_fraction": 0.996099151989563,
+          "unique_values": 52,
+          "standard_deviation": 0.28862283251331095
+        },
+        "rank_momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228992746963
+        },
+        "rank_momentum_63": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 50,
+          "standard_deviation": 0.28862305667755866
+        },
+        "rank_momentum_126": {
+          "non_null_fraction": 0.9171689497716895,
+          "unique_values": 51,
+          "standard_deviation": 0.2886233054851928
+        },
+        "rank_volatility": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228594856511
+        },
+        "rank_volatility_63": {
+          "non_null_fraction": 0.9797912589693412,
+          "unique_values": 50,
+          "standard_deviation": 0.2886229322628441
+        },
+        "rank_vol_scaled_momentum": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228992746963
+        },
+        "rank_log_dollar_volume": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285589696496
+        },
+        "rank_volume_change_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285589696496
+        },
+        "rank_amihud_20": {
+          "non_null_fraction": 0.9928375733855186,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285948565103
+        },
+        "rank_range_20": {
+          "non_null_fraction": 0.9934898891063275,
+          "unique_values": 50,
+          "standard_deviation": 0.28862285589696496
+        },
+        "rank_beta": {
+          "non_null_fraction": 0.9582648401826483,
+          "unique_values": 50,
+          "standard_deviation": 0.2886230566775587
+        },
+        "rank_residual_momentum_21": {
+          "non_null_fraction": 0.9856621004566211,
+          "unique_values": 50,
+          "standard_deviation": 0.2886228992746963
+        },
+        "rank_fundamental_revenue": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 10,
+          "standard_deviation": 0.2830716581663319
+        },
+        "rank_fundamental_net_income": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 10,
+          "standard_deviation": 0.2830716581663319
+        },
+        "rank_fundamental_operating_cash_flow": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 10,
+          "standard_deviation": 0.2830716581663319
+        },
+        "rank_fundamental_total_assets": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 10,
+          "standard_deviation": 0.2830716581663319
+        },
+        "rank_fundamental_total_equity": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 10,
+          "standard_deviation": 0.28307165816633184
+        },
+        "rank_fundamental_market_cap": {
+          "non_null_fraction": 0.05835616438356164,
+          "unique_values": 10,
+          "standard_deviation": 0.2830716581663319
+        }
+      }
+    }
+  }
+}

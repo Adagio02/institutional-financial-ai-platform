@@ -28,9 +28,18 @@ class Config:
     ic_lookback: int = 126
     ic_floor: float = 0.005
     seed: int = 17
-    rebalance_every: int = 1
+    rebalance_every: int = 5
     beta_exposure_limit: float = 0.10
     rebalance_turnover_limit: float = 0.25
+
+    def __post_init__(self) -> None:
+        if self.horizon < 1 or self.rebalance_every < 1:
+            raise ValueError("horizon and rebalance_every must be at least 1")
+        if self.rebalance_every < self.horizon:
+            raise ValueError(
+                f"rebalance_every ({self.rebalance_every}) must be >= horizon ({self.horizon}); "
+                "otherwise each ledger row books an overlapping multi-day forward return"
+            )
 
 
 def read_frame(path: str | Path) -> pd.DataFrame:
