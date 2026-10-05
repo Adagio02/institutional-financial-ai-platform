@@ -29,6 +29,8 @@ class Config:
     ic_floor: float = 0.005
     seed: int = 17
     rebalance_every: int = 1
+    beta_exposure_limit: float = 0.10
+    rebalance_turnover_limit: float = 0.25
 
 
 def read_frame(path: str | Path) -> pd.DataFrame:

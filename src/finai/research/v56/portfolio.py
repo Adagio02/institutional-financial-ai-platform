@@ -74,6 +74,99 @@ def neutral_weights(
     return raw
 
 
+def ranked_factor_neutral_weights(
+    scores: np.ndarray,
+    previous: np.ndarray,
+    cfg: Config,
+    beta: np.ndarray,
+    sectors: np.ndarray,
+    volatility: np.ndarray,
+) -> tuple[np.ndarray, str]:
+    """Deterministic long/short construction with sector and beta neutrality."""
+    scores = np.asarray(scores, float)
+    beta = np.asarray(beta, float)
+    volatility = np.asarray(volatility, float)
+    sectors = np.asarray(sectors)
+    valid = np.isfinite(scores) & np.isfinite(beta) & np.isfinite(volatility)
+    if valid.sum() < max(8, int(0.8 * len(scores))) or np.nanstd(scores) < 1e-12:
+        return np.zeros(len(scores)), "insufficient_signal_or_exposure_data"
+    # Fill rare missing exposures from the same-date cross section; never future data.
+    beta = np.where(np.isfinite(beta), beta, np.nanmedian(beta))
+    volatility = np.where(np.isfinite(volatility), volatility, np.nanmedian(volatility))
+    volatility = np.maximum(volatility, 1e-4)
+    weights = np.zeros(len(scores))
+    unique = sorted(pd.Series(sectors).dropna().unique())
+    usable = [sector for sector in unique if np.sum(sectors == sector) >= 4]
+    if len(usable) < 3:
+        return weights, "insufficient_sector_breadth"
+    sector_gross = cfg.gross_limit / len(usable)
+    for sector in usable:
+        indices = np.flatnonzero(sectors == sector)
+        ranked = indices[np.argsort(scores[indices])]
+        count = max(1, int(np.floor(len(indices) * cfg.long_fraction)))
+        short_idx, long_idx = ranked[:count], ranked[-count:]
+        long_scale = 1.0 / volatility[long_idx]
+        short_scale = 1.0 / volatility[short_idx]
+        weights[long_idx] = 0.5 * sector_gross * long_scale / long_scale.sum()
+        weights[short_idx] = -0.5 * sector_gross * short_scale / short_scale.sum()
+    # Remove beta exposure using beta residualized within sector. This correction
+    # preserves each sector's zero net exposure.
+    beta_residual = beta.copy()
+    for sector in usable:
+        mask = sectors == sector
+        beta_residual[mask] -= beta_residual[mask].mean()
+    denominator = float(beta_residual @ beta_residual)
+    if denominator > 1e-12:
+        weights -= float(weights @ beta) / denominator * beta_residual
+    # Smooth toward the new target. Both vectors are then re-projected so the
+    # result remains neutral under today's beta estimates.
+    if np.abs(previous).sum() > 1e-12:
+        weights = 0.50 * previous + 0.50 * weights
+        if denominator > 1e-12:
+            weights -= float(weights @ beta) / denominator * beta_residual
+        for sector in usable:
+            mask = sectors == sector
+            weights[mask] -= weights[mask].mean()
+    scale = min(
+        1.0,
+        cfg.position_limit / max(np.abs(weights).max(), 1e-12),
+        cfg.gross_limit / max(np.abs(weights).sum(), 1e-12),
+    )
+    weights *= scale
+    if np.abs(weights).sum() < 0.10:
+        return np.zeros(len(scores)), "degenerate_after_neutralization"
+    return weights, "active"
+
+
+def simulate_ranked(predictions: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:
+    rows, positions, previous_map = [], [], {}
+    grouped = list(predictions.groupby("timestamp", sort=True))
+    for group_index, (date, section) in enumerate(grouped):
+        if group_index % cfg.rebalance_every:
+            continue
+        section = section.sort_values("symbol").copy()
+        previous = np.array([previous_map.get(symbol, 0.0) for symbol in section.symbol])
+        weights, status = ranked_factor_neutral_weights(
+            section.ensemble.to_numpy(float), previous, cfg,
+            section.beta.to_numpy(float), section.sector.to_numpy(),
+            section.volatility.to_numpy(float),
+        )
+        turnover = float(np.abs(weights - previous).sum())
+        gross = float(np.nansum(weights * section.forward_return.to_numpy(float)))
+        cost = turnover * cfg.cost_bps / 10000.0
+        net = gross - cost
+        rows.append({
+            "timestamp": date, "gross_return": gross, "cost": cost,
+            "net_return": net, "turnover": turnover, "construction_status": status,
+            "gross_exposure": float(np.abs(weights).sum()),
+            "net_exposure": float(weights.sum()), "beta_exposure": float(weights @ section.beta.to_numpy(float)),
+        })
+        for symbol, weight, signal in zip(section.symbol, weights, section.ensemble):
+            positions.append({"timestamp": date, "symbol": symbol, "weight": weight, "signal": signal})
+            previous_map[symbol] = weight
+    return pd.DataFrame(rows), pd.DataFrame(positions)
+
+
 def simulate(predictions: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:
     rows, positions, previous_map = [], [], {}
     grouped = list(predictions.groupby("timestamp", sort=True))
@@ -102,7 +195,8 @@ def metrics(ledger: pd.DataFrame) -> dict:
     equity = (1.0 + r).cumprod()
     drawdown = equity / equity.cummax() - 1.0
     std = float(r.std(ddof=1))
-    sharpe = float(np.sqrt(252) * r.mean() / std) if std > 0 else 0.0
+    annual_periods = 252.0 / max(1, int(getattr(ledger, "attrs", {}).get("rebalance_every", 1)))
+    sharpe = float(np.sqrt(annual_periods) * r.mean() / std) if std > 0 else 0.0
     return {
         "period_count": len(r), "cumulative_net_return": float(equity.iloc[-1] - 1.0),
         "annualized_sharpe": sharpe, "maximum_drawdown": float(drawdown.min()),
