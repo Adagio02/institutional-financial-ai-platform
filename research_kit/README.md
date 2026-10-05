@@ -12,6 +12,15 @@ project root with the virtual environment active.
 | `python -m research_kit freeze <id> [--exploratory]` | Locks a strategy for forward testing |
 | `python -m research_kit shadow-run` | Refreshes data and records new shadow portfolios (weekly) |
 | `python -m research_kit shadow-report` | Scores shadow portfolios on data after the freeze |
+| `python -m research_kit daily` | After-close pipeline: incremental data, health checks, recording, verdicts |
+
+Daily automation
+- `.\research_kit\schedule_daily.ps1` registers a Mon-Fri 18:00 task (replaces the weekly one).
+- Or call `.\research_kit\run_daily_step.ps1` from your existing after-close script.
+- Exit codes: 0 ok, 1 failed or data unhealthy (nothing recorded), 2 a strategy reached a final verdict.
+- Outputs: `research/shadow/run.log`, `status.json`, `daily_summary.csv`, `<id>/report.json`, `<id>/ledger.csv`.
+- Verdict rules (version 1, fixed): early retirement only for failure (from period 6: drawdown beyond
+  2x the backtest's, or t < -2.5 versus the backtest); a positive verdict only at the planned length.
 
 Rules this kit enforces
 1. A hypothesis must be registered before it is tested, and cannot be edited afterwards.

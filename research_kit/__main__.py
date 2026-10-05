@@ -25,6 +25,10 @@ def main() -> int:
     s = sub.add_parser("shadow-run", help="refresh data and record new shadow portfolios (schedule weekly)")
     s.add_argument("--skip-refresh", action="store_true")
     sub.add_parser("shadow-report", help="score shadow portfolios on data after each freeze date")
+    d = sub.add_parser("daily", help="after-close pipeline: update data, record, evaluate (schedule on weekdays)")
+    d.add_argument("--force", action="store_true", help="rebuild even if no new trading day was found")
+    d.add_argument("--min-symbols", type=int, default=None,
+                   help="only if you built the panel with a non-default --min-symbols")
     a = p.parse_args()
 
     if a.command == "register":
@@ -57,6 +61,9 @@ def main() -> int:
     elif a.command == "shadow-report":
         from . import shadow
         shadow.report()
+    elif a.command == "daily":
+        from . import daily
+        return daily.run_daily(force=a.force, min_symbols=a.min_symbols)
     return 0
 
 

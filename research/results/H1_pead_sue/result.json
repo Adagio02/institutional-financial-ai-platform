@@ -1,0 +1,145 @@
+{
+  "ic_checks": {
+    "score before neutralization": {
+      "dates": 98,
+      "mean_ic": 0.007441624544521729,
+      "t_stat": 1.0796396207398116,
+      "positive_years": "7/9"
+    },
+    "score, sector + beta neutral": {
+      "dates": 98,
+      "mean_ic": 0.0070770857865058,
+      "t_stat": 1.0000235778262685,
+      "positive_years": "7/9"
+    },
+    "score, sector + beta + size neutral": {
+      "dates": 98,
+      "mean_ic": 0.004860025494375141,
+      "t_stat": 0.6973922062394643,
+      "positive_years": "6/9"
+    }
+  },
+  "metrics": {
+    "period_count": 98,
+    "cumulative_net_return": 0.05883672079016966,
+    "annualized_sharpe": 0.414075446565094,
+    "maximum_drawdown": -0.032645347881902986,
+    "positive_period_fraction": 0.5510204081632653,
+    "mean_turnover": 0.25000000000099953,
+    "total_transaction_cost": 0.012250000000048979
+  },
+  "gross_compounded_return": 0.07187892553931796,
+  "active_fraction": 1.0,
+  "cost_sensitivity": {
+    "10": {
+      "net": 0.045951608676506384,
+      "sharpe": 0.3272068338713534
+    },
+    "20": {
+      "net": 0.020645192864853223,
+      "sharpe": 0.15346960848387206
+    }
+  },
+  "yearly": [
+    {
+      "year": 2018,
+      "periods": 6,
+      "gross": 0.012052307784837568,
+      "net": 0.011295017356385717,
+      "turnover": 0.2500000000009995
+    },
+    {
+      "year": 2019,
+      "periods": 12,
+      "gross": 0.006753089099462262,
+      "net": 0.005244829097379444,
+      "turnover": 0.25000000000099953
+    },
+    {
+      "year": 2020,
+      "periods": 13,
+      "gross": 0.011051671714856992,
+      "net": 0.009411315868015357,
+      "turnover": 0.25000000000099953
+    },
+    {
+      "year": 2021,
+      "periods": 12,
+      "gross": 0.039559259599419416,
+      "net": 0.03800598168451397,
+      "turnover": 0.2500000000009995
+    },
+    {
+      "year": 2022,
+      "periods": 11,
+      "gross": -0.017643693584598497,
+      "net": -0.018995785856812386,
+      "turnover": 0.2500000000009996
+    },
+    {
+      "year": 2023,
+      "periods": 12,
+      "gross": -0.0051095770162269405,
+      "net": -0.006601550224827335,
+      "turnover": 0.25000000000099964
+    },
+    {
+      "year": 2024,
+      "periods": 12,
+      "gross": 0.01710548912030485,
+      "net": 0.015583018744031119,
+      "turnover": 0.2500000000009997
+    },
+    {
+      "year": 2025,
+      "periods": 12,
+      "gross": -0.0007593852962992642,
+      "net": -0.0022573252272304334,
+      "turnover": 0.2500000000009996
+    },
+    {
+      "year": 2026,
+      "periods": 8,
+      "gross": 0.0076665340788191205,
+      "net": 0.006660260251645456,
+      "turnover": 0.2500000000009994
+    }
+  ],
+  "checks": {
+    "minimum_periods": true,
+    "active_fraction": true,
+    "neutral_ic_t_stat": "False",
+    "positive_gross_return": true,
+    "positive_net_return": true,
+    "minimum_sharpe": true,
+    "maximum_drawdown": true,
+    "maximum_turnover": true,
+    "beta_band": true,
+    "positive_net_at_10_bps": true
+  },
+  "passed": false,
+  "blocking": [
+    "neutral_ic_t_stat"
+  ],
+  "config": {
+    "horizon": 21,
+    "train_periods": 504,
+    "test_periods": 21,
+    "embargo_periods": 5,
+    "min_train_periods": 252,
+    "min_symbols": 100,
+    "long_fraction": 0.2,
+    "gross_limit": 1.0,
+    "position_limit": 0.02,
+    "turnover_penalty": 0.002,
+    "risk_penalty": 8.0,
+    "cost_bps": 5.0,
+    "ic_lookback": 126,
+    "ic_floor": 0.005,
+    "seed": 17,
+    "rebalance_every": 21,
+    "beta_exposure_limit": 0.1,
+    "rebalance_turnover_limit": 0.25
+  },
+  "rebalances": 98
+}
