@@ -1,0 +1,24 @@
+[2026-10-05 18:35:59Z] Bars: fetching 2026-09-25 to now for 657 symbols...
+[2026-10-05 18:36:34Z]   Alpaca rejected symbol RVTY (PREVIOUSLY PKI); skipped
+[2026-10-05 18:37:39Z]   Re-downloading full history for 0 adjusted and 7 new symbols
+[2026-10-05 18:37:45Z]   Alpaca rejected symbol RVTY (PREVIOUSLY PKI); skipped
+[2026-10-05 18:37:47Z]   Bars through 2026-10-05: 558 symbols on the latest day
+[2026-10-05 18:37:47Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-05 18:38:08Z] H0_low_risk_monthly_forward: recorded rebalance for 2026-10-05 (active, 94 long / 94 short).
+[2026-10-05 18:38:09Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: +0.00% (day 0)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-06 22:00:02Z] Bars: fetching 2026-09-28 to now for 657 symbols...
+[2026-10-06 22:00:29Z]   Alpaca rejected symbol RVTY (PREVIOUSLY PKI); skipped
+[2026-10-06 22:01:33Z]   Re-downloading full history for 4 adjusted and 0 new symbols
+[2026-10-06 22:01:36Z]   Bars through 2026-10-06: 558 symbols on the latest day
+[2026-10-06 22:01:36Z] ETF bars: refreshing...
+[2026-10-06 22:01:39Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-06 22:02:08Z] H0_low_risk_monthly_forward: 1 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-06 22:02:09Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-06 (changed)
+[2026-10-06 22:02:12Z] H5_breakout_tight_stop: recorded 13 holdings for 2026-10-06 (changed)
+[2026-10-06 22:02:17Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.03% (day 1)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-06 22:02:17Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-06 22:02:17Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.56% (day 1)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12

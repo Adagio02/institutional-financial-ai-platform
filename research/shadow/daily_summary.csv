@@ -1,0 +1,5 @@
+date,id,verdict,completed,needed,net_return,sharpe,max_drawdown,t_vs_backtest,open_unrealized
+2026-10-05,H0_low_risk_monthly_forward,collecting,0,24,,,,,0.0
+2026-10-06,H0_low_risk_monthly_forward,collecting,0,24,,,,,-0.00032968095308010946
+2026-10-06,H3_cross_asset_trend,collecting,0,24,,,,,
+2026-10-06,H5_breakout_tight_stop,collecting,0,12,,,,,0.005562099414185617

@@ -12,6 +12,9 @@ project root with the virtual environment active.
 | `python -m research_kit freeze <id> [--exploratory]` | Locks a strategy for forward testing |
 | `python -m research_kit shadow-run` | Refreshes data and records new shadow portfolios (weekly) |
 | `python -m research_kit shadow-report` | Scores shadow portfolios on data after the freeze |
+| `python -m research_kit build-strategy-data` | ETF history for the cross-asset trend strategy (H3) |
+| `python -m research_kit build-validation-data` | S&P 400 mid-caps (never in the S&P 500) for one-time validation |
+| `python -m research_kit validate <id>` | Runs a passed calibration ONCE on the mid-caps |
 | `python -m research_kit daily` | After-close pipeline: incremental data, health checks, recording, verdicts |
 
 Daily automation
@@ -32,3 +35,12 @@ Rules this kit enforces
 
 Commit the whole `research/` folder (registry, policy, frozen specs, results, shadow books): it is your evidence trail.
 Do not commit `data/`.
+
+Rule-based strategies (H3 trend, H4 momentum, H5 breakout) use `research_kit/strategies.py`.
+They fit nothing to data, so a frozen strategy's results after its freeze date are a true
+forward test; holdings are snapshotted daily in `research/shadow/<id>/book.parquet` for audit.
+
+Calibration (H6, `research_kit/calibration.py`): a pre-registered grid of ATR stop multiples,
+walk-forward selection (each year chosen from earlier years only, smoothed over grid neighbours),
+a plateau check, and a single validation on mid-caps before freezing. Freezing a calibrated
+strategy as qualified requires both a passed test and a passed validation.

@@ -25,6 +25,10 @@ def main() -> int:
     s = sub.add_parser("shadow-run", help="refresh data and record new shadow portfolios (schedule weekly)")
     s.add_argument("--skip-refresh", action="store_true")
     sub.add_parser("shadow-report", help="score shadow portfolios on data after each freeze date")
+    sub.add_parser("build-validation-data", help="S&P 400 mid-cap bars for one-time validation of a calibration")
+    va = sub.add_parser("validate", help="run a passed calibration ONCE on stocks it never saw")
+    va.add_argument("id")
+    sub.add_parser("build-strategy-data", help="download ETF history for the trend-following strategy")
     d = sub.add_parser("daily", help="after-close pipeline: update data, record, evaluate (schedule on weekdays)")
     d.add_argument("--force", action="store_true", help="rebuild even if no new trading day was found")
     d.add_argument("--min-symbols", type=int, default=None,
@@ -44,8 +48,17 @@ def main() -> int:
     elif a.command == "test":
         from . import study
         spec = registry.require_testable(a.id, a.force_reason)
-        result = study.run_study(spec)
-        study.print_result(spec, result)
+        if spec.get("strategy_type") == "breakout_walkforward":
+            from . import calibration
+            result = calibration.run_test(spec)
+            calibration.print_result(spec, result)
+        elif spec.get("strategy_type"):
+            from . import strategies
+            result = strategies.run_test(spec)
+            strategies.print_result(spec, result)
+        else:
+            result = study.run_study(spec)
+            study.print_result(spec, result)
         path = study.save_result(spec, result)
         registry.append({"event": "tested", "id": a.id, "passed": result["passed"], "blocking": result["blocking"],
                          "metrics": result["metrics"], "ic_checks": result["ic_checks"],
@@ -61,6 +74,15 @@ def main() -> int:
     elif a.command == "shadow-report":
         from . import shadow
         shadow.report()
+    elif a.command == "build-validation-data":
+        from . import calibration
+        calibration.build_midcap_data()
+    elif a.command == "validate":
+        from . import calibration
+        calibration.validate(a.id)
+    elif a.command == "build-strategy-data":
+        from . import strategies
+        strategies.build_etf_data()
     elif a.command == "daily":
         from . import daily
         return daily.run_daily(force=a.force, min_symbols=a.min_symbols)

@@ -52,8 +52,15 @@ def freeze(hypothesis_id: str, exploratory: bool) -> None:
             raise SystemExit(f"'{hypothesis_id}' failed its historical test, so it cannot be frozen as a qualified "
                              "candidate. Use --exploratory to watch it forward anyway; exploratory strategies "
                              "can never become a champion.")
-    panel = load_panel(spec)
-    freeze_date = panel.timestamp.max()
+        validations = [e for e in registry.events(hypothesis_id) if e["event"] == "validated"]
+        if spec.get("validation") and not (validations and validations[-1]["passed"]):
+            raise SystemExit(f"'{hypothesis_id}' needs its one-time validation first: python -m research_kit validate "
+                             f"{hypothesis_id}  (or freeze it with --exploratory)")
+    if spec.get("strategy_type"):
+        from .strategies import latest_date
+        freeze_date = latest_date(spec)
+    else:
+        freeze_date = load_panel(spec).timestamp.max()
     record = {"id": hypothesis_id, "spec": spec, "spec_hash": registry.spec_hash(spec),
               "status": "exploratory" if exploratory else "qualified", "frozen_at": registry.now(),
               "freeze_data_date": str(freeze_date), "git_commit": registry.git_commit()}
@@ -93,6 +100,10 @@ def run(skip_refresh: bool) -> None:
             continue
         if registry.spec_hash(spec) != frozen["spec_hash"]:
             log(f"{hid}: frozen spec was modified after freezing - skipped. Restore the original file.")
+            continue
+        if spec.get("strategy_type"):
+            from .strategies import record_snapshot
+            record_snapshot(frozen)
             continue
         panel = load_panel(spec)
         latest = panel.timestamp.max()
@@ -187,6 +198,9 @@ def shadow_ledger(frozen: dict, panel: pd.DataFrame | None = None) -> tuple[pd.D
 
 
 def evaluate(frozen: dict, panel: pd.DataFrame | None = None) -> dict:
+    if frozen["spec"].get("strategy_type"):
+        from .strategies import evaluate_forward
+        return evaluate_forward(frozen)
     spec, hid = frozen["spec"], frozen["id"]
     horizon = int(spec["horizon"])
     rules = EVALUATION_RULES

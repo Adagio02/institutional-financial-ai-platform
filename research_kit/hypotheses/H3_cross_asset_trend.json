@@ -1,0 +1,56 @@
+{
+  "id": "H3_cross_asset_trend",
+  "strategy_type": "etf_trend",
+  "hypothesis": "A monthly, long-only cross-asset trend rule (hold each of 9 asset-class ETFs only while its 12-month return beats T-bills, otherwise hold T-bills) delivers a Sharpe ratio close to a 60/40 stock/bond portfolio with shallower drawdowns.",
+  "rationale": "Time-series momentum is documented across asset classes over more than a century (Moskowitz, Ooi and Pedersen 2012; Hurst, Ooi and Pedersen 2017). Its main value is cutting exposure in prolonged declines. The 2017-2026 test window is short, so this confirms a known effect rather than discovering one.",
+  "signal": {
+    "columns": {},
+    "description": "12-month total return of each ETF versus BIL"
+  },
+  "assets": [
+    "SPY",
+    "EFA",
+    "EEM",
+    "IWM",
+    "VNQ",
+    "TLT",
+    "IEF",
+    "GLD",
+    "DBC"
+  ],
+  "cash": "BIL",
+  "benchmark": {
+    "name": "60/40",
+    "weights": {
+      "SPY": 0.6,
+      "AGG": 0.4
+    }
+  },
+  "rule": {
+    "lookback_days": 252,
+    "rebalance": "month_end",
+    "execution": "next day close",
+    "weighting": "equal slots"
+  },
+  "horizon": 21,
+  "cost_bps": 5,
+  "sensitivity_costs": [
+    20
+  ],
+  "panel": "data/research/etf/bars.parquet",
+  "window": {
+    "start": "2017-01-01",
+    "end": "2026-09-30"
+  },
+  "gates": {
+    "min_months": 60,
+    "min_sharpe_ratio_vs_benchmark": 0.8
+  },
+  "decision_rule": "If every gate passes: freeze as qualified and forward-test for 24 months against 60/40. If any gate fails: close H3; do not try other lookbacks, asset lists or weightings on this data.",
+  "forward": {
+    "ready": true,
+    "min_periods": 24,
+    "benchmark": "60/40",
+    "compare": "sharpe"
+  }
+}

@@ -12,7 +12,8 @@ import argparse
 import json
 import os
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time as clock, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -40,9 +41,23 @@ def save_state(state: dict) -> None:
     STATE.write_text(json.dumps(state, indent=2, default=str), encoding="utf-8")
 
 
+EASTERN = ZoneInfo("America/New_York")
+
+
+def bar_cutoff(now: datetime | None = None) -> datetime:
+    """Latest moment whose daily bar is final. Before 16:30 New York time on a weekday,
+    today's bar is still forming, so it is excluded; afterwards it is included."""
+    now = now or datetime.now(timezone.utc)
+    local = now.astimezone(EASTERN)
+    if local.weekday() < 5 and local.time() < clock(16, 30):
+        midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
+        return (midnight - timedelta(seconds=1)).astimezone(timezone.utc)
+    return now - timedelta(minutes=16)
+
+
 def builder_args(**extra) -> argparse.Namespace:
-    values = {"start": "2018-01-01", "end": (datetime.now(timezone.utc) - timedelta(minutes=16)).strftime(
-        "%Y-%m-%dT%H:%M:%SZ"), "feed": "sip", "min_symbols": MIN_SYMBOLS, "refresh_days": None}
+    values = {"start": "2018-01-01", "end": bar_cutoff().strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "feed": "sip", "min_symbols": MIN_SYMBOLS, "refresh_days": None}
     values.update(extra)
     return argparse.Namespace(**values)
 
@@ -102,6 +117,9 @@ def update_bars(args: argparse.Namespace, state: dict) -> pd.Timestamp:
     # A split or dividend rewrites a stock's adjusted history: detect it on the overlap days
     # and re-download that stock's full history so returns stay consistent.
     overlap = recent.merge(bars[["timestamp", "symbol", "close"]], on=["timestamp", "symbol"], suffixes=("", "_old"))
+    # The last stored day may have been captured before it was final; differences there are
+    # not corporate actions, so only earlier overlap days are compared.
+    overlap = overlap[overlap.timestamp < last]
     changed = sorted(overlap.loc[(overlap.close / overlap.close_old - 1).abs() > 1e-4, "symbol"].unique())
     missing = sorted(set(symbols) - set(bars.symbol) - set(state.get("no_data_symbols", [])))
     full_start = (pd.Timestamp(args.start) - pd.Timedelta(days=400)).strftime("%Y-%m-%d")
@@ -213,12 +231,18 @@ def run_daily(force: bool = False, min_symbols: int | None = None) -> int:
             log("No frozen strategies yet; nothing to forward-test. Freeze one first.")
             return 0
         args = builder_args()
+        if bar_cutoff() < datetime.now(timezone.utc) - timedelta(hours=1):
+            log("Market session not finished yet (before 16:30 New York time): today's bar is excluded.")
         universe_path = DATA / "universe.csv"
         if time.time() - universe_path.stat().st_mtime > 7 * 86400:
             log("Weekly universe refresh...")
             bx.step_universe(args)
             state.pop("no_data_symbols", None)  # give renamed or new symbols another chance
         latest_bar = update_bars(args, state)
+        if any(f["spec"].get("strategy_type") == "etf_trend" for f in shadow.frozen_strategies()):
+            from .strategies import build_etf_data
+            log("ETF bars: refreshing...")
+            build_etf_data()
         if not force and str(latest_bar) == state.get("last_bar_date"):
             log(f"No new trading day since {latest_bar:%Y-%m-%d} (weekend or holiday); evaluation only.")
         else:

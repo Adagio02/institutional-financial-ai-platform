@@ -93,7 +93,8 @@ def require_testable(hypothesis_id: str, force_reason: str | None) -> dict:
                          "If the earlier run was broken by a bug, rerun with --force-reason \"what was wrong\"; "
                          "the reason is recorded permanently.")
     closed = set(policy().get("closed_features", []))
-    if set(spec["signal"]["columns"]) <= closed:
+    columns = set(spec["signal"].get("columns", {}))
+    if columns and columns <= closed:
         raise SystemExit("All signal columns are closed for historical testing (see research/policy.json). "
                          "Test this idea forward instead: python -m research_kit freeze "
                          f"{hypothesis_id} --exploratory")

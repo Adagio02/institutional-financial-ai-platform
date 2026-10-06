@@ -1,0 +1,29 @@
+{
+  "id": "H5_breakout_tight_stop",
+  "status_class": "exploratory",
+  "rules": {
+    "version": 1,
+    "early_retire_after_periods": 6,
+    "early_retire_drawdown_multiple": 2.0,
+    "early_retire_drawdown_floor": -0.15,
+    "early_retire_t_vs_backtest": -2.5,
+    "final_t_vs_backtest_floor": -1.5,
+    "final_requires_positive_net": true,
+    "final_requires_min_sharpe": true
+  },
+  "completed": 0,
+  "needed": 12,
+  "open_period": {
+    "since": "2026-10",
+    "days_held": 1,
+    "unrealized_gross": 0.005562099414185617
+  },
+  "as_of": "2026-10-06T22:02:17+00:00",
+  "benchmark": "SPY",
+  "trades": {
+    "trades": 0
+  },
+  "verdict": "collecting",
+  "final": false,
+  "reason": "0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "H3_cross_asset_trend",
+  "status_class": "qualified",
+  "rules": {
+    "version": 1,
+    "early_retire_after_periods": 6,
+    "early_retire_drawdown_multiple": 2.0,
+    "early_retire_drawdown_floor": -0.15,
+    "early_retire_t_vs_backtest": -2.5,
+    "final_t_vs_backtest_floor": -1.5,
+    "final_requires_positive_net": true,
+    "final_requires_min_sharpe": true
+  },
+  "completed": 0,
+  "needed": 24,
+  "open_period": {},
+  "as_of": "2026-10-06T22:02:14+00:00",
+  "benchmark": "60/40",
+  "verdict": "collecting",
+  "final": false,
+  "reason": "0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24"
+}

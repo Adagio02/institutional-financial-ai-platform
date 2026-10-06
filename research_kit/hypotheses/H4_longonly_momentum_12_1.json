@@ -1,0 +1,45 @@
+{
+  "id": "H4_longonly_momentum_12_1",
+  "strategy_type": "longonly_momentum",
+  "hypothesis": "Holding the S&P 500 members with the strongest 12-month gains (skipping the latest month), equal-weighted and rebalanced monthly, beats both SPY and an equal-weighted S&P 500 after costs.",
+  "rationale": "Medium-term momentum (Jegadeesh and Titman 1993) is among the most replicated return patterns. Skipping the latest month avoids short-term reversal. Comparing with the equal-weighted universe separates the momentum effect from simply equal-weighting smaller S&P members. Prior evidence on this data: 126-day momentum showed a weak positive raw IC (t about 1.6), so a strong result is not expected.",
+  "signal": {
+    "columns": {},
+    "description": "return from 252 to 21 trading days ago"
+  },
+  "related_closed_features": [
+    "rank_momentum_126",
+    "rank_momentum_63"
+  ],
+  "prior_evidence": "126-day momentum had a weak positive raw IC; this 12-1 construction was not tested.",
+  "rule": {
+    "lookback_days": 252,
+    "skip_days": 21,
+    "top_fraction": 0.2,
+    "keep_fraction": 0.3,
+    "rebalance": "month_end",
+    "execution": "next day close"
+  },
+  "horizon": 21,
+  "cost_bps": 5,
+  "sensitivity_costs": [
+    20
+  ],
+  "panel": "data/research/v56-expanded/bars.parquet",
+  "window": {
+    "start": "2018-01-01",
+    "end": "2026-09-30"
+  },
+  "gates": {
+    "min_months": 60,
+    "min_excess_t": 2.0,
+    "max_extra_drawdown": 0.1
+  },
+  "decision_rule": "If every gate passes: freeze as qualified and forward-test for 24 months against SPY. If any gate fails: close H4; do not try other lookbacks, skip periods or portfolio sizes on this data.",
+  "forward": {
+    "ready": true,
+    "min_periods": 24,
+    "benchmark": "SPY",
+    "compare": "return"
+  }
+}

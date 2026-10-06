@@ -1,0 +1,85 @@
+{
+  "strategy_type": "breakout_stops",
+  "metrics": {
+    "days": 2197,
+    "months": 105,
+    "total_return": 0.0009068560937153247,
+    "cagr": 0.00010397635525083437,
+    "volatility": 0.12694033197206572,
+    "sharpe": 0.06428595180019636,
+    "max_drawdown": -0.3434073020038195,
+    "worst_month": -0.06920514707639991
+  },
+  "stats": {},
+  "benchmarks": {
+    "SPY": {
+      "days": 2197,
+      "months": 105,
+      "total_return": 2.2546848381601308,
+      "cagr": 0.1449479186191378,
+      "volatility": 0.18721110146007172,
+      "sharpe": 0.8170582597959851,
+      "max_drawdown": -0.3379388816644996,
+      "worst_month": -0.12615555968071313
+    }
+  },
+  "excess_t_vs": {
+    "SPY": -3.196113467632401
+  },
+  "yearly": {
+    "2018": -0.15964236836122303,
+    "2019": 0.07789379596724255,
+    "2020": -0.139530468776506,
+    "2021": 0.035976441935593684,
+    "2022": -0.08988640698595451,
+    "2023": 0.03675627771335521,
+    "2024": 0.1559134548054013,
+    "2025": 0.04270724436790152,
+    "2026": 0.08995403266253632
+  },
+  "cost_sensitivity": {
+    "20": {
+      "days": 2197,
+      "months": 105,
+      "total_return": -0.23040240196826922,
+      "cagr": -0.029592298590781163,
+      "volatility": 0.12750858164975987,
+      "sharpe": -0.17180095596222894,
+      "max_drawdown": -0.4428311139437171,
+      "worst_month": -0.07159539345625499
+    }
+  },
+  "ic_checks": {},
+  "trades": {
+    "trades": 2621,
+    "win_rate": 0.3391835177413201,
+    "average_win": 0.08130685979448819,
+    "average_loss": -0.04141567793599501,
+    "profit_factor": 1.0076652612967643,
+    "average_days_held": 10.686760778328882,
+    "exit_reasons": {
+      "stop": 0.535,
+      "max_hold": 0.323,
+      "trailing": 0.074,
+      "stop_gap": 0.068
+    },
+    "worst_trade": -0.2117955743623252,
+    "best_trade": 0.9312344693493151
+  },
+  "checks": {
+    "minimum_months": true,
+    "positive_net_return": true,
+    "positive_net_at_20_bps": false,
+    "minimum_trades": true,
+    "profit_factor": false,
+    "sharpe_at_least_spy": false,
+    "maximum_drawdown": false
+  },
+  "passed": false,
+  "blocking": [
+    "positive_net_at_20_bps",
+    "profit_factor",
+    "sharpe_at_least_spy",
+    "maximum_drawdown"
+  ]
+}
