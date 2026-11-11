@@ -60,6 +60,44 @@ v40_directory <- file.path(
 )
 
 
+# Research program (V5.6 / V009) and forward shadow tests.
+# The V4.1 intraday loop above is kept as a legacy track.
+
+research_root <- Sys.getenv(
+  "FINAI_RESEARCH_ROOT",
+  unset = "/app/research"
+)
+
+ask_finai_url <- Sys.getenv(
+  "FINAI_ASK_URL",
+  unset = "http://127.0.0.1:8502"
+)
+
+v009_status_path <- file.path(
+  artifact_root,
+  "v009-shadow-monitoring",
+  "latest_status.json"
+)
+
+shadow_status_path <- file.path(
+  research_root,
+  "shadow",
+  "status.json"
+)
+
+research_ledger_path <- file.path(
+  artifact_root,
+  "v56_research_attempt_ledger.csv"
+)
+
+research_versions <- c(
+  "005",
+  "006",
+  "007",
+  "008"
+)
+
+
 latest_learning_path <- file.path(
   v41_directory,
   "latest_learning_cycle.json"
@@ -579,6 +617,184 @@ plotly_dark_layout <- function(
 
 
 # ============================================================
+# RESEARCH PROGRAM BUILDERS
+# ============================================================
+
+
+optional_number <- function(value) {
+  result <- suppressWarnings(
+    as.numeric(value %||% NA)
+  )
+
+  if (length(result) == 0) {
+    return(NA_real_)
+  }
+
+  result[1]
+}
+
+
+read_research_history <- function() {
+  rows <- lapply(
+    research_versions,
+    function(version) {
+      report <- safe_read_json(
+        file.path(
+          artifact_root,
+          paste0("v56-research-", version),
+          "research_report.json"
+        )
+      )
+
+      if (is.null(report)) {
+        return(NULL)
+      }
+
+      metrics <- report$metrics %||% list()
+
+      rank_ic <- report$mean_rebalance_rank_ic %||%
+        report$mean_oos_rank_ic %||%
+        report$mean_rebalance_residual_rank_ic
+
+      data.frame(
+        version = paste0("V", version),
+        net_return = optional_number(metrics$cumulative_net_return),
+        sharpe = optional_number(metrics$annualized_sharpe),
+        max_drawdown = optional_number(metrics$maximum_drawdown),
+        rank_ic = optional_number(rank_ic),
+        gates_passed = isTRUE(report$eligible_to_freeze_candidate) ||
+          isTRUE(report$eligible_to_create_new_locked_candidate),
+        blocking_gates = paste(
+          unlist(report$blocking_reasons %||% list()),
+          collapse = ", "
+        ),
+        stringsAsFactors = FALSE
+      )
+    }
+  )
+
+  rows <- Filter(
+    Negate(is.null),
+    rows
+  )
+
+  if (length(rows) == 0) {
+    return(data.frame())
+  }
+
+  frame <- do.call(rbind, rows)
+
+  ledger <- tryCatch(
+    utils::read.csv(
+      research_ledger_path,
+      stringsAsFactors = FALSE
+    ),
+    error = function(error) NULL
+  )
+
+  if (
+    !is.null(ledger) &&
+      all(c("Candidate", "Decision", "Reason") %in% names(ledger))
+  ) {
+    key <- sub(
+      "^(V[0-9]+).*$",
+      "\\1",
+      ledger$Candidate
+    )
+
+    frame$decision <- ledger$Decision[match(frame$version, key)]
+    frame$reason <- ledger$Reason[match(frame$version, key)]
+  }
+
+  frame
+}
+
+
+shadow_dataframe <- function(status) {
+  strategies <- status$strategies %||% list()
+
+  if (length(strategies) == 0) {
+    return(data.frame())
+  }
+
+  rows <- lapply(
+    strategies,
+    function(strategy) {
+      open_period <- strategy$open_period %||% list()
+
+      data.frame(
+        strategy = safe_character(strategy$id, ""),
+        class = safe_character(strategy$status_class, ""),
+        verdict = toupper(safe_character(strategy$verdict, "")),
+        progress = paste0(
+          strategy$completed %||% 0,
+          " / ",
+          strategy$needed %||% "?"
+        ),
+        benchmark = safe_character(strategy$benchmark, ""),
+        open_since = safe_character(open_period$since, ""),
+        open_unrealized = optional_number(open_period$unrealized_gross),
+        note = safe_character(strategy$reason, ""),
+        stringsAsFactors = FALSE
+      )
+    }
+  )
+
+  do.call(rbind, rows)
+}
+
+
+milestone_bar <- function(
+  label,
+  done,
+  target
+) {
+  percent <- max(
+    0,
+    min(100, round(100 * done / target))
+  )
+
+  div(
+    class = "milestone",
+    div(
+      class = "milestone-head",
+      span(label),
+      span(
+        class = "milestone-count",
+        paste0(done, " / ", target, " periods")
+      )
+    ),
+    div(
+      class = "milestone-track",
+      div(
+        class = if (done >= target) {
+          "milestone-fill milestone-done"
+        } else {
+          "milestone-fill"
+        },
+        style = paste0("width: ", percent, "%;")
+      )
+    )
+  )
+}
+
+
+flag_row <- function(
+  label,
+  value
+) {
+  div(
+    class = "flag-row",
+    span(label),
+    span(
+      class = if (isTRUE(value)) "flag-yes" else "flag-no",
+      if (isTRUE(value)) "Yes" else "No"
+    )
+  )
+}
+
+
+# ============================================================
 # UI HELPERS
 # ============================================================
 
@@ -683,9 +899,21 @@ ui <- dashboardPage(
     sidebarMenu(
       id = "tabs",
       menuItem(
-        "Executive",
+        "Research Program",
+        tabName = "program",
+        icon = icon("flask"),
+        selected = TRUE
+      ),
+      menuItem(
+        "Ask FinAI",
+        href = ask_finai_url,
+        newtab = TRUE,
+        icon = icon("comments")
+      ),
+      menuItem(
+        "Legacy Intraday (V4.1)",
         tabName = "executive",
-        icon = icon("dashboard")
+        icon = icon("archive")
       ),
       menuItem(
         "Model Lab",
@@ -735,6 +963,19 @@ ui <- dashboardPage(
       div(
         span(
           class = "status-label",
+          "V009"
+        ),
+        span(
+          class = "status-value",
+          textOutput(
+            "top_v009",
+            inline = TRUE
+          )
+        )
+      ),
+      div(
+        span(
+          class = "status-label",
           "SYSTEM"
         ),
         span(
@@ -748,7 +989,7 @@ ui <- dashboardPage(
       div(
         span(
           class = "status-label",
-          "SYMBOL"
+          "LEGACY SYMBOL"
         ),
         span(
           class = "status-value",
@@ -761,7 +1002,7 @@ ui <- dashboardPage(
       div(
         span(
           class = "status-label",
-          "INTERVAL"
+          "LEGACY INTERVAL"
         ),
         span(
           class = "status-value",
@@ -774,7 +1015,7 @@ ui <- dashboardPage(
       div(
         span(
           class = "status-label",
-          "ARTIFACT"
+          "LEGACY ARTIFACT"
         ),
         span(
           class = "status-value",
@@ -787,15 +1028,125 @@ ui <- dashboardPage(
     ),
     tabItems(
       # ======================================================
-      # EXECUTIVE
+      # RESEARCH PROGRAM (V5.6 / V009)
+      # ======================================================
+      tabItem(
+        tabName = "program",
+        section_header(
+          "Research program",
+          paste(
+            "Daily cross-sectional research (V5.6 / V009) and forward",
+            "shadow tests. V009 is performance-blind until its lock."
+          )
+        ),
+        fluidRow(
+          column(
+            width = 3,
+            metric_card(
+              "v009_designation",
+              "V009 forward test",
+              "hourglass-half"
+            )
+          ),
+          column(
+            width = 3,
+            metric_card(
+              "v009_periods",
+              "Periods to next milestone",
+              "calendar"
+            )
+          ),
+          column(
+            width = 3,
+            metric_card(
+              "shadow_health",
+              "Shadow strategies",
+              "eye"
+            )
+          ),
+          column(
+            width = 3,
+            metric_card(
+              "research_freshness",
+              "V009 data refreshed",
+              "database"
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 5,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3("V009 milestones"),
+                span("Toward the 52-period one-shot lock")
+              ),
+              uiOutput("v009_milestones")
+            )
+          ),
+          column(
+            width = 7,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3("Forward shadow tests"),
+                span("Paper tracking; verdicts only at the final period")
+              ),
+              DTOutput("shadow_table")
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              class = "dashboard-panel",
+              div(
+                class = "panel-header",
+                h3("Development research history"),
+                span("V5.6 candidates on the already-observed development window")
+              ),
+              DTOutput("research_history_table")
+            )
+          )
+        ),
+        div(
+          class = "paper-only-banner",
+          icon("info-circle"),
+          span(
+            paste(
+              "Gates are fixed in advance and are never lowered to force a promotion.",
+              "The V4.1 1-minute AAPL loop is shown under Legacy Intraday for reference."
+            )
+          )
+        )
+      ),
+
+
+      # ======================================================
+      # LEGACY INTRADAY (V4.1) - formerly Executive
       # ======================================================
       tabItem(
         tabName = "executive",
         section_header(
-          "Executive overview",
+          "Legacy intraday track (V4.1)",
           paste(
-            "Research performance, model governance",
-            "and deployment readiness."
+            "AAPL 1-minute learning loop, kept for reference.",
+            "This is not the primary research program."
+          )
+        ),
+        div(
+          class = "legacy-banner",
+          icon("archive"),
+          span(
+            paste(
+              "LEGACY: predicts 5 one-minute bars ahead on a single stock.",
+              "Its candidates are expected to fail the gates; the primary",
+              "program is under Research Program."
+            )
           )
         ),
         fluidRow(
@@ -1415,6 +1766,233 @@ server <- function(
       evaluations(),
       winner
     )
+  })
+
+
+  # ==========================================================
+  # RESEARCH PROGRAM
+  # ==========================================================
+
+
+  v009 <- reactive({
+    refresh()
+
+    safe_read_json(v009_status_path)
+  })
+
+
+  shadow_research <- reactive({
+    refresh()
+
+    safe_read_json(shadow_status_path)
+  })
+
+
+  research_history <- reactive({
+    refresh()
+
+    read_research_history()
+  })
+
+
+  output$top_v009 <- renderText({
+    status <- v009()
+
+    if (is.null(status)) {
+      return("NO DATA")
+    }
+
+    paste0(
+      toupper(safe_character(status$designation, "unknown")),
+      " ",
+      status$completed_non_overlapping_periods %||% 0,
+      "/",
+      status$next_milestone_periods %||% 13
+    )
+  })
+
+
+  output$v009_designation <- renderText({
+    status <- v009()
+
+    if (is.null(status)) {
+      return("NO DATA")
+    }
+
+    toupper(safe_character(status$designation, "unknown"))
+  })
+
+
+  output$v009_periods <- renderText({
+    status <- v009()
+
+    if (is.null(status)) {
+      return("N/A")
+    }
+
+    paste0(
+      status$completed_non_overlapping_periods %||% 0,
+      " / ",
+      status$next_milestone_periods %||% 13
+    )
+  })
+
+
+  output$shadow_health <- renderText({
+    status <- shadow_research()
+
+    if (is.null(status)) {
+      return("NO DATA")
+    }
+
+    paste0(
+      if (isTRUE(status$healthy)) "HEALTHY" else "CHECK",
+      " - ",
+      length(status$strategies %||% list()),
+      " running"
+    )
+  })
+
+
+  output$research_freshness <- renderText({
+    artifact_age(v009_status_path)
+  })
+
+
+  output$v009_milestones <- renderUI({
+    status <- v009()
+
+    if (is.null(status)) {
+      return(
+        p(
+          class = "empty-note",
+          "No V009 monitoring status found yet."
+        )
+      )
+    }
+
+    done <- number_or_zero(status$completed_non_overlapping_periods)
+
+    tagList(
+      milestone_bar("Provisional milestone", done, 13),
+      milestone_bar("Second milestone", done, 26),
+      milestone_bar("Official lock readiness", done, 52),
+      div(
+        class = "milestone-facts",
+        div(
+          span("Qualified market dates"),
+          span(integer_text(status$qualified_market_dates))
+        ),
+        div(
+          span("Symbols observed"),
+          span(
+            paste0(
+              integer_text(status$minimum_observed_symbols),
+              " - ",
+              integer_text(status$maximum_observed_symbols),
+              " (min ",
+              integer_text(status$minimum_symbols_required),
+              ")"
+            )
+          )
+        ),
+        div(
+          span("Last qualified date"),
+          span(substr(safe_character(status$last_qualified_date, "N/A"), 1, 10))
+        )
+      ),
+      div(
+        class = "flag-list",
+        flag_row("Performance-blind", status$performance_blind),
+        flag_row("Lock ready", status$official_lock_ready),
+        flag_row("Lock executed", status$official_lock_executed),
+        flag_row("V5.7 unlocked", status$v57_unlocked),
+        flag_row("Champion eligible", status$champion_eligible),
+        flag_row("Live trading allowed", status$live_trading_allowed)
+      )
+    )
+  })
+
+
+  output$shadow_table <- renderDT({
+    frame <- shadow_dataframe(shadow_research())
+
+    if (nrow(frame) == 0) {
+      frame <- data.frame(
+        status = "No shadow strategy status found."
+      )
+    }
+
+    table <- DT::datatable(
+      frame,
+      rownames = FALSE,
+      options = list(
+        pageLength = 10,
+        dom = "t",
+        scrollX = TRUE
+      ),
+      class = "stripe hover compact"
+    )
+
+    if ("open_unrealized" %in% names(frame)) {
+      table <- DT::formatPercentage(
+        table,
+        columns = "open_unrealized",
+        digits = 2
+      )
+    }
+
+    table
+  })
+
+
+  output$research_history_table <- renderDT({
+    frame <- research_history()
+
+    if (nrow(frame) == 0) {
+      frame <- data.frame(
+        status = "No V5.6 research reports found."
+      )
+    }
+
+    table <- DT::datatable(
+      frame,
+      rownames = FALSE,
+      options = list(
+        pageLength = 10,
+        dom = "t",
+        scrollX = TRUE
+      ),
+      class = "stripe hover compact"
+    )
+
+    percent_columns <- intersect(
+      c("net_return", "max_drawdown"),
+      names(frame)
+    )
+
+    if (length(percent_columns) > 0) {
+      table <- DT::formatPercentage(
+        table,
+        columns = percent_columns,
+        digits = 2
+      )
+    }
+
+    round_columns <- intersect(
+      c("sharpe", "rank_ic"),
+      names(frame)
+    )
+
+    if (length(round_columns) > 0) {
+      table <- DT::formatRound(
+        table,
+        columns = round_columns,
+        digits = 3
+      )
+    }
+
+    table
   })
 
 
