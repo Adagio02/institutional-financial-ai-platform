@@ -4,6 +4,8 @@ $CredentialPath = Join-Path $env:LOCALAPPDATA "FinAI\alpaca-credential.xml"
 $SecUserAgentPath = Join-Path $env:LOCALAPPDATA "FinAI\sec-user-agent.txt"
 $LogDirectory = Join-Path $ProjectRoot "logs\v009-prospective"
 Set-Location $ProjectRoot
+$env:VIRTUAL_ENV = Join-Path $ProjectRoot ".venv"
+$env:PATH = (Join-Path $ProjectRoot ".venv\Scripts") + ";" + $env:PATH
 New-Item -ItemType Directory -Force -Path $LogDirectory | Out-Null
 $LogPath = Join-Path $LogDirectory ("collection-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
 Start-Transcript -Path $LogPath
