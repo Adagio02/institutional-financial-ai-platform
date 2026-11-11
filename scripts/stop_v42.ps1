@@ -31,9 +31,11 @@ if (Test-Path $ComposeFile) {
     Push-Location $Project
 
     try {
+        # Remove only the dashboard container. "down" would also delete the network
+        # shared with the main stack (same compose project), breaking Postgres & co.
         docker compose `
             -f $ComposeFile `
-            down
+            rm --stop --force
     }
     finally {
         Pop-Location
