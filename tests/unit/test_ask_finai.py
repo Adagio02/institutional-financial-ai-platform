@@ -93,7 +93,7 @@ def test_tool_loop_runs_tools_then_answers(project):
 
 
 def test_request_job_only_proposes(project, monkeypatch):
-    import finai.assistant.jobs as jobs
+    from finai.assistant import jobs
 
     monkeypatch.setattr(jobs, "run_job", lambda key: pytest.fail("job must not run without confirmation"))
     replies = [
@@ -101,6 +101,7 @@ def test_request_job_only_proposes(project, monkeypatch):
                                                   "input": {"job": "legacy_learning_cycle", "reason": "refresh"}}]},
         {"stop_reason": "end_turn", "content": [{"type": "text", "text": "Click Confirm to run it."}]},
     ]
+    responses = iter(replies)
     result = claude_client.run_turn([{"role": "user", "content": "run it"}], "k",
-                                    post=lambda payload, key, _r=iter(replies): next(_r))
+                                    post=lambda payload, key: next(responses))
     assert result.pending_job == {"job": "legacy_learning_cycle", "reason": "refresh"}

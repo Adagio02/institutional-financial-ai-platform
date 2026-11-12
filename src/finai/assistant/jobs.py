@@ -60,6 +60,7 @@ def run_job(key: str) -> dict[str, Any]:
             capture_output=True,
             text=True,
             timeout=job.timeout_seconds,
+            check=False,
         )
     except subprocess.TimeoutExpired:
         return {"ok": False, "job": key, "error": f"Timed out after {job.timeout_seconds} s"}

@@ -6,8 +6,9 @@ import json
 import os
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from finai.assistant import knowledge
 from finai.assistant.jobs import JOBS, describe_jobs

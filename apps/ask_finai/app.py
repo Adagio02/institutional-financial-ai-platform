@@ -14,10 +14,10 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-import streamlit as st  # noqa: E402
+import streamlit as st
 
-from finai.assistant import claude_client, knowledge  # noqa: E402
-from finai.assistant.jobs import JOBS, run_job  # noqa: E402
+from finai.assistant import claude_client, knowledge
+from finai.assistant.jobs import JOBS, run_job
 
 st.set_page_config(page_title="Ask FinAI", page_icon=":speech_balloon:", layout="wide")
 

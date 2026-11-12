@@ -23,7 +23,7 @@ PROJECT_ROOT = Path(
 
 ALLOWED_TOP_LEVEL = ("artifacts", "research", "logs", "docs", "config", "research_kit")
 ALLOWED_SUFFIXES = (".json", ".jsonl", ".csv", ".md", ".txt", ".log", ".yml", ".yaml")
-BLOCKED_NAME = re.compile(r"(^\.env)|credential|secret|password|\.key$|\.pem$|token", re.I)
+BLOCKED_NAME = re.compile(r"(^\.env)|credential|secret|password|\.key$|\.pem$|token", re.IGNORECASE)
 MAX_CHARS = 20_000
 
 RESEARCH_VERSIONS = ("005", "006", "007", "008")
@@ -384,7 +384,7 @@ def run_tool(name: str, arguments: dict[str, Any] | None) -> str:
         result = spec["function"](**(arguments or {}))
     except AccessDenied as exc:
         result = {"error": str(exc)}
-    except Exception as exc:  # report, don't crash the chat
+    except Exception as exc:  # noqa: BLE001 - report any tool error to Claude, never crash the chat
         result = {"error": f"{type(exc).__name__}: {exc}"}
     text = redact(json.dumps(result, default=str, indent=1))
     if len(text) > MAX_CHARS:
