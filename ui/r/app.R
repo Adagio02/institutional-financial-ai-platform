@@ -734,7 +734,6 @@ shadow_dataframe <- function(status) {
         benchmark = safe_character(strategy$benchmark, ""),
         open_since = safe_character(open_period$since, ""),
         open_unrealized = optional_number(open_period$unrealized_gross),
-        note = safe_character(strategy$reason, ""),
         stringsAsFactors = FALSE
       )
     }
@@ -1845,12 +1844,7 @@ server <- function(
       return("NO DATA")
     }
 
-    paste0(
-      if (isTRUE(status$healthy)) "HEALTHY" else "CHECK",
-      " - ",
-      length(status$strategies %||% list()),
-      " running"
-    )
+    if (isTRUE(status$healthy)) "HEALTHY" else "CHECK"
   })
 
 
