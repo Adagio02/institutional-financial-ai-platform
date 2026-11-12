@@ -70,7 +70,9 @@ include = ["finai*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+# Project-local temp dir (git-ignored): avoids a Windows PermissionError when pytest
+# cleans up %TEMP%\pytest-of-<user>\pytest-current after the run.
+addopts = "-q --basetemp=pytest-temp"
 
 [tool.ruff]
 line-length = 100
