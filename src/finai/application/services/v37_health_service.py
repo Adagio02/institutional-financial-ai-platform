@@ -14,6 +14,7 @@ from finai.application.services.v34_learning_factory import (
     create_v34_learning_service,
 )
 from finai.core.config import Settings
+from finai.core.durable_io import write_text_durable
 from finai.domain.learning.v37_runtime import (
     V37PlatformHealth,
 )
@@ -271,22 +272,11 @@ class V37HealthService:
             exist_ok=True,
         )
 
-        temporary = (
-            self._health_path
-            .with_suffix(
-                ".tmp"
-            )
-        )
-
-        temporary.write_text(
+        write_text_durable(
+            self._health_path,
             json.dumps(
                 payload,
                 indent=2,
                 sort_keys=True,
             ),
-            encoding="utf-8",
-        )
-
-        temporary.replace(
-            self._health_path
         )
