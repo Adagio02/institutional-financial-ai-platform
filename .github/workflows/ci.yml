@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       # Integration tests expect Postgres on localhost:5433
       # (see src/finai/core/config.py and docker-compose.yml).
@@ -21,6 +22,7 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgresql+psycopg://finai:finai@localhost:5433/finai
+      MLFLOW_TRACKING_URI: sqlite:///mlflow-ci.db
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
