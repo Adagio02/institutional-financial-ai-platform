@@ -1,0 +1,67 @@
+{
+  "strategy_type": "vol_target",
+  "metrics": {
+    "days": 2448,
+    "months": 117,
+    "total_return": 2.2707795014858787,
+    "cagr": 0.12974078327284455,
+    "volatility": 0.13838234716859052,
+    "sharpe": 0.9510868730135554,
+    "max_drawdown": -0.24187938509719287,
+    "worst_month": -0.07927121077459487
+  },
+  "stats": {
+    "rebalances": 130,
+    "average_exposure": 0.8998785119082248,
+    "minimum_exposure": 0.17786691519403156
+  },
+  "benchmarks": {
+    "SPY": {
+      "days": 2448,
+      "months": 117,
+      "total_return": 2.9624598154101283,
+      "cagr": 0.1522725268340619,
+      "volatility": 0.17859825803127183,
+      "sharpe": 0.8833465692764051,
+      "max_drawdown": -0.3379388816644996,
+      "worst_month": -0.12615555968071313
+    }
+  },
+  "excess_t_vs": {
+    "SPY": -1.2817396062675859
+  },
+  "yearly": {
+    "2017": 0.21746344498600045,
+    "2018": -0.03174684419951246,
+    "2019": 0.25205990677504686,
+    "2020": 0.04223719584157837,
+    "2021": 0.2837335960390295,
+    "2022": -0.14329512463280325,
+    "2023": 0.24723731057593978,
+    "2024": 0.24128942063844416,
+    "2025": 0.12700030183186706,
+    "2026": 0.10805779375626923
+  },
+  "cost_sensitivity": {
+    "20": {
+      "days": 2448,
+      "months": 117,
+      "total_return": 2.1764276692228743,
+      "cagr": 0.12634176496000338,
+      "volatility": 0.1383849928855338,
+      "sharpe": 0.9292892743510983,
+      "max_drawdown": -0.24274691870478016,
+      "worst_month": -0.07927121077459487
+    }
+  },
+  "ic_checks": {},
+  "checks": {
+    "minimum_months": true,
+    "positive_net_return": true,
+    "positive_net_at_20_bps": true,
+    "sharpe_at_least_SPY": true,
+    "drawdown_improves_on_SPY": true
+  },
+  "passed": true,
+  "blocking": []
+}

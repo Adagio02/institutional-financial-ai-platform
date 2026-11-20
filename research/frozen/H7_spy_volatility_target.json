@@ -1,0 +1,48 @@
+{
+  "id": "H7_spy_volatility_target",
+  "spec": {
+    "id": "H7_spy_volatility_target",
+    "strategy_type": "vol_target",
+    "hypothesis": "Holding SPY scaled each month end to a 15% annualized volatility target (weight = min(1, 0.15 / realized volatility of the last 21 trading days), the rest in T-bills, no leverage) delivers a Sharpe ratio at least equal to buy-and-hold SPY with a maximum drawdown at least 5 percentage points shallower.",
+    "rationale": "Equity volatility clusters while expected returns do not rise proportionally, so cutting exposure when recent volatility is high has historically improved risk-adjusted returns (Moreira and Muir 2017; Harvey, Hoyle, Korgaonkar, Rattray, Sargaison and Van Hemert 2018). Out-of-sample evidence is mixed (Cederburg, O'Doherty, Wang and Yan 2020), and without leverage most of any benefit should come from smaller drawdowns rather than higher returns, so a modest result is expected. This uses the time-series volatility of one index ETF; it is unrelated to the closed cross-sectional stock features in research/policy.json (rank_volatility, rank_volatility_63). The 2017-2026 window contains two sharp drawdowns (2020, 2022), which is where the rule should matter.",
+    "signal": {
+      "columns": {},
+      "description": "annualized standard deviation of SPY daily returns over the last 21 trading days"
+    },
+    "asset": "SPY",
+    "cash": "BIL",
+    "rule": {
+      "vol_lookback_days": 21,
+      "target_volatility": 0.15,
+      "max_weight": 1.0,
+      "rebalance": "month_end",
+      "execution": "next day close"
+    },
+    "horizon": 21,
+    "cost_bps": 5,
+    "sensitivity_costs": [
+      20
+    ],
+    "panel": "data/research/etf/bars.parquet",
+    "window": {
+      "start": "2017-01-01",
+      "end": "2026-09-30"
+    },
+    "gates": {
+      "min_months": 60,
+      "min_drawdown_improvement": 0.05
+    },
+    "decision_rule": "If every gate passes: freeze as qualified and forward-test for 24 months against SPY on Sharpe. If any gate fails: close H7; do not try other volatility targets, lookbacks, caps or leverage on this data.",
+    "forward": {
+      "ready": true,
+      "min_periods": 24,
+      "benchmark": "SPY",
+      "compare": "sharpe"
+    }
+  },
+  "spec_hash": "645204fc119ef7b4",
+  "status": "qualified",
+  "frozen_at": "2026-11-20T21:56:56+00:00",
+  "freeze_data_date": "2026-11-20 05:00:00+00:00",
+  "git_commit": "040db78"
+}
