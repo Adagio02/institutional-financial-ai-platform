@@ -1,0 +1,54 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261117173002
+Username: DESKTOP-K31RHT8\ftaru
+RunAs User: DESKTOP-K31RHT8\ftaru
+Configuration Name: 
+Machine: DESKTOP-K31RHT8 (Microsoft Windows NT 10.0.26200.0)
+Host Application: powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\Projects\institutional-financial-ai-platform\scripts\scheduled_v009_collection.ps1
+Process ID: 21812
+PSVersion: 5.1.26100.9818
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9818
+BuildVersion: 10.0.26100.9818
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is D:\Projects\institutional-financial-ai-platform\logs\v009-prospective\collection-20261117-173002.log
+Saved 47,190 rows, 110 symbols to data\research\v009-prospective\bars_with_lookback.parquet
+85/109 SRE: facts=120902 events=11636
+86/109 EXC: facts=122361 events=11829
+87/109 XEL: facts=123658 events=12065
+88/109 ED: facts=124697 events=12187
+89/109 PEG: facts=126114 events=12376
+90/109 WEC: facts=127286 events=12627
+91/109 META: facts=128504 events=12663
+92/109 GOOGL: facts=129626 events=12718
+93/109 NFLX: facts=131839 events=12762
+94/109 TMUS: facts=133583 events=12941
+95/109 VZ: facts=135128 events=13009
+96/109 T: facts=136368 events=13093
+97/109 DIS: facts=137021 events=13213
+98/109 CMCSA: facts=138337 events=13375
+99/109 CHTR: facts=139638 events=13550
+100/109 PLD: facts=140909 events=13712
+101/109 AMT: facts=142372 events=13984
+102/109 EQIX: facts=143752 events=14133
+103/109 WELL: facts=144499 events=14353
+104/109 SPG: facts=145830 events=14519
+105/109 O: facts=146756 events=14802
+106/109 PSA: facts=148070 events=14975
+107/109 DLR: facts=149444 events=15212
+108/109 VICI: facts=150052 events=15412
+109/109 CBRE: facts=151465 events=15586
+Saved 7094 point-in-time fundamental rows and 15586 filing events to data\research\v009-prospective\sec
+
+
+Prospective data refreshed without evaluating returns: .\data\research\v009-prospective\prospective_panel.parquet
+
+**********************
+Windows PowerShell transcript end
+End time: 20261117173235
+**********************

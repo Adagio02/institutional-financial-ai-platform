@@ -351,9 +351,10 @@ function Start-V42Dashboard {
 
 
     try {
+        # --build picks up dashboard code changes (cached layers keep it fast).
         docker compose `
             -f $DashboardCompose `
-            up -d
+            up -d --build
 
 
         if ($LASTEXITCODE -ne 0) {
@@ -611,6 +612,39 @@ function Show-SystemStatus {
     Write-Host "Dashboard:"
     Write-Host "http://127.0.0.1:3838"
     Write-Host ""
+    Write-Host "Ask FinAI:"
+    Write-Host "http://127.0.0.1:8502"
+    Write-Host ""
+}
+
+
+# ============================================================
+# ASK FINAI (optional; starts only if an Anthropic key is stored)
+# ============================================================
+
+
+function Start-AskFinAI {
+    $KeyPath = Join-Path $env:LOCALAPPDATA "FinAI\anthropic-credential.xml"
+
+    if (-not (Test-Path $KeyPath)) {
+        Write-StartupLog `
+            "Ask FinAI skipped: no Anthropic key stored (run scripts\set_anthropic_key.ps1)."
+        return
+    }
+
+    try {
+        & (Join-Path $Project "scripts\start_ask_finai.ps1") -Background
+
+        Write-StartupLog `
+            "Ask FinAI available at http://127.0.0.1:8502."
+    }
+    catch {
+        # Never let the optional chat page block platform startup.
+        Write-StartupLog (
+            "Ask FinAI could not start: " +
+            $_.Exception.Message
+        )
+    }
 }
 
 
@@ -640,6 +674,9 @@ try {
 
 
     Start-AutonomousSupervisor
+
+
+    Start-AskFinAI
 
 
     Start-VSCode

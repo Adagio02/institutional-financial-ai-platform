@@ -1,0 +1,52 @@
+﻿[
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005\\audit.json",
+        "Length":  1009,
+        "LastWriteTime":  "\/Date(1788793099934)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005\\ledger.parquet",
+        "Length":  6806,
+        "LastWriteTime":  "\/Date(1788793357394)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005\\oos_predictions.parquet",
+        "Length":  1624217,
+        "LastWriteTime":  "\/Date(1788793111751)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005\\positions.parquet",
+        "Length":  62606,
+        "LastWriteTime":  "\/Date(1788793357397)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005\\research_report.json",
+        "Length":  2825,
+        "LastWriteTime":  "\/Date(1788793357413)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005-enriched\\audit.json",
+        "Length":  1431,
+        "LastWriteTime":  "\/Date(1788793757809)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005-enriched\\ledger.parquet",
+        "Length":  6829,
+        "LastWriteTime":  "\/Date(1788794066984)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005-enriched\\oos_predictions.parquet",
+        "Length":  1592357,
+        "LastWriteTime":  "\/Date(1788793853209)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005-enriched\\positions.parquet",
+        "Length":  56970,
+        "LastWriteTime":  "\/Date(1788794066989)\/"
+    },
+    {
+        "FullName":  "D:\\Projects\\institutional-financial-ai-platform\\artifacts\\v56-research-005-enriched\\research_report.json",
+        "Length":  3296,
+        "LastWriteTime":  "\/Date(1788794067006)\/"
+    }
+]

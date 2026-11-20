@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "policy": "chronological_80_20_precommitted_split",
+  "source": "artifacts\\v54-real-candidate-002\\v542_ensemble_signal.parquet",
+  "source_sha256": "3008e2296f5654f619a6843f6a55c6d2b4f125b3804698d011da58763b805fad",
+  "training": {
+    "path": "data\\research\\v56-candidate-002\\v55_prelock_ensemble.parquet",
+    "rows": 5887,
+    "periods": 736,
+    "symbols": 8,
+    "start": "2023-01-03T00:00:00+00:00",
+    "end": "2025-12-08T00:00:00+00:00",
+    "sha256": "e4ffd072c15343942f10c82d8ec440e16e4d9affbc826f65c4f05f7c43c1e8f0"
+  },
+  "locked": {
+    "path": "data\\research\\v56-candidate-002\\v56_locked_input.parquet",
+    "rows": 1480,
+    "periods": 185,
+    "symbols": 8,
+    "start": "2025-12-09T00:00:00+00:00",
+    "end": "2026-09-03T00:00:00+00:00",
+    "sha256": "16fe8d432d9342f46ef965b521ba5651a3ecd57d79954e3a25e9bed6cfb832d0"
+  }
+}

@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Cached public SEC EDGAR data (filing filenames trigger false positives)"
+paths = [
+  '''^data/cache/''',
+]

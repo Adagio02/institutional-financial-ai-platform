@@ -1,0 +1,81 @@
+{
+  "strategy_type": "longonly_momentum",
+  "metrics": {
+    "days": 2197,
+    "months": 105,
+    "total_return": 1.7967808106150671,
+    "cagr": 0.12520733764169312,
+    "volatility": 0.20267197375786722,
+    "sharpe": 0.6838568049525583,
+    "max_drawdown": -0.3506604392794168,
+    "worst_month": -0.12791800770963302
+  },
+  "stats": {
+    "rebalances": 108,
+    "average_holdings": 121.03703703703704
+  },
+  "benchmarks": {
+    "SPY": {
+      "days": 2197,
+      "months": 105,
+      "total_return": 2.2546848381601308,
+      "cagr": 0.1449479186191378,
+      "volatility": 0.18721110146007172,
+      "sharpe": 0.8170582597959851,
+      "max_drawdown": -0.3379388816644996,
+      "worst_month": -0.12615555968071313
+    },
+    "equal_weight_universe": {
+      "days": 2197,
+      "months": 105,
+      "total_return": 1.4389272575763936,
+      "cagr": 0.10767519511018708,
+      "volatility": 0.19496510979867246,
+      "sharpe": 0.6224884513602337,
+      "max_drawdown": -0.3978424519942563,
+      "worst_month": -0.18931991888999433
+    }
+  },
+  "excess_t_vs": {
+    "SPY": -0.7597003386120331,
+    "equal_weight_universe": 0.49752548470280117
+  },
+  "yearly": {
+    "2018": -0.06325164479477186,
+    "2019": 0.25896893535994514,
+    "2020": 0.14977774159658552,
+    "2021": 0.16615362110711107,
+    "2022": -0.07114479733707924,
+    "2023": 0.12018836320233062,
+    "2024": 0.22121649838751178,
+    "2025": 0.1302496751941522,
+    "2026": 0.2315291248868372
+  },
+  "cost_sensitivity": {
+    "20": {
+      "days": 2197,
+      "months": 105,
+      "total_return": 1.6463288999311834,
+      "cagr": 0.11809327375192424,
+      "volatility": 0.20266797944941695,
+      "sharpe": 0.6525590764433807,
+      "max_drawdown": -0.35101487836484124,
+      "worst_month": -0.1283940297518128
+    }
+  },
+  "ic_checks": {},
+  "checks": {
+    "minimum_months": true,
+    "positive_net_return": true,
+    "positive_net_at_20_bps": true,
+    "beats_SPY": false,
+    "beats_equal_weight_universe": true,
+    "excess_vs_equal_weight_t_stat": false,
+    "drawdown_within_limit_of_spy": true
+  },
+  "passed": false,
+  "blocking": [
+    "beats_SPY",
+    "excess_vs_equal_weight_t_stat"
+  ]
+}

@@ -13,29 +13,24 @@ V41_FEATURE_COLUMNS = [
     "return_15",
     "return_30",
     "return_60",
-
     # Realized volatility
     "volatility_5",
     "volatility_20",
     "volatility_60",
-
     # Volatility-normalized momentum
     "normalized_momentum_5",
     "normalized_momentum_15",
     "normalized_momentum_30",
-
     # Candle/range structure
     "range_pct",
     "body_pct",
     "atr_14_pct",
     "range_expansion_20",
-
     # Volume/liquidity
     "volume_change",
     "volume_zscore_20",
     "volume_zscore_60",
     "dollar_volume_zscore_20",
-
     # Trend
     "ema_gap_10_30",
     "ema_gap_20_60",
@@ -43,11 +38,9 @@ V41_FEATURE_COLUMNS = [
     "price_vs_ema_60",
     "trend_strength",
     "trend_persistence_10",
-
     # VWAP
     "price_vs_vwap_20",
     "price_vs_vwap_60",
-
     # SPY
     "spy_return_1",
     "spy_return_5",
@@ -55,7 +48,6 @@ V41_FEATURE_COLUMNS = [
     "spy_return_30",
     "spy_return_60",
     "spy_volatility_20",
-
     # QQQ
     "qqq_return_1",
     "qqq_return_5",
@@ -63,7 +55,6 @@ V41_FEATURE_COLUMNS = [
     "qqq_return_30",
     "qqq_return_60",
     "qqq_volatility_20",
-
     # Relative strength
     "relative_spy_1",
     "relative_spy_5",
@@ -75,7 +66,6 @@ V41_FEATURE_COLUMNS = [
     "relative_qqq_15",
     "relative_qqq_30",
     "relative_qqq_60",
-
     # Market relationship
     "rolling_beta_spy_60",
     "rolling_corr_spy_60",
@@ -83,7 +73,6 @@ V41_FEATURE_COLUMNS = [
     "market_dispersion_1",
     "market_momentum",
     "market_volatility",
-
     # Time/session
     "minute_sin",
     "minute_cos",
@@ -105,8 +94,7 @@ def _prepare(
     )
 
     result = (
-        result
-        .sort_values("timestamp")
+        result.sort_values("timestamp")
         .drop_duplicates(
             subset=["timestamp"],
             keep="last",
@@ -131,12 +119,9 @@ def _safe_divide(
     numerator: pd.Series,
     denominator: pd.Series,
 ) -> pd.Series:
-    return (
-        numerator
-        / denominator.replace(
-            0.0,
-            np.nan,
-        )
+    return numerator / denominator.replace(
+        0.0,
+        np.nan,
     )
 
 
@@ -144,14 +129,9 @@ def _zscore(
     series: pd.Series,
     window: int,
 ) -> pd.Series:
-    rolling = series.rolling(
-        window
-    )
+    rolling = series.rolling(window)
 
-    return (
-        (series - rolling.mean())
-        / rolling.std()
-    )
+    return (series - rolling.mean()) / rolling.std()
 
 
 def build_v41_features(
@@ -165,31 +145,19 @@ def build_v41_features(
     include_target: bool = True,
 ) -> pd.DataFrame:
     if forward_horizon_bars <= 0:
-        raise ValueError(
-            "forward_horizon_bars must be positive."
-        )
+        raise ValueError("forward_horizon_bars must be positive.")
 
     if minimum_edge_bps < 0.0:
-        raise ValueError(
-            "minimum_edge_bps cannot be negative."
-        )
+        raise ValueError("minimum_edge_bps cannot be negative.")
 
     if round_trip_cost_bps < 0.0:
-        raise ValueError(
-            "round_trip_cost_bps cannot be negative."
-        )
+        raise ValueError("round_trip_cost_bps cannot be negative.")
 
-    target = _prepare(
-        target_bars
-    )
+    target = _prepare(target_bars)
 
-    spy = _prepare(
-        spy_bars
-    )
+    spy = _prepare(spy_bars)
 
-    qqq = _prepare(
-        qqq_bars
-    )
+    qqq = _prepare(qqq_bars)
 
     spy = spy[
         [
@@ -227,33 +195,19 @@ def build_v41_features(
         validate="one_to_one",
     )
 
-    close = result[
-        "close_price"
-    ].astype(float)
+    close = result["close_price"].astype(float)
 
-    open_price = result[
-        "open_price"
-    ].astype(float)
+    open_price = result["open_price"].astype(float)
 
-    high = result[
-        "high_price"
-    ].astype(float)
+    high = result["high_price"].astype(float)
 
-    low = result[
-        "low_price"
-    ].astype(float)
+    low = result["low_price"].astype(float)
 
-    volume = result[
-        "volume"
-    ].astype(float)
+    volume = result["volume"].astype(float)
 
-    spy_close = result[
-        "spy_close"
-    ].astype(float)
+    spy_close = result["spy_close"].astype(float)
 
-    qqq_close = result[
-        "qqq_close"
-    ].astype(float)
+    qqq_close = result["qqq_close"].astype(float)
 
     #
     # Returns
@@ -268,60 +222,38 @@ def build_v41_features(
         30,
         60,
     ):
-        result[
-            f"return_{periods}"
-        ] = _returns(
+        result[f"return_{periods}"] = _returns(
             close,
             periods,
         )
 
-    return_1 = result[
-        "return_1"
-    ]
+    return_1 = result["return_1"]
 
     #
     # Volatility
     #
 
-    result["volatility_5"] = (
-        return_1
-        .rolling(5)
-        .std()
-    )
+    result["volatility_5"] = return_1.rolling(5).std()
 
-    result["volatility_20"] = (
-        return_1
-        .rolling(20)
-        .std()
-    )
+    result["volatility_20"] = return_1.rolling(20).std()
 
-    result["volatility_60"] = (
-        return_1
-        .rolling(60)
-        .std()
-    )
+    result["volatility_60"] = return_1.rolling(60).std()
 
     #
     # Volatility-normalized momentum
     #
 
-    result[
-        "normalized_momentum_5"
-    ] = _safe_divide(
+    result["normalized_momentum_5"] = _safe_divide(
         result["return_5"],
         result["volatility_20"],
     )
 
-    result[
-        "normalized_momentum_15"
-    ] = _safe_divide(
+    result["normalized_momentum_15"] = _safe_divide(
         result["return_15"],
         result["volatility_20"],
     )
 
-    result[
-        "normalized_momentum_30"
-    ] = _safe_divide(
+    result["normalized_momentum_30"] = _safe_divide(
         result["return_30"],
         result["volatility_60"],
     )
@@ -330,65 +262,37 @@ def build_v41_features(
     # Candle/range features
     #
 
-    result["range_pct"] = (
-        _safe_divide(
-            high - low,
-            close,
-        )
+    result["range_pct"] = _safe_divide(
+        high - low,
+        close,
     )
 
-    result["body_pct"] = (
-        _safe_divide(
-            close - open_price,
-            open_price,
-        )
+    result["body_pct"] = _safe_divide(
+        close - open_price,
+        open_price,
     )
 
-    previous_close = close.shift(
-        1
-    )
+    previous_close = close.shift(1)
 
     true_range = pd.concat(
         [
             high - low,
-            (
-                high
-                - previous_close
-            ).abs(),
-            (
-                low
-                - previous_close
-            ).abs(),
+            (high - previous_close).abs(),
+            (low - previous_close).abs(),
         ],
         axis=1,
-    ).max(
-        axis=1
-    )
+    ).max(axis=1)
 
-    atr_14 = (
-        true_range
-        .rolling(14)
-        .mean()
-    )
+    atr_14 = true_range.rolling(14).mean()
 
-    result[
-        "atr_14_pct"
-    ] = _safe_divide(
+    result["atr_14_pct"] = _safe_divide(
         atr_14,
         close,
     )
 
-    average_range_20 = (
-        result[
-            "range_pct"
-        ]
-        .rolling(20)
-        .mean()
-    )
+    average_range_20 = result["range_pct"].rolling(20).mean()
 
-    result[
-        "range_expansion_20"
-    ] = _safe_divide(
+    result["range_expansion_20"] = _safe_divide(
         result["range_pct"],
         average_range_20,
     )
@@ -397,34 +301,21 @@ def build_v41_features(
     # Volume features
     #
 
-    result[
-        "volume_change"
-    ] = volume.pct_change(
-        fill_method=None
-    )
+    result["volume_change"] = volume.pct_change(fill_method=None)
 
-    result[
-        "volume_zscore_20"
-    ] = _zscore(
+    result["volume_zscore_20"] = _zscore(
         volume,
         20,
     )
 
-    result[
-        "volume_zscore_60"
-    ] = _zscore(
+    result["volume_zscore_60"] = _zscore(
         volume,
         60,
     )
 
-    dollar_volume = (
-        close
-        * volume
-    )
+    dollar_volume = close * volume
 
-    result[
-        "dollar_volume_zscore_20"
-    ] = _zscore(
+    result["dollar_volume_zscore_20"] = _zscore(
         dollar_volume,
         20,
     )
@@ -453,91 +344,53 @@ def build_v41_features(
         adjust=False,
     ).mean()
 
-    result[
-        "ema_gap_10_30"
-    ] = _safe_divide(
+    result["ema_gap_10_30"] = _safe_divide(
         ema_10 - ema_30,
         close,
     )
 
-    result[
-        "ema_gap_20_60"
-    ] = _safe_divide(
+    result["ema_gap_20_60"] = _safe_divide(
         ema_20 - ema_60,
         close,
     )
 
-    result[
-        "price_vs_ema_20"
-    ] = _safe_divide(
+    result["price_vs_ema_20"] = _safe_divide(
         close - ema_20,
         ema_20,
     )
 
-    result[
-        "price_vs_ema_60"
-    ] = _safe_divide(
+    result["price_vs_ema_60"] = _safe_divide(
         close - ema_60,
         ema_60,
     )
 
-    result[
-        "trend_strength"
-    ] = _safe_divide(
-        (
-            ema_10
-            - ema_60
-        ).abs(),
+    result["trend_strength"] = _safe_divide(
+        (ema_10 - ema_60).abs(),
         atr_14,
     )
 
-    direction = np.sign(
-        return_1
-    )
+    direction = np.sign(return_1)
 
-    result[
-        "trend_persistence_10"
-    ] = (
-        direction
-        .rolling(10)
-        .mean()
-    )
+    result["trend_persistence_10"] = direction.rolling(10).mean()
 
     #
     # Rolling VWAP approximation
     #
 
-    typical_price = (
-        high
-        + low
-        + close
-    ) / 3.0
+    typical_price = (high + low + close) / 3.0
 
-    price_volume = (
-        typical_price
-        * volume
-    )
+    price_volume = typical_price * volume
 
     for window in (
         20,
         60,
     ):
-        rolling_vwap = (
-            price_volume
-            .rolling(window)
-            .sum()
-            / volume
-            .rolling(window)
-            .sum()
-            .replace(
-                0.0,
-                np.nan,
-            )
+        rolling_vwap = price_volume.rolling(window).sum() / volume.rolling(window).sum().replace(
+            0.0,
+            np.nan,
         )
 
-        result[
-            f"price_vs_vwap_{window}"
-        ] = _safe_divide(
+        result[f"price_vs_vwap_{window}"] = _safe_divide(
             close - rolling_vwap,
             rolling_vwap,
         )
@@ -553,43 +406,23 @@ def build_v41_features(
         30,
         60,
     ):
-        result[
-            f"spy_return_{periods}"
-        ] = _returns(
+        result[f"spy_return_{periods}"] = _returns(
             spy_close,
             periods,
         )
 
-        result[
-            f"qqq_return_{periods}"
-        ] = _returns(
+        result[f"qqq_return_{periods}"] = _returns(
             qqq_close,
             periods,
         )
 
-    spy_return_1 = result[
-        "spy_return_1"
-    ]
+    spy_return_1 = result["spy_return_1"]
 
-    qqq_return_1 = result[
-        "qqq_return_1"
-    ]
+    qqq_return_1 = result["qqq_return_1"]
 
-    result[
-        "spy_volatility_20"
-    ] = (
-        spy_return_1
-        .rolling(20)
-        .std()
-    )
+    result["spy_volatility_20"] = spy_return_1.rolling(20).std()
 
-    result[
-        "qqq_volatility_20"
-    ] = (
-        qqq_return_1
-        .rolling(20)
-        .std()
-    )
+    result["qqq_volatility_20"] = qqq_return_1.rolling(20).std()
 
     for periods in (
         1,
@@ -598,89 +431,32 @@ def build_v41_features(
         30,
         60,
     ):
-        result[
-            f"relative_spy_{periods}"
-        ] = (
-            result[
-                f"return_{periods}"
-            ]
-            - result[
-                f"spy_return_{periods}"
-            ]
+        result[f"relative_spy_{periods}"] = (
+            result[f"return_{periods}"] - result[f"spy_return_{periods}"]
         )
 
-        result[
-            f"relative_qqq_{periods}"
-        ] = (
-            result[
-                f"return_{periods}"
-            ]
-            - result[
-                f"qqq_return_{periods}"
-            ]
+        result[f"relative_qqq_{periods}"] = (
+            result[f"return_{periods}"] - result[f"qqq_return_{periods}"]
         )
 
-    rolling_covariance = (
-        return_1
-        .rolling(60)
-        .cov(
-            spy_return_1
-        )
-    )
+    rolling_covariance = return_1.rolling(60).cov(spy_return_1)
 
-    rolling_spy_variance = (
-        spy_return_1
-        .rolling(60)
-        .var()
-    )
+    rolling_spy_variance = spy_return_1.rolling(60).var()
 
-    result[
-        "rolling_beta_spy_60"
-    ] = _safe_divide(
+    result["rolling_beta_spy_60"] = _safe_divide(
         rolling_covariance,
         rolling_spy_variance,
     )
 
-    result[
-        "rolling_corr_spy_60"
-    ] = (
-        return_1
-        .rolling(60)
-        .corr(
-            spy_return_1
-        )
-    )
+    result["rolling_corr_spy_60"] = return_1.rolling(60).corr(spy_return_1)
 
-    result[
-        "rolling_corr_qqq_60"
-    ] = (
-        return_1
-        .rolling(60)
-        .corr(
-            qqq_return_1
-        )
-    )
+    result["rolling_corr_qqq_60"] = return_1.rolling(60).corr(qqq_return_1)
 
-    result[
-        "market_dispersion_1"
-    ] = (
-        spy_return_1
-        - qqq_return_1
-    ).abs()
+    result["market_dispersion_1"] = (spy_return_1 - qqq_return_1).abs()
 
-    result[
-        "market_momentum"
-    ] = (
-        result["spy_return_15"]
-        + result["qqq_return_15"]
-    ) / 2.0
+    result["market_momentum"] = (result["spy_return_15"] + result["qqq_return_15"]) / 2.0
 
-    result[
-        "market_volatility"
-    ] = (
-        result["spy_volatility_20"]
-        + result["qqq_volatility_20"]
-    ) / 2.0
+    result["market_volatility"] = (result["spy_volatility_20"] + result["qqq_volatility_20"]) / 2.0
 
     #
     # Session/time features
@@ -695,90 +471,30 @@ def build_v41_features(
     # session-relative features as additional signals.
     #
 
-    timestamp = result[
-        "timestamp"
-    ]
+    timestamp = result["timestamp"]
 
-    minute_of_day = (
-        timestamp.dt.hour
-        * 60
-        + timestamp.dt.minute
-    )
+    minute_of_day = timestamp.dt.hour * 60 + timestamp.dt.minute
 
-    angle = (
-        2.0
-        * np.pi
-        * minute_of_day
-        / 1440.0
-    )
+    angle = 2.0 * np.pi * minute_of_day / 1440.0
 
-    result[
-        "minute_sin"
-    ] = np.sin(
-        angle
-    )
+    result["minute_sin"] = np.sin(angle)
 
-    result[
-        "minute_cos"
-    ] = np.cos(
-        angle
-    )
+    result["minute_cos"] = np.cos(angle)
 
-    market_open_minute = (
-        13 * 60
-        + 30
-    )
+    market_open_minute = 13 * 60 + 30
 
-    market_close_minute = (
-        20 * 60
-    )
+    market_close_minute = 20 * 60
 
-    result[
-        "minutes_from_open"
-    ] = (
-        minute_of_day
-        - market_open_minute
-    )
+    result["minutes_from_open"] = minute_of_day - market_open_minute
 
-    result[
-        "minutes_to_close"
-    ] = (
-        market_close_minute
-        - minute_of_day
-    )
+    result["minutes_to_close"] = market_close_minute - minute_of_day
 
-    result[
-        "opening_session"
-    ] = (
-        (
-            result[
-                "minutes_from_open"
-            ]
-            >= 0
-        )
-        & (
-            result[
-                "minutes_from_open"
-            ]
-            < 60
-        )
+    result["opening_session"] = (
+        (result["minutes_from_open"] >= 0) & (result["minutes_from_open"] < 60)
     ).astype(float)
 
-    result[
-        "closing_session"
-    ] = (
-        (
-            result[
-                "minutes_to_close"
-            ]
-            >= 0
-        )
-        & (
-            result[
-                "minutes_to_close"
-            ]
-            < 60
-        )
+    result["closing_session"] = (
+        (result["minutes_to_close"] >= 0) & (result["minutes_to_close"] < 60)
     ).astype(float)
 
     #
@@ -786,41 +502,24 @@ def build_v41_features(
     #
 
     if include_target:
-        future_close = close.shift(
-            -forward_horizon_bars
-        )
+        future_close = close.shift(-forward_horizon_bars)
+        timestamps = result["timestamp"]
+        session_date = timestamps.dt.tz_convert("America/New_York").dt.date
+        same_session = session_date.shift(-forward_horizon_bars) == session_date
+        elapsed = timestamps.shift(-forward_horizon_bars) - timestamps
+        within_window = elapsed <= pd.Timedelta(minutes=forward_horizon_bars * 1.5)
 
-        result[
-            "forward_return"
-        ] = (
-            future_close
-            / close
-            - 1.0
-        )
+        # Only score trades that close in the same session within ~1.5x the horizon.
+        result["forward_return"] = (future_close / close - 1.0).where(same_session & within_window)
 
-        required_edge_bps = (
-            minimum_edge_bps
-            + round_trip_cost_bps
-        )
+        required_edge_bps = minimum_edge_bps + round_trip_cost_bps
 
-        required_edge = (
-            required_edge_bps
-            / 10_000.0
-        )
+        required_edge = required_edge_bps / 10_000.0
 
-        result[
-            "target"
-        ] = np.select(
+        result["target"] = np.select(
             [
-                result[
-                    "forward_return"
-                ]
-                > required_edge,
-
-                result[
-                    "forward_return"
-                ]
-                < -required_edge,
+                result["forward_return"] > required_edge,
+                result["forward_return"] < -required_edge,
             ],
             [
                 1,
@@ -829,9 +528,7 @@ def build_v41_features(
             default=0,
         )
 
-    required = list(
-        V41_FEATURE_COLUMNS
-    )
+    required = list(V41_FEATURE_COLUMNS)
 
     if include_target:
         required.extend(
@@ -849,20 +546,9 @@ def build_v41_features(
         np.nan,
     )
 
-    result = result.dropna(
-        subset=required
-    )
+    result = result.dropna(subset=required)
 
     if include_target:
-        result[
-            "target"
-        ] = (
-            result[
-                "target"
-            ]
-            .astype(int)
-        )
+        result["target"] = result["target"].astype(int)
 
-    return result.reset_index(
-        drop=True
-    )
+    return result.reset_index(drop=True)

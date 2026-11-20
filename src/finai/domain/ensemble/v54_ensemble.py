@@ -9,6 +9,30 @@ import pandas as pd
 KEYS = ["timestamp", "symbol"]
 
 
+def _safe_spearman(
+    section: pd.DataFrame,
+    signal_column: str,
+    return_column: str = "forward_return",
+) -> float:
+    pair = section[[signal_column, return_column]].dropna()
+
+    if len(pair) < 2:
+        return np.nan
+
+    if pair[signal_column].nunique() < 2:
+        return np.nan
+
+    if pair[return_column].nunique() < 2:
+        return np.nan
+
+    return float(
+        pair[signal_column].corr(
+            pair[return_column],
+            method="spearman",
+        )
+    )
+
+
 def normalize_signal_family(frame: pd.DataFrame, family: str) -> pd.DataFrame:
     source = frame.rename(columns={"underlying_symbol": "symbol"}).copy()
     missing = sorted(set(KEYS).difference(source.columns))
@@ -74,17 +98,38 @@ def build_expanding_ensemble(panel: pd.DataFrame, minimum_training_periods: int 
     dates = list(ranked["timestamp"].drop_duplicates().sort_values())
     output_parts, weight_rows = [], []
     equal = np.repeat(1.0 / len(alpha), len(alpha))
+
+    valid_training = ranked.dropna(subset=["forward_return"])
+    daily_ic_by_column = {}
+
+    for column in alpha:
+        daily_ic_by_column[column] = (
+            valid_training
+            .groupby("timestamp", observed=True)
+            .apply(
+                lambda section: _safe_spearman(section, column),
+                include_groups=False,
+            )
+        )
+
     for index, date in enumerate(dates):
         current = ranked.loc[ranked["timestamp"] == date].copy()
-        training_dates = dates[: max(0, index - 1)]
-        training = ranked.loc[ranked["timestamp"].isin(training_dates)].dropna(subset=["forward_return"])
+        training_dates = dates[:max(0, index - 1)]
         scores = []
+
         for column in alpha:
-            daily = training.groupby("timestamp", observed=True).apply(
-                lambda section: section[column].corr(section["forward_return"], method="spearman"),
-                include_groups=False,
-            ).dropna()
-            scores.append(float(daily.mean()) if len(daily) >= minimum_training_periods else 0.0)
+            daily = (
+                daily_ic_by_column[column]
+                .reindex(training_dates)
+                .dropna()
+            )
+
+            scores.append(
+                float(daily.mean())
+                if len(daily) >= minimum_training_periods
+                else 0.0
+            )
+
         scores_array = np.asarray(scores, dtype=float)
         weights = equal if np.abs(scores_array).sum() <= 1e-12 else scores_array / np.abs(scores_array).sum()
         current["alpha__ensemble"] = current[alpha].to_numpy() @ weights
@@ -97,7 +142,7 @@ def build_expanding_ensemble(panel: pd.DataFrame, minimum_training_periods: int 
 
 def qualify_ensemble(ensemble: pd.DataFrame, weights: pd.DataFrame, minimum_periods: int = 3) -> dict[str, Any]:
     daily_ic = ensemble.groupby("timestamp", observed=True).apply(
-        lambda section: section["alpha__ensemble"].corr(section["forward_return"], method="spearman"),
+        lambda section: _safe_spearman(section, "alpha__ensemble"),
         include_groups=False,
     ).dropna()
     positions = ensemble.pivot(index="timestamp", columns="symbol", values="alpha__ensemble").sort_index()
@@ -114,4 +159,5 @@ def qualify_ensemble(ensemble: pd.DataFrame, weights: pd.DataFrame, minimum_peri
         "mean_weight_turnover": float(weight_turnover.mean()) if len(weight_turnover) else 0.0,
         "eligible_for_v55_walk_forward": bool(len(daily_ic) >= minimum_periods and np.isfinite(mean_ic)),
     }
+
 

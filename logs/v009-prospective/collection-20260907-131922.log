@@ -1,0 +1,26 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260907131922
+Username: DESKTOP-K31RHT8\ftaru
+RunAs User: DESKTOP-K31RHT8\ftaru
+Configuration Name: 
+Machine: DESKTOP-K31RHT8 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\scheduled_v009_collection.ps1
+Process ID: 9780
+PSVersion: 5.1.26100.9168
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9168
+BuildVersion: 10.0.26100.9168
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is D:\Projects\institutional-financial-ai-platform\logs\v009-prospective\collection-20260907-131922.log
+
+No completed daily bars exist on or after 2026-09-07. Nothing was evaluated.
+V009 collection completed safely.
+**********************
+Windows PowerShell transcript end
+End time: 20260907131928
+**********************

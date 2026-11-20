@@ -1,0 +1,111 @@
+symbol,sector,effective_from,effective_to,classification_provenance
+AAPL,Information Technology,2016-01-01,2099-12-31,seed_unverified
+MSFT,Information Technology,2016-01-01,2099-12-31,seed_unverified
+NVDA,Information Technology,2016-01-01,2099-12-31,seed_unverified
+AVGO,Information Technology,2016-01-01,2099-12-31,seed_unverified
+ORCL,Information Technology,2016-01-01,2099-12-31,seed_unverified
+CRM,Information Technology,2016-01-01,2099-12-31,seed_unverified
+AMD,Information Technology,2016-01-01,2099-12-31,seed_unverified
+CSCO,Information Technology,2016-01-01,2099-12-31,seed_unverified
+ACN,Information Technology,2016-01-01,2099-12-31,seed_unverified
+IBM,Information Technology,2016-01-01,2099-12-31,seed_unverified
+JPM,Financials,2016-01-01,2099-12-31,seed_unverified
+BAC,Financials,2016-01-01,2099-12-31,seed_unverified
+WFC,Financials,2016-01-01,2099-12-31,seed_unverified
+GS,Financials,2016-01-01,2099-12-31,seed_unverified
+MS,Financials,2016-01-01,2099-12-31,seed_unverified
+C,Financials,2016-01-01,2099-12-31,seed_unverified
+BLK,Financials,2016-01-01,2099-12-31,seed_unverified
+SCHW,Financials,2016-01-01,2099-12-31,seed_unverified
+AXP,Financials,2016-01-01,2099-12-31,seed_unverified
+PNC,Financials,2016-01-01,2099-12-31,seed_unverified
+JNJ,Health Care,2016-01-01,2099-12-31,seed_unverified
+LLY,Health Care,2016-01-01,2099-12-31,seed_unverified
+UNH,Health Care,2016-01-01,2099-12-31,seed_unverified
+ABBV,Health Care,2016-01-01,2099-12-31,seed_unverified
+MRK,Health Care,2016-01-01,2099-12-31,seed_unverified
+TMO,Health Care,2016-01-01,2099-12-31,seed_unverified
+ABT,Health Care,2016-01-01,2099-12-31,seed_unverified
+DHR,Health Care,2016-01-01,2099-12-31,seed_unverified
+AMGN,Health Care,2016-01-01,2099-12-31,seed_unverified
+PFE,Health Care,2016-01-01,2099-12-31,seed_unverified
+AMZN,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+TSLA,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+HD,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+MCD,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+LOW,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+NKE,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+SBUX,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+BKNG,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+TJX,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+GM,Consumer Discretionary,2016-01-01,2099-12-31,seed_unverified
+WMT,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+COST,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+PG,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+KO,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+PEP,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+PM,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+MO,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+MDLZ,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+CL,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+KMB,Consumer Staples,2016-01-01,2099-12-31,seed_unverified
+XOM,Energy,2016-01-01,2099-12-31,seed_unverified
+CVX,Energy,2016-01-01,2099-12-31,seed_unverified
+COP,Energy,2016-01-01,2099-12-31,seed_unverified
+SLB,Energy,2016-01-01,2099-12-31,seed_unverified
+EOG,Energy,2016-01-01,2099-12-31,seed_unverified
+MPC,Energy,2016-01-01,2099-12-31,seed_unverified
+PSX,Energy,2016-01-01,2099-12-31,seed_unverified
+OXY,Energy,2016-01-01,2099-12-31,seed_unverified
+VLO,Energy,2016-01-01,2099-12-31,seed_unverified
+KMI,Energy,2016-01-01,2099-12-31,seed_unverified
+GE,Industrials,2016-01-01,2099-12-31,seed_unverified
+CAT,Industrials,2016-01-01,2099-12-31,seed_unverified
+HON,Industrials,2016-01-01,2099-12-31,seed_unverified
+UPS,Industrials,2016-01-01,2099-12-31,seed_unverified
+RTX,Industrials,2016-01-01,2099-12-31,seed_unverified
+BA,Industrials,2016-01-01,2099-12-31,seed_unverified
+DE,Industrials,2016-01-01,2099-12-31,seed_unverified
+LMT,Industrials,2016-01-01,2099-12-31,seed_unverified
+UNP,Industrials,2016-01-01,2099-12-31,seed_unverified
+ETN,Industrials,2016-01-01,2099-12-31,seed_unverified
+LIN,Materials,2016-01-01,2099-12-31,seed_unverified
+SHW,Materials,2016-01-01,2099-12-31,seed_unverified
+FCX,Materials,2016-01-01,2099-12-31,seed_unverified
+NEM,Materials,2016-01-01,2099-12-31,seed_unverified
+APD,Materials,2016-01-01,2099-12-31,seed_unverified
+ECL,Materials,2016-01-01,2099-12-31,seed_unverified
+NUE,Materials,2016-01-01,2099-12-31,seed_unverified
+DOW,Materials,2016-01-01,2099-12-31,seed_unverified
+DD,Materials,2016-01-01,2099-12-31,seed_unverified
+MLM,Materials,2016-01-01,2099-12-31,seed_unverified
+NEE,Utilities,2016-01-01,2099-12-31,seed_unverified
+SO,Utilities,2016-01-01,2099-12-31,seed_unverified
+DUK,Utilities,2016-01-01,2099-12-31,seed_unverified
+AEP,Utilities,2016-01-01,2099-12-31,seed_unverified
+SRE,Utilities,2016-01-01,2099-12-31,seed_unverified
+EXC,Utilities,2016-01-01,2099-12-31,seed_unverified
+XEL,Utilities,2016-01-01,2099-12-31,seed_unverified
+ED,Utilities,2016-01-01,2099-12-31,seed_unverified
+PEG,Utilities,2016-01-01,2099-12-31,seed_unverified
+WEC,Utilities,2016-01-01,2099-12-31,seed_unverified
+META,Communication Services,2016-01-01,2099-12-31,seed_unverified
+GOOGL,Communication Services,2016-01-01,2099-12-31,seed_unverified
+NFLX,Communication Services,2016-01-01,2099-12-31,seed_unverified
+TMUS,Communication Services,2016-01-01,2099-12-31,seed_unverified
+VZ,Communication Services,2016-01-01,2099-12-31,seed_unverified
+T,Communication Services,2016-01-01,2099-12-31,seed_unverified
+DIS,Communication Services,2016-01-01,2099-12-31,seed_unverified
+CMCSA,Communication Services,2016-01-01,2099-12-31,seed_unverified
+CHTR,Communication Services,2016-01-01,2099-12-31,seed_unverified
+EA,Communication Services,2016-01-01,2099-12-31,seed_unverified
+PLD,Real Estate,2016-01-01,2099-12-31,seed_unverified
+AMT,Real Estate,2016-01-01,2099-12-31,seed_unverified
+EQIX,Real Estate,2016-01-01,2099-12-31,seed_unverified
+WELL,Real Estate,2016-01-01,2099-12-31,seed_unverified
+SPG,Real Estate,2016-01-01,2099-12-31,seed_unverified
+O,Real Estate,2016-01-01,2099-12-31,seed_unverified
+PSA,Real Estate,2016-01-01,2099-12-31,seed_unverified
+DLR,Real Estate,2016-01-01,2099-12-31,seed_unverified
+VICI,Real Estate,2016-01-01,2099-12-31,seed_unverified
+CBRE,Real Estate,2016-01-01,2099-12-31,seed_unverified

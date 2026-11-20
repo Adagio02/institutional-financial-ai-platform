@@ -11,7 +11,8 @@ $Processes = Get-CimInstance Win32_Process |
         $_.Name -match "^python" -and (
             $_.CommandLine -match "run_v37_autonomous_platform\.py" -or
             $_.CommandLine -match "run_v41_learning_cycle\.py" -or
-            $_.CommandLine -match "run_v40_shadow_cycle\.py"
+            $_.CommandLine -match "run_v40_shadow_cycle\.py" -or
+            $_.CommandLine -match "ask_finai\\app\.py"
         )
     }
 
@@ -30,9 +31,11 @@ if (Test-Path $ComposeFile) {
     Push-Location $Project
 
     try {
+        # Remove only the dashboard container. "down" would also delete the network
+        # shared with the main stack (same compose project), breaking Postgres & co.
         docker compose `
             -f $ComposeFile `
-            down
+            rm --stop --force
     }
     finally {
         Pop-Location

@@ -1274,3 +1274,94 @@ table.dataTable tbody td {
         font-size: 21px;
     }
 }
+
+/* ==========================================================
+   RESEARCH PROGRAM (V5.6 / V009) AND LEGACY TRACK
+   ========================================================== */
+
+.milestone {
+    margin-bottom: 14px;
+}
+
+.milestone-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: #d0d5dc;
+    font-size: 13px;
+}
+
+.milestone-count {
+    color: #8b95a3;
+    font-variant-numeric: tabular-nums;
+}
+
+.milestone-track {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.milestone-fill {
+    height: 100%;
+    background: #2dd4bf;
+    border-radius: 4px;
+}
+
+.milestone-done {
+    background: #4ade80;
+}
+
+.milestone-facts {
+    display: grid;
+    gap: 6px;
+    margin: 16px 0 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.milestone-facts div,
+.flag-row {
+    display: flex;
+    justify-content: space-between;
+    color: #aab2bd;
+    font-size: 12px;
+}
+
+.milestone-facts div span:last-child {
+    color: #e6e9ee;
+    font-variant-numeric: tabular-nums;
+}
+
+.flag-list {
+    display: grid;
+    gap: 5px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.flag-yes {
+    color: #2dd4bf;
+    font-weight: 600;
+}
+
+.flag-no {
+    color: #8b95a3;
+}
+
+.legacy-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    color: #f5d48a;
+    background: rgba(245, 158, 11, 0.07);
+    border: 1px solid rgba(245, 158, 11, 0.32);
+    border-radius: 8px;
+}
+
+.empty-note {
+    color: #8b95a3;
+}

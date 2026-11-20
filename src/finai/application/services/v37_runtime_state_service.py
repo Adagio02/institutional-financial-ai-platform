@@ -8,6 +8,8 @@ from datetime import (
 from pathlib import Path
 from typing import Any
 
+from finai.core.durable_io import write_text_durable
+
 
 class V37RuntimeStateService:
     def __init__(
@@ -45,46 +47,55 @@ class V37RuntimeStateService:
                 "jobs": {},
             }
 
-        raw = self._state_path.read_text(
-            encoding="utf-8"
-        )
-
-        payload = json.loads(
-            raw
-        )
-
-        if not isinstance(
-            payload,
-            dict,
-        ):
-            raise RuntimeError(
-                "V3.7 runtime state is invalid."
+        try:
+            raw = self._state_path.read_text(
+                encoding="utf-8"
             )
-
-        return payload
+            payload = json.loads(
+                raw
+            )
+            if not isinstance(
+                payload,
+                dict,
+            ):
+                raise ValueError(
+                    "state is not a JSON object"
+                )
+            return payload
+        except (OSError, UnicodeDecodeError, ValueError) as error:
+            # A corrupt state file (e.g. all null bytes after a power loss) must not stop
+            # the supervisor. Keep the bad file for inspection and start from defaults.
+            stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+            backup = self._state_path.with_name(
+                f"{self._state_path.name}.corrupt-{stamp}"
+            )
+            try:
+                self._state_path.replace(backup)
+            except OSError:
+                pass
+            self.record_event(
+                event_type="state_recovered",
+                message="Runtime state was unreadable; started from defaults.",
+                details={"error": str(error)[:200], "backup": str(backup)},
+            )
+            return {
+                "version": "3.7",
+                "last_learning_bar_count": 0,
+                "last_learning_timestamp": None,
+                "jobs": {},
+            }
 
     def save(
         self,
         state: dict[str, Any],
     ) -> None:
-        temporary_path = (
-            self._state_path
-            .with_suffix(
-                ".tmp"
-            )
-        )
-
-        temporary_path.write_text(
+        write_text_durable(
+            self._state_path,
             json.dumps(
                 state,
                 indent=2,
                 sort_keys=True,
             ),
-            encoding="utf-8",
-        )
-
-        temporary_path.replace(
-            self._state_path
         )
 
     def record_event(

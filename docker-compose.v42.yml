@@ -13,9 +13,12 @@ services:
 
     environment:
       FINAI_ARTIFACT_ROOT: /app/artifacts
+      FINAI_RESEARCH_ROOT: /app/research
+      FINAI_ASK_URL: http://127.0.0.1:8502
 
     volumes:
       - ./artifacts:/app/artifacts:ro
+      - ./research:/app/research:ro
 
     healthcheck:
       test:

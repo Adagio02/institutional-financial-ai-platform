@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "policy_source": "data\\research\\v56-candidate-002\\v55_candidate_005_policy.json",
+  "policy_sha256": "a7330fd7ac46ebff58ed7206ec2938cf60fb3c10af04a0b0dded73dcf983c379",
+  "raw_locked_source": "data\\research\\v56-candidate-002\\v56_locked_input.parquet",
+  "raw_locked_sha256": "16fe8d432d9342f46ef965b521ba5651a3ecd57d79954e3a25e9bed6cfb832d0",
+  "transformed_locked_path": "data\\research\\v56-candidate-002\\v56_locked_calibrated_polarity.parquet",
+  "transformed_locked_sha256": "0f27aee83aefa18114427cec9eb441a3e05e60c1991736a50addbf94c08648bc",
+  "frozen_polarity": -1.0,
+  "ewm_span": 10,
+  "recalibrated_on_locked_returns": false,
+  "rows": 1480,
+  "periods": 185,
+  "symbols": 8
+}

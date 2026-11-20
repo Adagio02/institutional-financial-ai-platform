@@ -1,0 +1,160 @@
+{
+  "strategy_type": "breakout_walkforward",
+  "metrics": {
+    "days": 1694,
+    "months": 81,
+    "total_return": 0.14851599922242165,
+    "cagr": 0.020812565686322282,
+    "volatility": 0.19140550662410605,
+    "sharpe": 0.20346052129301723,
+    "max_drawdown": -0.3061075856815323,
+    "worst_month": -0.10140898996163927
+  },
+  "benchmarks": {
+    "SPY": {
+      "days": 1694,
+      "months": 81,
+      "total_return": 1.6114889109113864,
+      "cagr": 0.1534968805298671,
+      "volatility": 0.1973301563022258,
+      "sharpe": 0.8227461655881764,
+      "max_drawdown": -0.33793888166449926,
+      "worst_month": -0.12615555968071313
+    }
+  },
+  "excess_t_vs": {
+    "SPY": -2.226873434557973
+  },
+  "yearly": {
+    "2020": 0.13021516380354403,
+    "2021": 0.11275570800150603,
+    "2022": -0.18513333822106726,
+    "2023": 0.011880291706843904,
+    "2024": 0.04554053644185774,
+    "2025": -0.05326110281127394,
+    "2026": 0.11889492866598794
+  },
+  "cost_sensitivity": {
+    "20": {
+      "days": 1694,
+      "months": 81,
+      "total_return": -0.048666734321168414,
+      "cagr": -0.007394304574769306,
+      "volatility": 0.19171504981973186,
+      "sharpe": 0.05729676355396643,
+      "max_drawdown": -0.33382164108567214,
+      "worst_month": -0.10387741095442338
+    }
+  },
+  "trades": {
+    "trades": 955,
+    "win_rate": 0.4356020942408377,
+    "average_win": 0.09238700246328338,
+    "average_loss": -0.06844322090412064,
+    "profit_factor": 1.0418015586986757,
+    "average_days_held": 14.490052356020943,
+    "exit_reasons": {
+      "max_hold": 0.516,
+      "stop": 0.371,
+      "stop_gap": 0.075,
+      "trailing": 0.037,
+      "no_data": 0.001
+    },
+    "worst_trade": -0.4355856766770375,
+    "best_trade": 0.9312344693493151
+  },
+  "stats": {
+    "out_of_sample_years": [
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025",
+      "2026"
+    ]
+  },
+  "ic_checks": {},
+  "selections": {
+    "2020": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.533,
+        "2.5": 0.253,
+        "3": 0.082
+      }
+    },
+    "2021": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.547,
+        "2.5": 0.435,
+        "3": 0.277
+      }
+    },
+    "2022": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.582,
+        "2.5": 0.569,
+        "3": 0.402
+      }
+    },
+    "2023": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.25,
+        "2.5": 0.224,
+        "3": 0.135
+      }
+    },
+    "2024": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.237,
+        "2.5": 0.207,
+        "3": 0.019
+      }
+    },
+    "2025": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.253,
+        "2.5": 0.211,
+        "3": 0.115
+      }
+    },
+    "2026": {
+      "chosen": 2.0,
+      "training_sharpes": {
+        "2": 0.192,
+        "2.5": 0.128,
+        "3": 0.067
+      }
+    }
+  },
+  "full_period_sharpe_by_setting": {
+    "2": 0.255,
+    "2.5": 0.31,
+    "3": 0.233
+  },
+  "final_choice": 2.0,
+  "plateau_ok": true,
+  "checks": {
+    "minimum_out_of_sample_months": true,
+    "positive_net_return": true,
+    "positive_net_at_20_bps": false,
+    "minimum_trades": true,
+    "profit_factor": false,
+    "sharpe_at_least_spy": false,
+    "maximum_drawdown": false,
+    "plateau_not_peak": true
+  },
+  "passed": false,
+  "blocking": [
+    "positive_net_at_20_bps",
+    "profit_factor",
+    "sharpe_at_least_spy",
+    "maximum_drawdown"
+  ]
+}

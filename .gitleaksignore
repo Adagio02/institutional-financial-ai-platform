@@ -1,0 +1,3 @@
+# Known false positives: fake test keys (not real credentials) in an earlier commit.
+2f0ed32945bd908d43cf3e2a736f85625033834c:tests/unit/test_ask_finai.py:aws-access-token:48
+2f0ed32945bd908d43cf3e2a736f85625033834c:tests/unit/test_ask_finai.py:aws-access-token:49

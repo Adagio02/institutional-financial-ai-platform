@@ -1,0 +1,58 @@
+{
+  "id": "H5_breakout_tight_stop",
+  "spec": {
+    "id": "H5_breakout_tight_stop",
+    "strategy_type": "breakout_stops",
+    "hypothesis": "Buying S&P 500 stocks right after a big, fast breakout (5-day gain of at least 8%, a new 20-day closing high, volume at least 1.5x normal) and selling with a 4% stop-loss, an 8% trailing stop, or after 20 days, earns a better risk-adjusted return than SPY after costs.",
+    "rationale": "Cutting losses quickly while letting winners run should make average wins larger than average losses even with a low win rate. Counter-evidence on this exact data: last week's biggest gainers tended to UNDERPERFORM over the following week and month (5-day return raw IC about -0.016 at 5 days and -0.026 at 21 days). Tight stops on volatile stocks are also often hit by ordinary noise. Tested once, honestly, as the user's idea.",
+    "signal": {
+      "columns": {},
+      "description": "5-day gain, 20-day high and volume breakout"
+    },
+    "related_closed_features": [
+      "rank_momentum_5"
+    ],
+    "prior_evidence": "5-day winners underperformed afterwards in this universe (raw IC about -0.016 at 5 days, -0.026 at 21 days).",
+    "rule": {
+      "gain_days": 5,
+      "min_gain": 0.08,
+      "high_days": 20,
+      "volume_multiple": 1.5,
+      "stop_loss": 0.04,
+      "trailing_stop": 0.08,
+      "max_hold_days": 20,
+      "position_size": 0.05,
+      "max_positions": 20,
+      "max_new_per_day": 5,
+      "execution": "buy at next open; hard stop intraday (gap exits at open); trailing stop and time exit at close"
+    },
+    "horizon": 1,
+    "cost_bps": 10,
+    "sensitivity_costs": [
+      20
+    ],
+    "panel": "data/research/v56-expanded/bars.parquet",
+    "window": {
+      "start": "2018-01-01",
+      "end": "2026-09-30"
+    },
+    "gates": {
+      "min_months": 60,
+      "min_trades": 200,
+      "min_profit_factor": 1.2,
+      "max_drawdown": -0.3
+    },
+    "decision_rule": "If every gate passes: freeze as qualified and forward-test for 12 months against SPY. If any gate fails: close H5; do not try other gain thresholds, stop distances or holding periods on this data.",
+    "forward": {
+      "ready": true,
+      "min_periods": 12,
+      "benchmark": "SPY",
+      "compare": "sharpe"
+    }
+  },
+  "spec_hash": "12c891dfa846fb89",
+  "status": "exploratory",
+  "frozen_at": "2026-10-06T21:35:17+00:00",
+  "freeze_data_date": "2026-10-05 04:00:00+00:00",
+  "git_commit": "bd9d338"
+}

@@ -1,0 +1,42 @@
+{
+  "id": "H5_breakout_tight_stop",
+  "status_class": "exploratory",
+  "rules": {
+    "version": 1,
+    "early_retire_after_periods": 6,
+    "early_retire_drawdown_multiple": 2.0,
+    "early_retire_drawdown_floor": -0.15,
+    "early_retire_t_vs_backtest": -2.5,
+    "final_t_vs_backtest_floor": -1.5,
+    "final_requires_positive_net": true,
+    "final_requires_min_sharpe": true
+  },
+  "completed": 1,
+  "needed": 12,
+  "open_period": {
+    "since": "2026-11",
+    "days_held": 14,
+    "unrealized_gross": -0.058220813414730954
+  },
+  "as_of": "2026-11-19T23:01:26+00:00",
+  "benchmark": "SPY",
+  "trades": {
+    "trades": 44,
+    "win_rate": 0.22727272727272727,
+    "average_win": 0.04872662972831578,
+    "average_loss": -0.04068670753734475,
+    "profit_factor": 0.35223694794287697,
+    "average_days_held": 9.522727272727273,
+    "exit_reasons": {
+      "stop": 0.568,
+      "max_hold": 0.205,
+      "trailing": 0.114,
+      "stop_gap": 0.114
+    },
+    "worst_trade": -0.05572472049999999,
+    "best_trade": 0.1237269390695761
+  },
+  "verdict": "collecting",
+  "final": false,
+  "reason": "1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12"
+}
