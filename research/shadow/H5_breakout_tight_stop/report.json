@@ -11,19 +11,32 @@
     "final_requires_positive_net": true,
     "final_requires_min_sharpe": true
   },
-  "completed": 0,
+  "completed": 1,
   "needed": 12,
   "open_period": {
-    "since": "2026-10",
-    "days_held": 1,
-    "unrealized_gross": 0.005562099414185617
+    "since": "2026-11",
+    "days_held": 14,
+    "unrealized_gross": -0.058220813414730954
   },
-  "as_of": "2026-10-06T22:02:17+00:00",
+  "as_of": "2026-11-19T23:01:26+00:00",
   "benchmark": "SPY",
   "trades": {
-    "trades": 0
+    "trades": 44,
+    "win_rate": 0.22727272727272727,
+    "average_win": 0.04872662972831578,
+    "average_loss": -0.04068670753734475,
+    "profit_factor": 0.35223694794287697,
+    "average_days_held": 9.522727272727273,
+    "exit_reasons": {
+      "stop": 0.568,
+      "max_hold": 0.205,
+      "trailing": 0.114,
+      "stop_gap": 0.114
+    },
+    "worst_trade": -0.05572472049999999,
+    "best_trade": 0.1237269390695761
   },
   "verdict": "collecting",
   "final": false,
-  "reason": "0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12"
+  "reason": "1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12"
 }

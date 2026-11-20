@@ -22,3 +22,485 @@
     0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
 [2026-10-06 22:02:17Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.56% (day 1)
     0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-07 22:00:05Z] Bars: fetching 2026-09-29 to now for 657 symbols...
+[2026-10-07 22:00:39Z]   Alpaca rejected symbol RVTY (PREVIOUSLY PKI); skipped
+[2026-10-07 22:02:01Z]   Re-downloading full history for 3 adjusted and 0 new symbols
+[2026-10-07 22:02:04Z]   Bars through 2026-10-07: 558 symbols on the latest day
+[2026-10-07 22:02:04Z] ETF bars: refreshing...
+[2026-10-07 22:02:08Z]   Updated fundamentals and earnings for 1 companies with new filings
+[2026-10-07 22:02:08Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-07 22:02:47Z] H0_low_risk_monthly_forward: 2 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-07 22:02:49Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-07 (changed)
+[2026-10-07 22:02:53Z] H5_breakout_tight_stop: recorded 14 holdings for 2026-10-07 (changed)
+[2026-10-07 22:03:00Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.08% (day 2)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-07 22:03:00Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.68% (day 1)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-07 22:03:00Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.60% (day 2)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-08 22:00:07Z] Bars: fetching 2026-09-30 to now for 657 symbols...
+[2026-10-08 22:00:39Z]   Alpaca rejected symbol RVTY (PREVIOUSLY PKI); skipped
+[2026-10-08 22:01:56Z]   Re-downloading full history for 1 adjusted and 0 new symbols
+[2026-10-08 22:01:59Z]   Bars through 2026-10-08: 558 symbols on the latest day
+[2026-10-08 22:01:59Z] ETF bars: refreshing...
+[2026-10-08 22:02:07Z]   Updated fundamentals and earnings for 3 companies with new filings
+[2026-10-08 22:02:07Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-08 22:02:50Z] H0_low_risk_monthly_forward: 3 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-08 22:02:52Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-08 (changed)
+[2026-10-08 22:02:57Z] H5_breakout_tight_stop: recorded 13 holdings for 2026-10-08 (changed)
+[2026-10-08 22:03:05Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.15% (day 3)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-08 22:03:05Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.77% (day 2)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-08 22:03:05Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -0.82% (day 3)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-09 22:00:14Z] Bars: fetching 2026-10-01 to now for 657 symbols...
+[2026-10-09 22:00:42Z]   Alpaca rejected symbol RVTY (PREVIOUSLY PKI); skipped
+[2026-10-09 22:01:55Z]   Re-downloading full history for 10 adjusted and 0 new symbols
+[2026-10-09 22:02:01Z]   Bars through 2026-10-09: 558 symbols on the latest day
+[2026-10-09 22:02:01Z] ETF bars: refreshing...
+[2026-10-09 22:02:05Z]   Updated fundamentals and earnings for 1 companies with new filings
+[2026-10-09 22:02:05Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-09 22:02:40Z] H0_low_risk_monthly_forward: 4 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-09 22:02:41Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-09 (changed)
+[2026-10-09 22:02:45Z] H5_breakout_tight_stop: recorded 13 holdings for 2026-10-09 (changed)
+[2026-10-09 22:02:52Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.19% (day 4)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-09 22:02:52Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.25% (day 3)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-09 22:02:52Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.36% (day 4)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-12 22:00:09Z] Weekly universe refresh...
+[2026-10-12 22:00:47Z] Bars: fetching 2026-10-02 to now for 656 symbols...
+[2026-10-12 22:01:02Z]   Bars through 2026-10-12: 558 symbols on the latest day
+[2026-10-12 22:01:02Z] ETF bars: refreshing...
+[2026-10-12 22:01:08Z]   Updated fundamentals and earnings for 3 companies with new filings
+[2026-10-12 22:01:08Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-12 22:01:36Z] H0_low_risk_monthly_forward: 5 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-12 22:01:37Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-12 (changed)
+[2026-10-12 22:01:40Z] H5_breakout_tight_stop: recorded 15 holdings for 2026-10-12 (changed)
+[2026-10-12 22:01:45Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.13% (day 5)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-12 22:01:45Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.40% (day 4)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-12 22:01:45Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.03% (day 5)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-13 22:00:18Z] Bars: fetching 2026-10-05 to now for 656 symbols...
+[2026-10-13 22:00:38Z]   Re-downloading full history for 4 adjusted and 0 new symbols
+[2026-10-13 22:00:42Z]   Bars through 2026-10-13: 558 symbols on the latest day
+[2026-10-13 22:00:42Z] ETF bars: refreshing...
+[2026-10-13 22:00:46Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-13 22:01:23Z] H0_low_risk_monthly_forward: 6 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-13 22:01:25Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-13 (changed)
+[2026-10-13 22:01:29Z] H5_breakout_tight_stop: recorded 12 holdings for 2026-10-13 (changed)
+[2026-10-13 22:01:36Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.17% (day 6)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-13 22:01:36Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.42% (day 5)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-13 22:01:36Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.11% (day 6)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-14 22:00:14Z] Bars: fetching 2026-10-06 to now for 656 symbols...
+[2026-10-14 22:00:32Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-10-14 22:00:34Z]   Bars through 2026-10-14: 558 symbols on the latest day
+[2026-10-14 22:00:34Z] ETF bars: refreshing...
+[2026-10-14 22:00:38Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-14 22:01:05Z] H0_low_risk_monthly_forward: 7 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-14 22:01:06Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-14 (changed)
+[2026-10-14 22:01:09Z] H5_breakout_tight_stop: recorded 9 holdings for 2026-10-14 (changed)
+[2026-10-14 22:01:14Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.06% (day 7)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-14 22:01:14Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.28% (day 6)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-14 22:01:14Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -1.28% (day 7)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-15 22:00:15Z] Bars: fetching 2026-10-07 to now for 656 symbols...
+[2026-10-15 22:00:35Z]   Re-downloading full history for 5 adjusted and 0 new symbols
+[2026-10-15 22:00:39Z]   Bars through 2026-10-15: 558 symbols on the latest day
+[2026-10-15 22:00:39Z] ETF bars: refreshing...
+[2026-10-15 22:00:46Z]   Updated fundamentals and earnings for 1 companies with new filings
+[2026-10-15 22:00:46Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-15 22:01:23Z] H0_low_risk_monthly_forward: 8 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-15 22:01:25Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-15 (changed)
+[2026-10-15 22:01:29Z] H5_breakout_tight_stop: recorded 8 holdings for 2026-10-15 (changed)
+[2026-10-15 22:01:36Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.25% (day 8)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-15 22:01:36Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.87% (day 7)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-15 22:01:36Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -0.71% (day 8)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-16 22:00:18Z] Bars: fetching 2026-10-08 to now for 656 symbols...
+[2026-10-16 22:01:05Z]   Re-downloading full history for 3 adjusted and 0 new symbols
+[2026-10-16 22:01:09Z]   Bars through 2026-10-16: 558 symbols on the latest day
+[2026-10-16 22:01:09Z] ETF bars: refreshing...
+[2026-10-16 22:01:14Z]   Updated fundamentals and earnings for 1 companies with new filings
+[2026-10-16 22:01:14Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-16 22:01:52Z] H0_low_risk_monthly_forward: 9 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-16 22:01:54Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-16 (changed)
+[2026-10-16 22:01:58Z] H5_breakout_tight_stop: recorded 12 holdings for 2026-10-16 (changed)
+[2026-10-16 22:02:06Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.11% (day 9)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-16 22:02:06Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.24% (day 8)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-16 22:02:06Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -1.17% (day 9)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-19 22:00:19Z] Bars: fetching 2026-10-09 to now for 656 symbols...
+[2026-10-19 22:00:42Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-10-19 22:00:45Z]   Bars through 2026-10-19: 558 symbols on the latest day
+[2026-10-19 22:00:45Z] ETF bars: refreshing...
+[2026-10-19 22:00:52Z]   Updated fundamentals and earnings for 2 companies with new filings
+[2026-10-19 22:00:52Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-19 22:01:28Z] H0_low_risk_monthly_forward: 10 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-19 22:01:30Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-19 (changed)
+[2026-10-19 22:01:34Z] H5_breakout_tight_stop: recorded 12 holdings for 2026-10-19 (changed)
+[2026-10-19 22:01:41Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.10% (day 10)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-19 22:01:41Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.24% (day 9)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-19 22:01:41Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -1.15% (day 10)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-20 22:00:13Z] Weekly universe refresh...
+[2026-10-20 22:00:52Z] Bars: fetching 2026-10-12 to now for 656 symbols...
+[2026-10-20 22:01:14Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-10-20 22:01:16Z]   Bars through 2026-10-20: 558 symbols on the latest day
+[2026-10-20 22:01:16Z] ETF bars: refreshing...
+[2026-10-20 22:01:20Z]   Updated fundamentals and earnings for 1 companies with new filings
+[2026-10-20 22:01:20Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-20 22:01:48Z] H0_low_risk_monthly_forward: 11 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-20 22:01:49Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-20 (changed)
+[2026-10-20 22:01:52Z] H5_breakout_tight_stop: recorded 11 holdings for 2026-10-20 (changed)
+[2026-10-20 22:01:57Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.13% (day 11)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-20 22:01:57Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.03% (day 10)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-20 22:01:57Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -0.39% (day 11)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-21 22:00:16Z] Bars: fetching 2026-10-13 to now for 656 symbols...
+[2026-10-21 22:00:36Z]   Re-downloading full history for 1 adjusted and 0 new symbols
+[2026-10-21 22:00:38Z]   Bars through 2026-10-21: 558 symbols on the latest day
+[2026-10-21 22:00:38Z] ETF bars: refreshing...
+[2026-10-21 22:00:49Z]   Updated fundamentals and earnings for 9 companies with new filings
+[2026-10-21 22:00:49Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-21 22:01:20Z] H0_low_risk_monthly_forward: 12 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-21 22:01:21Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-21 (changed)
+[2026-10-21 22:01:25Z] H5_breakout_tight_stop: recorded 16 holdings for 2026-10-21 (changed)
+[2026-10-21 22:01:31Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.08% (day 12)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-21 22:01:31Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.84% (day 11)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-21 22:01:31Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: -0.43% (day 12)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-22 22:00:09Z] Bars: fetching 2026-10-14 to now for 656 symbols...
+[2026-10-22 22:00:33Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-10-22 22:00:35Z]   Bars through 2026-10-22: 558 symbols on the latest day
+[2026-10-22 22:00:35Z] ETF bars: refreshing...
+[2026-10-22 22:00:50Z]   Updated fundamentals and earnings for 12 companies with new filings
+[2026-10-22 22:00:50Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-22 22:01:19Z] H0_low_risk_monthly_forward: 13 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-22 22:01:20Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-22 (changed)
+[2026-10-22 22:01:23Z] H5_breakout_tight_stop: recorded 17 holdings for 2026-10-22 (changed)
+[2026-10-22 22:01:29Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.11% (day 13)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-22 22:01:29Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.63% (day 12)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-22 22:01:29Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +1.54% (day 13)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-23 23:45:59Z] Bars: fetching 2026-10-15 to now for 656 symbols...
+[2026-10-23 23:46:14Z]   Re-downloading full history for 4 adjusted and 0 new symbols
+[2026-10-23 23:46:16Z]   Bars through 2026-10-23: 558 symbols on the latest day
+[2026-10-23 23:46:16Z] ETF bars: refreshing...
+[2026-10-23 23:46:45Z]   Updated fundamentals and earnings for 24 companies with new filings
+[2026-10-23 23:46:45Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-23 23:47:14Z] H0_low_risk_monthly_forward: 14 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-23 23:47:16Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-23 (changed)
+[2026-10-23 23:47:19Z] H5_breakout_tight_stop: recorded 19 holdings for 2026-10-23 (changed)
+[2026-10-23 23:47:24Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.08% (day 14)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-23 23:47:24Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.61% (day 13)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-23 23:47:24Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +1.09% (day 14)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-26 22:00:11Z] Bars: fetching 2026-10-16 to now for 656 symbols...
+[2026-10-26 22:00:29Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-10-26 22:00:31Z]   Bars through 2026-10-26: 558 symbols on the latest day
+[2026-10-26 22:00:31Z] ETF bars: refreshing...
+[2026-10-26 22:00:48Z]   Updated fundamentals and earnings for 16 companies with new filings
+[2026-10-26 22:00:48Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-26 22:01:19Z] H0_low_risk_monthly_forward: 15 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-26 22:01:21Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-26 (changed)
+[2026-10-26 22:01:24Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-10-26 (changed)
+[2026-10-26 22:01:29Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: -0.02% (day 15)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-26 22:01:29Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.56% (day 14)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-26 22:01:29Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +1.05% (day 15)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-27 22:00:22Z] Bars: fetching 2026-10-19 to now for 656 symbols...
+[2026-10-27 22:00:39Z]   Re-downloading full history for 3 adjusted and 0 new symbols
+[2026-10-27 22:00:42Z]   Bars through 2026-10-27: 558 symbols on the latest day
+[2026-10-27 22:00:42Z] ETF bars: refreshing...
+[2026-10-27 22:00:55Z]   Updated fundamentals and earnings for 6 companies with new filings
+[2026-10-27 22:00:55Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-27 22:01:37Z] H0_low_risk_monthly_forward: 16 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-27 22:01:39Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-27 (changed)
+[2026-10-27 22:01:44Z] H5_breakout_tight_stop: recorded 17 holdings for 2026-10-27 (changed)
+[2026-10-27 22:01:52Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: +0.10% (day 16)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-27 22:01:52Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -1.10% (day 15)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-27 22:01:52Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.11% (day 16)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-28 22:00:13Z] Weekly universe refresh...
+[2026-10-28 22:01:03Z] Bars: fetching 2026-10-20 to now for 656 symbols...
+[2026-10-28 22:01:38Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-10-28 22:01:40Z]   Bars through 2026-10-28: 558 symbols on the latest day
+[2026-10-28 22:01:40Z] ETF bars: refreshing...
+[2026-10-28 22:02:16Z]   Updated fundamentals and earnings for 20 companies with new filings
+[2026-10-28 22:02:16Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-28 22:02:52Z] H0_low_risk_monthly_forward: 17 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-28 22:02:54Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-28 (changed)
+[2026-10-28 22:02:59Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-10-28 (changed)
+[2026-10-28 22:03:05Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: +0.11% (day 17)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-28 22:03:05Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.75% (day 16)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-28 22:03:05Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +0.70% (day 17)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-29 22:00:26Z] Bars: fetching 2026-10-21 to now for 656 symbols...
+[2026-10-29 22:00:54Z]   Re-downloading full history for 1 adjusted and 0 new symbols
+[2026-10-29 22:00:56Z]   Bars through 2026-10-29: 558 symbols on the latest day
+[2026-10-29 22:00:56Z] ETF bars: refreshing...
+[2026-10-29 22:01:55Z]   Updated fundamentals and earnings for 50 companies with new filings
+[2026-10-29 22:01:55Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-29 22:02:34Z] H0_low_risk_monthly_forward: 18 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-29 22:02:36Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-29 (changed)
+[2026-10-29 22:02:39Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-10-29 (changed)
+[2026-10-29 22:02:45Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: +0.15% (day 18)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-29 22:02:45Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -0.91% (day 17)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-29 22:02:45Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +1.84% (day 18)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-10-30 22:00:10Z] Bars: fetching 2026-10-22 to now for 656 symbols...
+[2026-10-30 22:00:53Z]   Re-downloading full history for 14 adjusted and 0 new symbols
+[2026-10-30 22:00:59Z]   Bars through 2026-10-30: 558 symbols on the latest day
+[2026-10-30 22:00:59Z] ETF bars: refreshing...
+[2026-10-30 22:01:52Z]   Updated fundamentals and earnings for 55 companies with new filings
+[2026-10-30 22:01:52Z] Rebuilding fundamentals, earnings and panel...
+[2026-10-30 22:02:25Z] H0_low_risk_monthly_forward: 19 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-10-30 22:02:26Z] H3_cross_asset_trend: recorded 7 holdings for 2026-10-30 (changed)
+[2026-10-30 22:02:29Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-10-30 (changed)
+[2026-10-30 22:02:35Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: +0.07% (day 19)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-10-30 22:02:35Z] H3_cross_asset_trend [qualified]: COLLECTING | 0/24 periods | open period since 2026-10: -2.07% (day 18)
+    0/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-10-30 22:02:35Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 0/12 periods | open period since 2026-10: +1.44% (day 19)
+    0/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-02 23:00:15Z] Bars: fetching 2026-10-23 to now for 656 symbols...
+[2026-11-02 23:00:41Z]   Re-downloading full history for 8 adjusted and 0 new symbols
+[2026-11-02 23:00:47Z]   Bars through 2026-11-02: 557 symbols on the latest day
+[2026-11-02 23:00:47Z] ETF bars: refreshing...
+[2026-11-02 23:01:36Z]   Updated fundamentals and earnings for 45 companies with new filings
+[2026-11-02 23:01:36Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-02 23:02:11Z] H0_low_risk_monthly_forward: 20 trading days since the last rebalance (2026-10-05); next after 21.
+[2026-11-02 23:02:12Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-02 (changed)
+[2026-11-02 23:02:15Z] H5_breakout_tight_stop: recorded 17 holdings for 2026-11-02 (changed)
+[2026-11-02 23:02:21Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 0/24 periods | open period since 2026-10-05: +0.06% (day 20)
+    0/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-02 23:02:21Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -0.24% (day 1)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-02 23:02:21Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: +1.34% (day 1)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-03 23:00:18Z] Bars: fetching 2026-10-26 to now for 656 symbols...
+[2026-11-03 23:00:38Z]   Re-downloading full history for 1 adjusted and 0 new symbols
+[2026-11-03 23:00:40Z]   Bars through 2026-11-03: 557 symbols on the latest day
+[2026-11-03 23:00:40Z] ETF bars: refreshing...
+[2026-11-03 23:00:58Z]   Updated fundamentals and earnings for 16 companies with new filings
+[2026-11-03 23:00:58Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-03 23:01:39Z] H0_low_risk_monthly_forward: recorded rebalance for 2026-11-03 (active, 130 long / 118 short).
+[2026-11-03 23:01:40Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-03 (changed)
+[2026-11-03 23:01:44Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-11-03 (changed)
+[2026-11-03 23:01:49Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: +0.00% (day 0)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-03 23:01:49Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -0.26% (day 2)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-03 23:01:49Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -0.61% (day 2)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-04 23:00:10Z] Weekly universe refresh...
+[2026-11-04 23:01:05Z] Bars: fetching 2026-10-27 to now for 656 symbols...
+[2026-11-04 23:01:42Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-11-04 23:01:44Z]   Bars through 2026-11-04: 557 symbols on the latest day
+[2026-11-04 23:01:44Z] ETF bars: refreshing...
+[2026-11-04 23:02:30Z]   Updated fundamentals and earnings for 38 companies with new filings
+[2026-11-04 23:02:30Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-04 23:03:17Z] H0_low_risk_monthly_forward: 1 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-04 23:03:19Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-04 (changed)
+[2026-11-04 23:03:23Z] H5_breakout_tight_stop: recorded 17 holdings for 2026-11-04 (changed)
+[2026-11-04 23:03:30Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.07% (day 1)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-04 23:03:30Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: +0.43% (day 3)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-04 23:03:30Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: +1.24% (day 3)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-05 23:00:12Z] Bars: fetching 2026-10-28 to now for 656 symbols...
+[2026-11-05 23:00:51Z]   Re-downloading full history for 2 adjusted and 0 new symbols
+[2026-11-05 23:00:53Z]   Bars through 2026-11-05: 557 symbols on the latest day
+[2026-11-05 23:00:53Z] ETF bars: refreshing...
+[2026-11-05 23:02:10Z]   Updated fundamentals and earnings for 52 companies with new filings
+[2026-11-05 23:02:10Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-05 23:02:53Z] H0_low_risk_monthly_forward: 2 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-05 23:02:54Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-05 (changed)
+[2026-11-05 23:02:58Z] H5_breakout_tight_stop: recorded 15 holdings for 2026-11-05 (changed)
+[2026-11-05 23:03:03Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.17% (day 2)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-05 23:03:03Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -1.70% (day 4)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-05 23:03:03Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -0.52% (day 4)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-06 23:00:14Z] Bars: fetching 2026-10-29 to now for 656 symbols...
+[2026-11-06 23:00:53Z]   Re-downloading full history for 11 adjusted and 0 new symbols
+[2026-11-06 23:01:01Z]   Bars through 2026-11-06: 557 symbols on the latest day
+[2026-11-06 23:01:01Z] ETF bars: refreshing...
+[2026-11-06 23:02:05Z]   Updated fundamentals and earnings for 65 companies with new filings
+[2026-11-06 23:02:05Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-06 23:02:32Z] H0_low_risk_monthly_forward: 3 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-06 23:02:33Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-06 (changed)
+[2026-11-06 23:02:37Z] H5_breakout_tight_stop: recorded 13 holdings for 2026-11-06 (changed)
+[2026-11-06 23:02:42Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.07% (day 3)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-06 23:02:42Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -1.44% (day 5)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-06 23:02:42Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -2.06% (day 5)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-09 23:00:29Z] Bars: fetching 2026-10-30 to now for 656 symbols...
+[2026-11-09 23:01:35Z]   Re-downloading full history for 4 adjusted and 0 new symbols
+[2026-11-09 23:01:39Z]   Bars through 2026-11-09: 557 symbols on the latest day
+[2026-11-09 23:01:39Z] ETF bars: refreshing...
+[2026-11-09 23:02:20Z]   Updated fundamentals and earnings for 33 companies with new filings
+[2026-11-09 23:02:20Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-09 23:03:12Z] H0_low_risk_monthly_forward: 4 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-09 23:03:14Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-09 (changed)
+[2026-11-09 23:03:18Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-11-09 (changed)
+[2026-11-09 23:03:24Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.18% (day 4)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-09 23:03:24Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -0.20% (day 6)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-09 23:03:24Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -0.78% (day 6)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-10 23:00:12Z] Bars: fetching 2026-11-02 to now for 656 symbols...
+[2026-11-10 23:00:40Z]   Re-downloading full history for 15 adjusted and 0 new symbols
+[2026-11-10 23:00:47Z]   Bars through 2026-11-10: 557 symbols on the latest day
+[2026-11-10 23:00:47Z] ETF bars: refreshing...
+[2026-11-10 23:01:09Z]   Updated fundamentals and earnings for 20 companies with new filings
+[2026-11-10 23:01:09Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-10 23:01:35Z] H0_low_risk_monthly_forward: 5 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-10 23:01:36Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-10 (changed)
+[2026-11-10 23:01:39Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-11-10 (changed)
+[2026-11-10 23:01:45Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.14% (day 5)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-10 23:01:45Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -0.56% (day 7)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-10 23:01:45Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -0.65% (day 7)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-11 23:00:03Z] Bars: fetching 2026-11-03 to now for 656 symbols...
+[2026-11-11 23:00:49Z]   Bars through 2026-11-11: 557 symbols on the latest day
+[2026-11-11 23:00:49Z] ETF bars: refreshing...
+[2026-11-11 23:00:58Z]   Updated fundamentals and earnings for 5 companies with new filings
+[2026-11-11 23:00:58Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-11 23:01:50Z] H0_low_risk_monthly_forward: 6 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-11 23:01:51Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-11 (changed)
+[2026-11-11 23:01:54Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-11-11 (changed)
+[2026-11-11 23:01:59Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.24% (day 6)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-11 23:01:59Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: +0.01% (day 8)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-11 23:01:59Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -0.31% (day 8)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-12 23:00:02Z] Weekly universe refresh...
+[2026-11-12 23:00:41Z] Bars: fetching 2026-11-04 to now for 656 symbols...
+[2026-11-12 23:01:27Z]   Re-downloading full history for 10 adjusted and 0 new symbols
+[2026-11-12 23:01:37Z]   Bars through 2026-11-12: 557 symbols on the latest day
+[2026-11-12 23:01:37Z] ETF bars: refreshing...
+[2026-11-12 23:01:42Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-12 23:02:29Z] H0_low_risk_monthly_forward: 7 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-12 23:02:30Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-12 (changed)
+[2026-11-12 23:02:33Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-11-12 (changed)
+[2026-11-12 23:02:38Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.02% (day 7)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-12 23:02:38Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -0.49% (day 9)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-12 23:02:38Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -2.56% (day 9)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-13 23:00:04Z] Bars: fetching 2026-11-05 to now for 656 symbols...
+[2026-11-13 23:00:23Z]   Re-downloading full history for 24 adjusted and 0 new symbols
+[2026-11-13 23:00:35Z]   Bars through 2026-11-13: 557 symbols on the latest day
+[2026-11-13 23:00:35Z] ETF bars: refreshing...
+[2026-11-13 23:00:38Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-13 23:01:32Z] H0_low_risk_monthly_forward: 8 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-13 23:01:34Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-13 (changed)
+[2026-11-13 23:01:38Z] H5_breakout_tight_stop: recorded 18 holdings for 2026-11-13 (changed)
+[2026-11-13 23:01:44Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: -0.11% (day 8)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-13 23:01:44Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -0.62% (day 10)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-13 23:01:44Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -2.05% (day 10)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-16 23:00:04Z] Bars: fetching 2026-11-06 to now for 656 symbols...
+[2026-11-16 23:00:11Z]   Re-downloading full history for 18 adjusted and 0 new symbols
+[2026-11-16 23:00:20Z]   Bars through 2026-11-16: 557 symbols on the latest day
+[2026-11-16 23:00:20Z] ETF bars: refreshing...
+[2026-11-16 23:00:50Z]   Updated fundamentals and earnings for 6 companies with new filings
+[2026-11-16 23:00:50Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-16 23:01:37Z] H0_low_risk_monthly_forward: 9 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-16 23:01:38Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-16 (changed)
+[2026-11-16 23:01:41Z] H5_breakout_tight_stop: recorded 17 holdings for 2026-11-16 (changed)
+[2026-11-16 23:01:46Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: +0.01% (day 9)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-16 23:01:46Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -1.75% (day 11)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-16 23:01:46Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -2.91% (day 11)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-17 23:00:03Z] Bars: fetching 2026-11-09 to now for 656 symbols...
+[2026-11-17 23:00:10Z]   Re-downloading full history for 6 adjusted and 0 new symbols
+[2026-11-17 23:00:14Z]   Bars through 2026-11-17: 557 symbols on the latest day
+[2026-11-17 23:00:14Z] ETF bars: refreshing...
+[2026-11-17 23:00:19Z]   Updated fundamentals and earnings for 3 companies with new filings
+[2026-11-17 23:00:19Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-17 23:00:45Z] H0_low_risk_monthly_forward: 10 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-17 23:00:46Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-17 (changed)
+[2026-11-17 23:00:49Z] H5_breakout_tight_stop: recorded 13 holdings for 2026-11-17 (changed)
+[2026-11-17 23:00:54Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: +0.19% (day 10)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-17 23:00:54Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -2.44% (day 12)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-17 23:00:54Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -5.04% (day 12)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-18 23:00:07Z] Bars: fetching 2026-11-10 to now for 656 symbols...
+[2026-11-18 23:00:13Z]   Re-downloading full history for 11 adjusted and 0 new symbols
+[2026-11-18 23:00:18Z]   Bars through 2026-11-18: 557 symbols on the latest day
+[2026-11-18 23:00:18Z] ETF bars: refreshing...
+[2026-11-18 23:00:24Z]   Updated fundamentals and earnings for 3 companies with new filings
+[2026-11-18 23:00:24Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-18 23:01:28Z] H0_low_risk_monthly_forward: 11 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-18 23:01:29Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-18 (changed)
+[2026-11-18 23:01:33Z] H5_breakout_tight_stop: recorded 10 holdings for 2026-11-18 (changed)
+[2026-11-18 23:01:40Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: +0.38% (day 11)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-18 23:01:40Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -2.81% (day 13)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-18 23:01:40Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -4.38% (day 13)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12
+[2026-11-19 23:00:04Z] Bars: fetching 2026-11-11 to now for 656 symbols...
+[2026-11-19 23:00:10Z]   Re-downloading full history for 7 adjusted and 0 new symbols
+[2026-11-19 23:00:15Z]   Bars through 2026-11-19: 557 symbols on the latest day
+[2026-11-19 23:00:15Z] ETF bars: refreshing...
+[2026-11-19 23:00:20Z]   Updated fundamentals and earnings for 1 companies with new filings
+[2026-11-19 23:00:20Z] Rebuilding fundamentals, earnings and panel...
+[2026-11-19 23:01:15Z] H0_low_risk_monthly_forward: 12 trading days since the last rebalance (2026-11-03); next after 21.
+[2026-11-19 23:01:16Z] H3_cross_asset_trend: recorded 7 holdings for 2026-11-19 (changed)
+[2026-11-19 23:01:20Z] H5_breakout_tight_stop: recorded 4 holdings for 2026-11-19 (changed)
+[2026-11-19 23:01:26Z] H0_low_risk_monthly_forward [exploratory]: COLLECTING | 1/24 periods | open period since 2026-11-03: +0.45% (day 12)
+    1/24 completed periods; early retirement possible from period 6, a positive verdict only at 24
+[2026-11-19 23:01:26Z] H3_cross_asset_trend [qualified]: COLLECTING | 1/24 periods | open period since 2026-11: -3.78% (day 14)
+    1/24 completed months vs 60/40; early retirement possible from month 6, a positive verdict only at 24
+[2026-11-19 23:01:26Z] H5_breakout_tight_stop [exploratory]: COLLECTING | 1/12 periods | open period since 2026-11: -5.82% (day 14)
+    1/12 completed months vs SPY; early retirement possible from month 6, a positive verdict only at 12

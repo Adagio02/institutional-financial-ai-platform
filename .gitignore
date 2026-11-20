@@ -36,3 +36,4 @@ Reports/v30_*
 
 .VSCodeCounter/
 .v*_backup_*/
+data/cache/
