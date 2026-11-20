@@ -36,7 +36,8 @@ Rules this kit enforces
 Commit the whole `research/` folder (registry, policy, frozen specs, results, shadow books): it is your evidence trail.
 Do not commit `data/`.
 
-Rule-based strategies (H3 trend, H4 momentum, H5 breakout) use `research_kit/strategies.py`.
+Rule-based strategies (H3 trend, H4 momentum, H5 breakout, H7 volatility target) use `research_kit/strategies.py`.
+H7 runs on the same ETF data as H3 (`build-strategy-data`); its gates compare it with buy-and-hold SPY.
 They fit nothing to data, so a frozen strategy's results after its freeze date are a true
 forward test; holdings are snapshotted daily in `research/shadow/<id>/book.parquet` for audit.
 
