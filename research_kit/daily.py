@@ -239,7 +239,8 @@ def run_daily(force: bool = False, min_symbols: int | None = None) -> int:
             bx.step_universe(args)
             state.pop("no_data_symbols", None)  # give renamed or new symbols another chance
         latest_bar = update_bars(args, state)
-        if any(f["spec"].get("strategy_type") == "etf_trend" for f in shadow.frozen_strategies()):
+        etf_kinds = ("etf_trend", "vol_target")
+        if any(f["spec"].get("strategy_type") in etf_kinds for f in shadow.frozen_strategies()):
             from .strategies import build_etf_data
             log("ETF bars: refreshing...")
             build_etf_data()

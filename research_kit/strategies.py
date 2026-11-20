@@ -6,6 +6,8 @@ are a genuine forward test.
   longonly_momentum  Hold S&P 500 stocks with the strongest 12-month gains (monthly).
   breakout_stops     Buy fresh breakouts after big quick gains; sell on a tight stop,
                      a trailing stop, or after a maximum holding period (daily).
+  vol_target         Hold one ETF scaled to a target volatility, the rest in T-bills
+                     (monthly, long-only, no leverage).
 
 Conventions that keep the tests honest:
   - Decisions use closes up to day d only; trades happen the NEXT trading day
@@ -28,6 +30,7 @@ from . import DATA, RESEARCH, registry
 ETF_BARS = DATA.parent / "etf" / "bars.parquet"
 ETF_UNIVERSE = ["SPY", "EFA", "EEM", "IWM", "VNQ", "TLT", "IEF", "AGG", "GLD", "DBC", "BIL"]
 YEAR = 252
+ETF_KINDS = {"etf_trend", "vol_target"}  # strategies that run on the ETF panel, not on stocks
 
 
 def log(message: str) -> None:
@@ -100,7 +103,7 @@ def load_stocks(directory=None) -> dict:
 
 
 def latest_date(spec: dict) -> pd.Timestamp:
-    if spec["strategy_type"] == "etf_trend":
+    if spec["strategy_type"] in ETF_KINDS:
         return load_etf_closes([spec["cash"]]).index.max()
     bars = pd.read_parquet(DATA / "bars.parquet", columns=["timestamp"])
     return pd.to_datetime(bars.timestamp, utc=True).max()
@@ -163,6 +166,38 @@ def etf_trend(spec: dict, cost_bps: float) -> dict:
     start = closes.index[closes.index.get_loc(min(targets)) + 1] if targets else closes.index[-1]
     return {"ledger": ledger[ledger.index >= start], "benchmarks": {"60/40": benchmark.net[benchmark.index >= start]},
             "holdings": holdings, "stats": {"rebalances": len(targets)}}
+
+
+def vol_target(spec: dict, cost_bps: float) -> dict:
+    """Each month end: risky weight = min(cap, target vol / realized vol over the lookback),
+    the rest in cash. Realized vol uses daily closes up to the decision day only."""
+    rule, asset, cash = spec["rule"], spec["asset"], spec["cash"]
+    closes = load_etf_closes(sorted({asset, cash}))
+    lookback = int(rule["vol_lookback_days"])
+    target, cap = float(rule["target_volatility"]), float(rule["max_weight"])
+    returns = closes[asset].pct_change(fill_method=None)
+    targets, bench_targets, exposures = {}, {}, []
+    for decided in month_ends(closes.index):
+        i = closes.index.get_loc(decided)
+        if i < lookback:
+            continue
+        window_returns = returns.iloc[i - lookback + 1:i + 1]
+        if window_returns.isna().any() or not np.isfinite(closes[cash].iloc[i]):
+            continue
+        realized = float(window_returns.std(ddof=1)) * np.sqrt(YEAR)
+        weight = cap if realized <= 0 else min(cap, target / realized)
+        targets[decided] = pd.Series({asset: weight, cash: 1.0 - weight})
+        bench_targets[decided] = pd.Series({asset: 1.0})
+        exposures.append(weight)
+    ledger, holdings = run_weights(closes, targets, cost_bps)
+    benchmark, _ = run_weights(closes, bench_targets, cost_bps)
+    start = closes.index[closes.index.get_loc(min(targets)) + 1] if targets else closes.index[-1]
+    return {"ledger": ledger[ledger.index >= start],
+            "benchmarks": {asset: benchmark.net[benchmark.index >= start]},
+            "holdings": holdings,
+            "stats": {"rebalances": len(targets),
+                      "average_exposure": float(np.mean(exposures)) if exposures else 0.0,
+                      "minimum_exposure": float(np.min(exposures)) if exposures else 0.0}}
 
 
 def longonly_momentum(spec: dict, cost_bps: float, data: dict | None = None) -> dict:
@@ -282,7 +317,8 @@ def breakout_stops(spec: dict, cost_bps: float, data: dict | None = None) -> dic
             "trades": pd.DataFrame(trades), "stats": {}}
 
 
-ENGINES = {"etf_trend": etf_trend, "longonly_momentum": longonly_momentum, "breakout_stops": breakout_stops}
+ENGINES = {"etf_trend": etf_trend, "longonly_momentum": longonly_momentum,
+           "breakout_stops": breakout_stops, "vol_target": vol_target}
 
 
 # ============================================================================ metrics
@@ -339,7 +375,7 @@ def window(series: pd.Series, spec: dict) -> pd.Series:
 def run_test(spec: dict) -> dict:
     kind = spec["strategy_type"]
     engine = ENGINES[kind]
-    data = None if kind == "etf_trend" else load_stocks()
+    data = None if kind in ETF_KINDS else load_stocks()
     call = (lambda bps: engine(spec, bps)) if data is None else (lambda bps: engine(spec, bps, data))
     base = call(float(spec["cost_bps"]))
     net = window(base["ledger"].net, spec)
@@ -373,6 +409,11 @@ def gates(spec: dict, r: dict) -> dict:
         b = r["benchmarks"]["60/40"]
         checks["sharpe_at_least_ratio_of_6040"] = m["sharpe"] >= g["min_sharpe_ratio_vs_benchmark"] * b["sharpe"]
         checks["drawdown_shallower_than_6040"] = m["max_drawdown"] >= b["max_drawdown"]
+    elif kind == "vol_target":
+        b = r["benchmarks"][spec["asset"]]
+        checks[f"sharpe_at_least_{spec['asset']}"] = m["sharpe"] >= b["sharpe"]
+        checks[f"drawdown_improves_on_{spec['asset']}"] = (
+            m["max_drawdown"] >= b["max_drawdown"] + g["min_drawdown_improvement"])
     elif kind == "longonly_momentum":
         for name in ("SPY", "equal_weight_universe"):
             checks[f"beats_{name}"] = m["cagr"] > r["benchmarks"][name]["cagr"]
