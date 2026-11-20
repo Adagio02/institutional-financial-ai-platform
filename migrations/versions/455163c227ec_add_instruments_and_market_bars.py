@@ -83,11 +83,13 @@ def upgrade() -> None:
         ["instrument_id", "interval", "timestamp"],
         unique=False,
     )
-    op.drop_index(op.f("ix_pipeline_run_pipeline_name"), table_name="pipeline_run")
-    op.drop_index(op.f("ix_pipeline_run_status"), table_name="pipeline_run")
-    op.drop_table("pipeline_run")
-    op.drop_index(op.f("ix_audit_event_event_type"), table_name="audit_event")
-    op.drop_table("audit_event")
+        # Legacy tables that existed in some pre-Alembic local databases.
+    # On a fresh database (e.g. CI) they never existed, so drop only if present.
+    op.execute("DROP INDEX IF EXISTS ix_pipeline_run_pipeline_name")
+    op.execute("DROP INDEX IF EXISTS ix_pipeline_run_status")
+    op.execute("DROP TABLE IF EXISTS pipeline_run")
+    op.execute("DROP INDEX IF EXISTS ix_audit_event_event_type")
+    op.execute("DROP TABLE IF EXISTS audit_event")
     # ### end Alembic commands ###
 
 
