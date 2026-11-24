@@ -110,7 +110,8 @@ def verify_and_extract(bundle: Path, destination: Path) -> dict:
 
 def s3_client():
     import boto3
-    kwargs = {"region_name": os.environ.get("AWS_REGION", "us-east-1")}
+    # GitHub Actions sets AWS_REGION to "" when the repository variable is missing: treat that as unset.
+    kwargs = {"region_name": os.environ.get("AWS_REGION", "").strip() or "us-east-1"}
     endpoint = os.environ.get("FINAI_S3_ENDPOINT_URL", "").strip()
     if endpoint:
         kwargs["endpoint_url"] = endpoint
